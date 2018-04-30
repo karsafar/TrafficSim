@@ -1,0 +1,81 @@
+function  [horizontalArm, verticalArm] = driverscript_density(...
+        carTypeRatios,...
+        runTime,...
+        plotFlag,...
+        priority,...
+        roadDimensions,...
+        occupancy,...
+        timeStep)
+
+dt = timeStep;
+nIterations = runTime/timeStep;
+nDigits = numel(num2str(dt))-2;
+t_rng = round(linspace(0,runTime,nIterations),nDigits);
+t = t_rng(1);
+
+% road start and end
+startPoint = roadDimensions(1);
+endPoint = roadDimensions(2);
+roadLength = endPoint - startPoint;
+roadWidth = roadDimensions(3);
+
+% construct two arms of the junction objects
+horizontalArm = LoopRoad([startPoint, endPoint,roadWidth, 0,priority,carTypeRatios(1)],occupancy(1),nIterations);
+verticalArm = LoopRoad([startPoint, endPoint,roadWidth, 90,priority,carTypeRatios(2)],occupancy(2),nIterations);
+
+% plot the junction
+junc = Junction(startPoint,endPoint,roadWidth, plotFlag);
+
+% spawn cars instantly
+horizontalArm.instant_spawn();
+verticalArm.instant_spawn();
+
+% acceleration options
+allCarsHoriz = horizontalArm.allCars;
+allCarsVert = verticalArm.allCars;
+
+for iIteration = 1:nIterations
+    
+    % draw cars
+    if plotFlag
+        junc.draw_all_cars(horizontalArm,verticalArm)
+    end
+    
+    % check for collision
+    junc.collision_check(...
+        allCarsHoriz,...
+        allCarsVert,...
+        horizontalArm.numCars,...
+        verticalArm.numCars,...
+        plotFlag);
+    
+    % calculate IDM acceleration
+    for iCar = 1:horizontalArm.numCars
+        calculate_idm_accel(allCarsHoriz(iCar),roadLength);
+    end
+    for jCar = 1:verticalArm.numCars
+        calculate_idm_accel(allCarsVert(jCar),roadLength);
+    end
+    
+    % Itersection Collision Avoidance (ICA)
+    for iCar = 1:horizontalArm.numCars
+        allCarsHoriz(iCar).decide_acceleration(verticalArm,t,dt);
+    end
+    for jCar = 1:verticalArm.numCars
+        allCarsVert(jCar).decide_acceleration(horizontalArm,t,dt);
+    end
+    
+    horizontalArm.move_all_cars(t,dt,iIteration,nIterations)
+    verticalArm.move_all_cars(t,dt,iIteration,nIterations)
+   
+    if plotFlag
+        pause(1/1200)
+        junc.delete_car_images();
+    end
+
+    % update time
+    t = t_rng(iIteration);
+end
+
+end
+

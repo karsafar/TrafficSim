@@ -1,0 +1,46 @@
+% clear all
+% close all
+
+delta = 2;  
+s0 = 6;     % m
+s1 = 0;     % m
+v0 = 10;    % m/s
+T = 1.6;    % sec
+
+
+v = linspace(0,v0,100);
+% v = locationVector1{520,3};
+q = flow(v,s0,s1,v0,T,delta);
+
+k = density(v,s0,s1,v0,T,delta);
+% convert to km and hours
+% k = k*1000;
+% q = q*3600;
+
+% figure(1)
+% plot(q,v)
+% xlabel('q veh/s')
+% ylabel('v (m/s)')
+% grid on
+% 
+% 
+% figure(2)
+plot(k,q)
+% xlabel('k (veh/m)')
+% ylabel('q veh/s')
+grid on
+
+figure(3)
+plot(k,v)
+xlabel('k (veh/m)')
+ylabel('v (m/s)')
+grid on
+
+
+s = 1./k;
+
+figure(4)
+plot(s,v)
+xlabel('s (m)')
+ylabel('v (m/s)')
+grid on
