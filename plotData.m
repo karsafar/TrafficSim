@@ -1,7 +1,7 @@
-close all
-clear all
+% close all
+% clear all
 
-load('/Users/robot/car_sim_mat_Files/flow_change_18_04_1.mat');
+% load('/Users/robot/car_sim_mat_Files/flow_change_18_04_1.mat');
 % load('/Users/robot/car_sim_mat_Files/density_change7.mat');
 nIterations = 10*runTime;
 if strcmpi(prescription,'flow')
@@ -47,7 +47,7 @@ iSim = 1;
 Arm = 'horizontal';
 time_average_velocity_plots(iSim,sim,Arm,runTime,timeStep);
 
-iSim = 7;
+iSim = 1;
 Arm = 'horizontal';
 time_aggregated_velocity_plots(iSim,sim,Arm,runTime,timeStep);
 %%

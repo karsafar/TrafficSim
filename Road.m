@@ -54,10 +54,11 @@ classdef Road < handle
         end
         function add_car(obj,prescription)
             if obj.carType == 1
-                obj.allCars = [obj.allCars  BtCar(obj.orientation, prescription, obj.startPoint, obj.Width)];
+                new_car = BtCar(obj.orientation, prescription, obj.startPoint, obj.Width);
             else
-                obj.allCars = [obj.allCars  IdmCar(obj.orientation, prescription, obj.startPoint, obj.Width)];
+                new_car = IdmCar(obj.orientation, prescription, obj.startPoint, obj.Width);
             end
+            obj.allCars = [obj.allCars new_car];
         end
         function move_all_cars(obj,dt)
             for iCar = 1:obj.numCars

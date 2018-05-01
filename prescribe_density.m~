@@ -11,12 +11,12 @@ runTime = 3600; % in seconds
 timeStep = 0.1; % in seconds
 priority = true;
 roadDimensions = [-200 100 4];
-numberOfSimRuns = 8;
-occupancy = {logspace(log10(0.5),log10(0.25),numberOfSimRuns);
-    logspace(log10(0.5),log10(0.25),numberOfSimRuns)};
-
-% density = {0.166-logspace(log10(0.166),log10(0.001),numberOfSimRuns);
+numberOfSimRuns = 20;
+% occupancy = {0.166-logspace(log10(0.166),log10(0.001),numberOfSimRuns);
 %     logspace(0.166-log10(0.166),log10(0.001),numberOfSimRuns)};
+
+density = {0.166-logspace(log10(0.166),log10(0.001),numberOfSimRuns);
+    logspace(0.166-log10(0.166),log10(0.001),numberOfSimRuns)};
 
 for k = 1:numberOfSimRuns
     [sim(k)] = driverscript_density(...

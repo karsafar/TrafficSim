@@ -15,7 +15,7 @@ classdef LoopRoad < Road
             obj.averageVelocityHistory = NaN(nIterations,1);
         end
         function instant_spawn(obj)
-            minimumSpacing = IdmCar.minimumGap;
+            minimumSpacing = 6;
             maxNumOfCars = abs(ceil((obj.endPoint - obj.startPoint - 20)/minimumSpacing));
             obj.numCars = round(obj.prescribedDensity*maxNumOfCars);
             allCarsPoseArray = nan(obj.numCars,1);
@@ -53,9 +53,8 @@ classdef LoopRoad < Road
         function respawn_car(obj,leaderCar)
             leaderCar.pose(1) = leaderCar.pose(1) - (obj.endPoint-obj.startPoint);
             
-            if leaderCar.timeHistory(1) >= 360
-                obj.collect_car_history(leaderCar);
-            end
+            obj.collect_car_history(leaderCar);
+            
             leaderCar.historyIndex = 1;
             leaderCar.locationHistory = leaderCar.locationHistory*NaN;
             leaderCar.velocityHistory = leaderCar.velocityHistory*NaN;
@@ -76,9 +75,8 @@ classdef LoopRoad < Road
                 obj.allCars(iCar).move_car(t,dt);
                 aggregatedVelocities = aggregatedVelocities + obj.allCars(iCar).velocity;
             end
-            if t >= 360
-                obj.averageVelocityHistory(iIteration) = aggregatedVelocities/obj.numCars;
-            end
+            if 
+            obj.averageVelocityHistory(iIteration) = aggregatedVelocities/obj.numCars;
             if iIteration == nIterations
                 for iCar = 1:obj.numCars
                     obj.collect_car_history(obj.allCars(iCar));

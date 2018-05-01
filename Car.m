@@ -1,4 +1,4 @@
-classdef Car < dlnode 
+classdef Car < dlnode
     properties (SetAccess = protected)
         velocity = NaN
         acceleration = 0
@@ -41,12 +41,12 @@ classdef Car < dlnode
                 else
                     obj.pose(2) = 90;
                 end
+                obj.ownDistfromRearToBack = (obj.dimension(2) - obj.dimension(3))/2;
+                obj.ownDistfromRearToFront = obj.dimension(3) + obj.ownDistfromRearToBack;
+                roadWidth = car_args{4};
+                obj.s_in = -roadWidth/2-obj.ownDistfromRearToFront;
+                obj.s_out = roadWidth/2+obj.ownDistfromRearToBack;
             end
-            obj.ownDistfromRearToBack = (obj.dimension(2) - obj.dimension(3))/2;
-            obj.ownDistfromRearToFront = obj.dimension(3) + obj.ownDistfromRearToBack;
-            roadWidth = car_args{4};
-            obj.s_in = -roadWidth/2-obj.ownDistfromRearToFront;
-            obj.s_out = roadWidth/2+obj.ownDistfromRearToBack;
         end
         function move_car(obj,t,dt)
             

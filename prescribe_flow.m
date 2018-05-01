@@ -9,8 +9,8 @@ plotFlag = true;
 runTime = 3600; % in seconds
 timeStep = 0.1; % in seconds
 numberOfSimRuns = 4;
-distributionMean = {logspace(log10(5),log10(5),numberOfSimRuns);
-              logspace(log10(5),log10(5),numberOfSimRuns)};
+distributionMean = {logspace(log10(5),log10(10),numberOfSimRuns);
+              logspace(log10(5),log10(10),numberOfSimRuns)};
 priority = true;
 roadDimensions = [-500 500, 4];
 
