@@ -75,7 +75,7 @@ classdef BtCar < IdmCar
                 obj.it_A_max_behind>=(obj.maximumAcceleration(2)-0.000001),...
                 selectIdmVsMax);
             
-            Crossing = BtSelector(aheadCar,stopCar,idmCar,BehindCar);
+            Crossing = BtSelector(aheadCar,idmCar,stopCar,BehindCar);
             
             % front car not passed junction
             idmAfterjunction = BtAssign(obj.it_accel,obj.it_idmAccel);
@@ -91,8 +91,8 @@ classdef BtCar < IdmCar
             oppositeDistToJunc = NaN(oppositeRoad.numCars,1);
             if   obj.pose(1) > crossingEnd
                 obj.acceleration = obj.idmAcceleration;
-%             elseif obj.pose(1) > crossingBegin && abs(obj.Prev.pose(1) - obj.pose(1)) > 15
-%                 obj.acceleration = obj.maximumAcceleration(1);
+            elseif obj.pose(1) > crossingBegin && abs(obj.Prev.pose(1) - obj.pose(1)) < 
+                obj.acceleration = 0.4*obj.maximumAcceleration(1);
             else
                 for jCar = 1:oppositeRoad.numCars
                     oppositeDistToJunc(jCar) = crossingEnd - oppositeCars(jCar).pose(1);
