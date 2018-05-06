@@ -1,10 +1,18 @@
 close all
-clear all
+clear
 
 prescription = 'flow';
-HorizArmBtCarRatio = 1; % per cent of cars are BtCars
-VertArmBtCarRatio = 1; % per cent of cars are BtCars
-carTypeRatios = [HorizArmBtCarRatio VertArmBtCarRatio];
+carTypes = {@Car, @IdmCar, @BtCar};
+HorizArmCarRatios = [0 0.8 0.2];
+VertArmCarRatios = [0 1 0];
+
+carTypeRatios = zeros(2,3);
+for i = 1:numel(carTypes)
+    carTypeRatios(1,i) = sum(HorizArmCarRatios(1:i)) - carTypeRatios(1,i); 
+    carTypeRatios(2,i) = sum(VertArmCarRatios(1:i)) - carTypeRatios(2,i); 
+end
+
+% carTypeRatios = [HorizArmBtCarRatio VertArmBtCarRatio];
 plotFlag = true;
 runTime = 3600; % in seconds
 timeStep = 0.1; % in seconds
@@ -17,6 +25,7 @@ roadDimensions = [-500 500, 4];
 sim = NaN(1,numberOfSimRuns);
 for k = 1:numberOfSimRuns
     [sim(k)] = driverscript_flow(...
+        carTypes,...
         carTypeRatios,...
         runTime,...
         plotFlag,...

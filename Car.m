@@ -1,10 +1,10 @@
 classdef Car < dlnode
     properties (SetAccess = protected)
-        velocity = NaN
         acceleration = 0
     end
     properties (Access = public)
         pose = NaN(1,2)
+        velocity = 0
         locationHistory = NaN(1,100000)
         velocityHistory = NaN(1,100000)
         accelerationHistory = NaN(1,100000)
@@ -29,13 +29,13 @@ classdef Car < dlnode
                 % assign values
             else
                 obj.parentRoad = car_args{1};
-                if strcmpi(car_args{2},'flow')
-                    obj.velocity = 8;
-                else
-                    obj.velocity = 0;
-                end
-                
-                obj.pose(1) = car_args{3};
+%                 if strcmpi(car_args{2},'flow')
+%                     obj.velocity = 8;
+%                 else
+%                     obj.velocity = 0;
+%                 end
+%                 
+                obj.pose(1) = car_args{2};
                 if strcmpi(obj.parentRoad,'horizontal')
                     obj.pose(2) = 0;
                 else
@@ -43,7 +43,7 @@ classdef Car < dlnode
                 end
                 obj.ownDistfromRearToBack = (obj.dimension(2) - obj.dimension(3))/2;
                 obj.ownDistfromRearToFront = obj.dimension(3) + obj.ownDistfromRearToBack;
-                roadWidth = car_args{4};
+                roadWidth = car_args{3};
                 obj.s_in = -roadWidth/2-obj.ownDistfromRearToFront;
                 obj.s_out = roadWidth/2+obj.ownDistfromRearToBack;
             end

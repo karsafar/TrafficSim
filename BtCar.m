@@ -14,13 +14,12 @@ classdef BtCar < IdmCar
     end
     methods
         function obj = BtCar(varargin)
-            if nargin == 4
+            if nargin == 3
                 orientation = varargin{1};
-                prescription = varargin{2};
-                startPoint = varargin{3};
-                Width = varargin{4};
+                startPoint = varargin{2};
+                Width = varargin{3};
             end
-            obj = obj@IdmCar(orientation, prescription, startPoint, Width);
+            obj = obj@IdmCar(orientation, startPoint, Width);
             
             %-----------------Initialize Blackboard------------------
             obj.bb = BtBlackboard;

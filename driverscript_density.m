@@ -5,7 +5,6 @@ function  [sim] = driverscript_density(...
     plotFlag,...
     priority,...
     roadDimensions,...
-    density,...
     numCars,...
     timeStep)
 
@@ -22,16 +21,15 @@ roadLength = endPoint - startPoint;
 roadWidth = roadDimensions(3);
 
 % construct two arms of the junction objects
-horizontalArm = LoopRoad([startPoint, endPoint,roadWidth, 0,priority,{carTypes},allCarsNumArray(1,:)],numCars(1),nIterations);
-verticalArm = LoopRoad([startPoint, endPoint,roadWidth, 90,priority,{carTypes},allCarsNumArray(2,:)],numCars(2),nIterations);
+horizontalArm = LoopRoad([startPoint, endPoint,roadWidth, 0,priority,{carTypes}],...
+                         [{allCarsNumArray(1,:)},numCars(1),nIterations]);
+verticalArm = LoopRoad([startPoint, endPoint,roadWidth, 90,priority,{carTypes}],...
+                       [{allCarsNumArray(2,:)},numCars(2),nIterations]);
 
 % plot the junction
 junc = Junction(startPoint,endPoint,roadWidth, plotFlag);
 
 % spawn cars instantly
-% horizontalArm.instant_spawn();
-% verticalArm.instant_spawn();
-
 horizontalArm.spawn_initial_cars();
 verticalArm.spawn_initial_cars();
 

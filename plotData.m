@@ -1,8 +1,8 @@
-% close all
-% clear 
-% % % 
+close all
+clear 
+% % 
 % % % % load('/Users/robot/car_sim_mat_Files/flow_change_18_04_1.mat');
-% load('/Users/robot/car_sim_mat_Files/density_02_05.mat');
+load('/Users/robot/car_sim_mat_Files/density_02_05_1_0.mat');
 nIterations = 10*runTime;
 if strcmpi(prescription,'flow')
     for i = 1:numel(sim)

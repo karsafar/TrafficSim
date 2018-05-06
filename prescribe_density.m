@@ -3,10 +3,10 @@ clear
 
 prescription = 'density';
 carTypes = {@Car, @IdmCar, @BtCar};
-carTypeRatios = [0 0.5 0.5;
+carTypeRatios = [0 0 1;
                  0 0 1];
              
-plotFlag = false;
+plotFlag = true;
 runTime = 3600; % in seconds
 timeStep = 0.1; % in seconds
 priority = true;
@@ -48,7 +48,6 @@ for k = 1:numberOfSimRuns
         plotFlag,...
         priority,...
         roadDimensions,...
-        [density.horizontal(k); density.vertical(k)],...
         [numCars.horizontal(k); numCars.vertical(k)],...
         timeStep);
 end

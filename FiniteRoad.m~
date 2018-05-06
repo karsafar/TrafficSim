@@ -2,7 +2,7 @@ classdef FiniteRoad < Road
     
     properties (SetAccess = protected)
         nextEntry = 0
-        spawnTimeProbDist = 0
+        pd = 0
         carTypePd = 0
         verticalQueue = []
         numCarsHistory
@@ -10,18 +10,18 @@ classdef FiniteRoad < Road
     end
     
     methods
-        function obj = FiniteRoad(road_args,finite_road_args)
+        function obj = FiniteRoad(road_args,finite_args)
             obj = obj@Road(road_args);
            
             % distribution - mean interval is distributionMean secs
-            obj.carRatios = finite_road_args{1};
-            obj.spawnTimeProbDist = makedist('Exponential','mu',finite_road_args{2});
-            obj.numCarsHistory = NaN(finite_road_args{3},1);
-            obj.averageVelocityHistory = NaN(finite_road_args{3},1);
+            obj.carRatios = finite_args{1};
+            obj.pd = makedist('Exponential','mu',finite_args{2});
+            obj.numCarsHistory = NaN(finite_args{3},1);
+            obj.averageVelocityHistory = NaN(finite_args{3},1);
             obj.carTypePd = makedist('uniform',0,1);
         end
-        function spawn_car(obj,time)
-            isTimeForNewEntry = (time >= obj.nextEntry);
+        function spawn_car(obj,globalTime)
+            isTimeForNewEntry = (globalTime >= obj.nextEntry);
             isVerticalQueueNotEmpty = (~isempty(obj.verticalQueue));
             if isempty(obj.allCars)
                 isEnoughSpace = true;
@@ -31,22 +31,17 @@ classdef FiniteRoad < Road
             if isTimeForNewEntry
                 nTypeCarChance = random(obj.carTypePd);
                 for i = 1:numel(obj.carTypes)
-                    if nTypeCarChance<obj.carRatios(i)
-                        obj.carType = i;
-                        break;
-                    end
-                end
-                interval = random(obj.spawnTimeProbDist);
-                obj.nextEntry = time + interval;
+                obj.carType = i
+                (nTypeCarChance<=obj.carRatios);
+                interval = random(obj.pd);
+                obj.nextEntry = globalTime + interval;
             end
             if isEnoughSpace && (isTimeForNewEntry || isVerticalQueueNotEmpty)
                 if isVerticalQueueNotEmpty
                     obj.carType = obj.verticalQueue(1);
                     obj.verticalQueue(1) = [];
                 end
-                new_car = obj.add_car(obj.carType);
-                new_car.velocity = 8; 
-                obj.allCars = [obj.allCars new_car];
+                obj.add_car('flow');
                 obj.numCars = obj.numCars + 1;
                 
                 if numel(obj.allCars) > 1
@@ -59,21 +54,6 @@ classdef FiniteRoad < Road
                 end
             elseif isTimeForNewEntry && ~isEnoughSpace
                 obj.verticalQueue = [obj.verticalQueue  obj.carType];
-            end
-        end
-        function delete_car(obj)
-            if obj.numCars > 1
-                obj.allCars(1).Next.leaderFlag = true;
-            end
-            obj.collect_car_history(obj.allCars(1));
-            obj.allCars(1).removeNode;
-            obj.allCars(1) = [];
-            if numel(obj.allCars) > 1
-                obj.allCars(1).Prev = obj.allCars(end);
-                obj.allCars(end).Next = obj.allCars(1);
-                obj.numCars = obj.numCars - 1;
-            else
-                obj.numCars = obj.numCars - 1;
             end
         end
         function move_all_cars(obj,t,dt,iIteration,nIterations)
@@ -94,6 +74,21 @@ classdef FiniteRoad < Road
                 end
             end
             obj.numCarsHistory(iIteration,1) = obj.numCars;
+        end
+        function delete_car(obj)
+            if obj.numCars > 1
+                obj.allCars(1).Next.leaderFlag = true;
+            end
+            obj.collect_car_history(obj.allCars(1));
+            obj.allCars(1).removeNode;
+            obj.allCars(1) = [];
+            if numel(obj.allCars) > 1
+                obj.allCars(1).Prev = obj.allCars(end);
+                obj.allCars(end).Next = obj.allCars(1);
+                obj.numCars = obj.numCars - 1;
+            else
+                obj.numCars = obj.numCars - 1;
+            end
         end
     end
 end

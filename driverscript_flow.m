@@ -1,4 +1,5 @@
 function  [sim] = driverscript_flow(...
+    carTypes,...
     carTypeRatios,...
     runTime,...
     plotFlag,...
@@ -20,8 +21,10 @@ roadLength = endPoint - startPoint;
 roadWidth = roadDimensions(3);
 
 % construct two arms of the junction objects
-horizontalArm = FiniteRoad([startPoint,endPoint,roadWidth,0,priority,carTypeRatios(1)],distributionMean(1),nIterations);
-verticalArm = FiniteRoad([startPoint,endPoint,roadWidth,90,priority,carTypeRatios(2)],distributionMean(2),nIterations);
+horizontalArm = FiniteRoad([startPoint,endPoint,roadWidth,0,priority,{carTypes}],...
+                           [{carTypeRatios(1,:)},distributionMean(1),nIterations]);
+verticalArm = FiniteRoad([startPoint,endPoint,roadWidth,90,priority,{carTypes}],...
+                         [{carTypeRatios(2,:)},distributionMean(2),nIterations]);
 
 % create a junction object
 junc = Junction(startPoint,endPoint,roadWidth, plotFlag);
@@ -69,8 +72,8 @@ for iIteration = 1:nIterations
 %         verticalArm.numCars,...
 %         plotFlag);
 
-    horizontalArm.store_num_cars(iIteration)
-    verticalArm.store_num_cars(iIteration)
+%     horizontalArm.store_num_cars(iIteration)
+%     verticalArm.store_num_cars(iIteration)
     
     % delete images of cars from junction
     if plotFlag

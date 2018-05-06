@@ -1,19 +1,16 @@
 classdef LoopRoad < Road
     properties (SetAccess = protected)
-        pd = []
-        prescribedDensity = []
+        initPoseProbDist = []
+        allCarsNumArray = 0
     end
     
     methods
-        function obj = LoopRoad(road_args,numCars,nIterations)
-            if nargin == 0
-                % Assign values to road_args
-            end
+        function obj = LoopRoad(road_args,loop_road_args)
             obj = obj@Road(road_args);
-            obj.numCars = numCars;
-            %             obj.prescribedDensity = occupancy;
-            %             obj.pd = makedist('uniform','lower',obj.startPoint,'upper',obj.endPoint);
-            obj.averageVelocityHistory = NaN(nIterations,1);
+           
+            obj.allCarsNumArray = loop_road_args{1};
+            obj.numCars = loop_road_args{2};
+            obj.averageVelocityHistory = NaN(loop_road_args{3},1);
         end
         function spawn_initial_cars(obj)
             minimumSpacing = IdmCar.minimumGap;
@@ -26,10 +23,10 @@ classdef LoopRoad < Road
                 end
             end
             unoccupiedSpace =  obj.endPoint - allCarsPoseArray(end) - 20;
-            obj.pd = makedist('uniform','lower',0,'upper',unoccupiedSpace);
+            obj.initPoseProbDist = makedist('uniform','lower',0,'upper',unoccupiedSpace);
             randomPosition = NaN(1,obj.numCars);
             for iCar = 1:obj.numCars
-                randomPosition(iCar) = random(obj.pd);
+                randomPosition(iCar) = random(obj.initPoseProbDist);
             end
             randomPosition = sort(randomPosition);
             deltaD = NaN(1,obj.numCars);
@@ -50,11 +47,19 @@ classdef LoopRoad < Road
                 end
             end
             
-            obj.add_car('density');
+            allCarsArray = [];
+            for i = 1:numel(obj.allCarsNumArray)
+                if obj.allCarsNumArray(i) > 0
+                    for j = 1:obj.allCarsNumArray(i)
+                        new_car = add_car(obj,i);
+                        allCarsArray = [allCarsArray new_car];
+                    end
+                end
+            end
+            
+            obj.allCars = allCarsArray(randperm(length(allCarsArray)));            
             allCarsPoseArray = flip(allCarsPoseArray);
             for iCar = 1:obj.numCars
-                %                obj.carType = (rand()<=obj.BtCarsRatio);
-                
                 obj.allCars(iCar).pose(1) = allCarsPoseArray(iCar);
                 if iCar > 1
                     insertAfter(obj.allCars(iCar),obj.allCars(iCar-1));
@@ -67,44 +72,6 @@ classdef LoopRoad < Road
                 obj.allCars(iCar).Next = leaderCar;
             end
         end
-        
-        
-        %         function instant_spawn(obj)
-        %             minimumSpacing = IdmCar.minimumGap;
-        %             maxNumOfCars = abs(ceil((obj.endPoint - obj.startPoint - 20)/minimumSpacing));
-        %             obj.numCars = round(obj.prescribedDensity*maxNumOfCars);
-        %             allCarsPoseArray = nan(obj.numCars,1);
-        %             iCar = 1;
-        %             while iCar <= obj.numCars
-        %                 randomPosition = random(obj.pd);
-        %                 if randomPosition <= -10 || randomPosition >= 10
-        %                     if iCar == 1
-        %                         allCarsPoseArray(iCar) = randomPosition;
-        %                         iCar = iCar + 1;
-        %                     elseif abs(allCarsPoseArray(1:iCar-1) - randomPosition) > minimumSpacing
-        %                         allCarsPoseArray(iCar) = randomPosition;
-        %                         iCar = iCar + 1;
-        %                     end
-        %                 end
-        %             end
-        %             allCarsPoseArray =  sort(allCarsPoseArray,'descend');
-        %
-        %             for iCar = 1:obj.numCars
-        %                 obj.carType = (rand()<=obj.BtCarsRatio);
-        %                 obj.add_car('density');
-        %
-        %                 obj.allCars(iCar).pose(1) = allCarsPoseArray(iCar);
-        %                 if iCar > 1
-        %                     insertAfter(obj.allCars(iCar),obj.allCars(iCar-1));
-        %                     obj.allCars(iCar).leaderFlag = false;
-        %                 end
-        %             end
-        %             leaderCar = obj.allCars(1);
-        %             if obj.numCars > 1
-        %                 leaderCar.Prev = obj.allCars(iCar);
-        %                 obj.allCars(iCar).Next = leaderCar;
-        %             end
-        %         end
         function respawn_car(obj,leaderCar)
             leaderCar.pose(1) = leaderCar.pose(1) - (obj.endPoint-obj.startPoint);
             
