@@ -11,6 +11,7 @@ classdef LoopRoad < Road
             obj.allCarsNumArray = loop_road_args{1};
             obj.numCars = loop_road_args{2};
             obj.averageVelocityHistory = NaN(loop_road_args{3},1);
+            obj.spawn_initial_cars();
         end
         function spawn_initial_cars(obj)
             minimumSpacing = IdmCar.minimumGap;

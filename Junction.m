@@ -5,23 +5,24 @@ classdef Junction < handle
     end
     
     methods
-        function obj = Junction(startPoint,endPoint,Width,plotFlag)
+        function obj = Junction(roadDimensions,plotFlag)
             if plotFlag
-                obj.plot_outline(startPoint,endPoint,Width);
+                obj.plot_outline(roadDimensions);
             end
         end
-        function plot_outline(obj,startPoint,endPoint,Width)
+        function plot_outline(obj,roadDimensions)
             figure('units', 'normalized', 'position', [0.4, 0, 0.6, 1]);
             obj.junctionPlotHandle = axes;
-            axis(obj.junctionPlotHandle,'equal',[startPoint endPoint startPoint endPoint], 'off')
+            axis(obj.junctionPlotHandle,'equal',[roadDimensions.Start(1) roadDimensions.End(1)...
+                                                 roadDimensions.Start(2) roadDimensions.End(2)], 'off')
             hold(obj.junctionPlotHandle,'on')
             for i = 1:2
                 if i == 1
-                    xLimit = [startPoint endPoint];
-                    yLimit = [-Width/2 Width/2];
+                    xLimit = [roadDimensions.Start(1) roadDimensions.End(1)];
+                    yLimit = [-roadDimensions.Width(1)/2 roadDimensions.Width(1)/2];
                 else
-                    xLimit = [-Width/2 Width/2];
-                    yLimit = [startPoint endPoint];
+                    xLimit = [-roadDimensions.Width(2)/2 roadDimensions.Width(2)/2];
+                    yLimit = [roadDimensions.Start(2) roadDimensions.End(2)];
                 end
                 xBox = xLimit([1 1 2 2 1]);
                 yBox = yLimit([1 2 2 1 1]);

@@ -12,7 +12,7 @@ classdef FiniteRoad < Road
     methods
         function obj = FiniteRoad(road_args,finite_road_args)
             obj = obj@Road(road_args);
-           
+            
             % distribution - mean interval is distributionMean secs
             obj.carRatios = finite_road_args{1};
             obj.spawnTimeProbDist = makedist('Exponential','mu',finite_road_args{2});
@@ -45,15 +45,19 @@ classdef FiniteRoad < Road
                     obj.verticalQueue(1) = [];
                 end
                 new_car = obj.add_car(obj.carType);
-                new_car.velocity = 8; 
+                new_car.velocity = 8;
                 obj.allCars = [obj.allCars new_car];
                 obj.numCars = obj.numCars + 1;
                 
                 if numel(obj.allCars) > 1
                     insertAfter(obj.allCars(end),obj.allCars(end-1));
                     obj.allCars(end).leaderFlag = false;
-                    obj.allCars(1).Prev = obj.allCars(end);
-                    obj.allCars(end).Next = obj.allCars(1);
+                    if numel(obj.allCars) == 2
+                        obj.allCars(1).Prev = obj.allCars(end);
+                        obj.allCars(end).Next = obj.allCars(1);
+                        %                                             obj.allCars(1).Prev = Car([obj.endPoint,nanmean(obj.averageVelocityHistory)]);
+                    end
+                    %                     obj.allCars(1).targetVelocity = nanmean(obj.averageVelocityHistory);
                 else
                     obj.allCars(1).targetVelocity = obj.allCars(1).velocity;
                 end
@@ -69,14 +73,21 @@ classdef FiniteRoad < Road
             obj.allCars(1).removeNode;
             obj.allCars(1) = [];
             if numel(obj.allCars) > 1
+                obj.allCars(1).targetVelocity = nanmean(obj.averageVelocityHistory);
                 obj.allCars(1).Prev = obj.allCars(end);
                 obj.allCars(end).Next = obj.allCars(1);
+                %                 obj.allCars(1).Prev = Car([obj.endPoint,nanmean(obj.averageVelocityHistory)]);
                 obj.numCars = obj.numCars - 1;
             else
                 obj.numCars = obj.numCars - 1;
+                %                 obj.allCars(1).Prev = Car([obj.endPoint,nanmean(obj.averageVelocityHistory)]);
+                %                 obj.allCars(1).targetVelocity = nanmean(obj.averageVelocityHistory);
+                
             end
         end
         function move_all_cars(obj,t,dt,iIteration,nIterations)
+            obj.spawn_car(t);
+            
             if obj.numCars > 0
                 if obj.allCars(1).pose(1) >= obj.endPoint
                     obj.delete_car()

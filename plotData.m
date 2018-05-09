@@ -1,36 +1,25 @@
-close all
-clear 
-% % 
-% % % % load('/Users/robot/car_sim_mat_Files/flow_change_18_04_1.mat');
-load('/Users/robot/car_sim_mat_Files/density_02_05_1_0.mat');
-nIterations = 10*runTime;
+% close all
+% clear 
+% % % % 
+% load('/Users/robot/car_sim_mat_Files/flow_change_07_05_0_0_none4x.mat');
+% load('/Users/robot/car_sim_mat_Files/density_02_05_1_1.mat');
 if strcmpi(prescription,'flow')
     for i = 1:numel(sim)
-        horizNumCars(i) = mean(sim(i).horizArm.numCarsHistory);
-        vertNumCars(i) = mean(sim(i).vertArm.numCarsHistory);
+        horizNumCars(i) = mean(sim(i).horizArm.numCarsHistory(10000:end));
+%         vertNumCars(i) = mean(sim(i).vertArm.numCarsHistory);
         
-        density.horizontal(i) = horizNumCars(i)/(roadDimensions(2)-roadDimensions(1));
-        density.vertical(i) = vertNumCars(i)/(roadDimensions(2)-roadDimensions(1));
+        density.horizontal(i) = horizNumCars(i)/(road.Length(1));
+%         density.vertical(i) = vertNumCars(i)/(road.Length(2));
     end
-% else
-%     dens = density;
-%     density = [];
-%     for i = 1:numel(sim)
-%         density.horizontal(i) = dens(1,i);
-%         density.vertical(i) = dens(2,i);
-%         
-% %         density.horizontal(i) = sim(i).horizArm.numCars/(roadDimensions(2)-roadDimensions(1));
-% %         density.vertical(i) = sim(i).vertArm.numCars/(roadDimensions(2)-roadDimensions(1));
-%     end
 end
 
 for iSim = 1:numel(sim)  
-    averagesAcrossSimulations.horizontal(iSim) = mean(sim(iSim).horizArm.averageVelocityHistory);
-    averagesAcrossSimulations.vertical(iSim) = mean(sim(iSim).vertArm.averageVelocityHistory);
+    averagesAcrossSimulations.horizontal(iSim) = mean(sim(iSim).horizArm.averageVelocityHistory(10000:end));
+%     averagesAcrossSimulations.vertical(iSim) = mean(sim(iSim).vertArm.averageVelocityHistory);
 end
 
 flow.horizontal = density.horizontal.* averagesAcrossSimulations.horizontal;
-flow.vertical = density.vertical.* averagesAcrossSimulations.vertical;
+% flow.vertical = density.vertical.* averagesAcrossSimulations.vertical;
 
 % plot speed-density diagrams
 density_diagram_plots(density,averagesAcrossSimulations);
@@ -50,11 +39,11 @@ time_velocity_plot(iCar,iSim,sim,Arm)
 
 iSim = 1;
 Arm = 'horizontal';
-time_average_velocity_plots(iSim,sim,Arm,runTime,timeStep);
+time_average_velocity_plots(iSim,sim,Arm,runTime,dt);
 
 iSim = 1;
 Arm = 'horizontal';
-time_aggregated_velocity_plots(iSim,sim,Arm,runTime,timeStep);
+time_aggregated_velocity_plots(iSim,sim,Arm,runTime,dt);
 %%
 function time_velocity_plot(iCar,iSim,sim,Arm)
 if strcmpi(Arm,'horizontal')

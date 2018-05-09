@@ -4,8 +4,7 @@ clear
 prescription = 'density';
 carTypes = {@Car, @IdmCar, @BtCar};
 carTypeRatios = [0 0 1;
-                 0 0 1];
-             
+                 0 0 1];             
 plotFlag = true;
 runTime = 3600; % in seconds
 timeStep = 0.1; % in seconds
@@ -41,7 +40,7 @@ for k = 1:numberOfSimRuns
 end
 
 for k = 1:numberOfSimRuns
-    sim(k) = driverscript_density(...
+    sim(k) = run_simulation(...
         carTypes,...
         [allCarsNumArray(k).horizontal; allCarsNumArray(k).vertical],...
         runTime,...

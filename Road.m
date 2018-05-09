@@ -4,7 +4,7 @@ classdef Road < handle
         startPoint = 0
         endPoint = 0
         Width = 0
-        priority
+        priority = false
         orientation = ''
         crossingBeginPosition = NaN
         crossingEndPosition = NaN
@@ -21,32 +21,22 @@ classdef Road < handle
     end
     methods
         function obj = Road(road_args)
-            obj.startPoint = road_args{1};
-            obj.endPoint = road_args{2};
-            obj.Width = road_args{3};
-            obj.crossingBeginPosition = -obj.Width/2;
-            obj.crossingEndPosition = obj.Width/2;
-            theta = road_args{4};
+            obj.carTypes = road_args{1};
+            theta = road_args{2};
             if theta == 0
                 obj.orientation = 'horizontal';
-                if road_args{5} == 1
-                    obj.priority = true;
-                elseif road_args{5} == 0
-                    obj.priority = true;
-                else
-                    obj.priority = NaN;
-                end
+                obj.startPoint = road_args{3}.Start(1);
+                obj.endPoint = road_args{3}.End(1);
+                obj.Width = road_args{3}.Width(1);
             else
                 obj.orientation = 'vertical';
-                if road_args{5} == 1
-                    obj.priority = false;
-                elseif road_args{5} == 0
-                    obj.priority = false;
-                else
-                    obj.priority = NaN;
-                end
+                obj.startPoint = road_args{3}.Start(2);
+                obj.endPoint = road_args{3}.End(2);
+                obj.Width = road_args{3}.Width(2);
+                obj.priority = road_args{4};
             end
-            obj.carTypes = road_args{6};
+            obj.crossingBeginPosition = -obj.Width/2;
+            obj.crossingEndPosition = obj.Width/2;
         end
         function new_car = add_car(obj,i)
             new_car = obj.carTypes{i}(obj.orientation, obj.startPoint, obj.Width);

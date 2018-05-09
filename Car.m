@@ -1,6 +1,6 @@
 classdef Car < dlnode
     properties (SetAccess = protected)
-        acceleration = 0
+        acceleration = 1
     end
     properties (Access = public)
         pose = NaN(1,2)
@@ -25,16 +25,11 @@ classdef Car < dlnode
     end
     methods
         function obj = Car(car_args)
-            if nargin == 0
-                % assign values
+            if numel(car_args) == 2
+                obj.pose(1) = car_args(1);
+                obj.velocity = car_args(2);
             else
-                obj.parentRoad = car_args{1};
-%                 if strcmpi(car_args{2},'flow')
-%                     obj.velocity = 8;
-%                 else
-%                     obj.velocity = 0;
-%                 end
-%                 
+                obj.parentRoad = car_args{1};               
                 obj.pose(1) = car_args{2};
                 if strcmpi(obj.parentRoad,'horizontal')
                     obj.pose(2) = 0;
