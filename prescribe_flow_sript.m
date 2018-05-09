@@ -19,7 +19,7 @@ runTime = 14400; % in seconds
 dt = 0.1; % in seconds
 numberOfSimRuns = 10;
 distributionMean.horizontal = logspace(log10(3),log10(10),numberOfSimRuns);
-distributionMean.vertical = logspace(log10(15),log10(15),numberOfSimRuns);
+distributionMean.vertical = logspace(log10(30),log10(30),numberOfSimRuns);
 priority = true;
 
 % road dimensions
@@ -31,18 +31,18 @@ road.Length = road.End - road.Start;
 nIterations = runTime/dt;
 nDigits = numel(num2str(dt))-2;
 t_rng = round(linspace(0,runTime,nIterations),nDigits);
-tic
+
 for k = 1:numberOfSimRuns
     subRoadArgs.Horizontal = [{carTypeRatios(1,:)},distributionMean.horizontal(k),nIterations];
     subRoadArgs.Vertical = [{carTypeRatios(2,:)},distributionMean.vertical(k),nIterations];
         
     [sim(k)] = run_simulation({roadTypes{2},roadTypes{2}},carTypes,subRoadArgs,t_rng,plotFlag,priority,road,nIterations,dt);
 end
-toc
-load handel
-sound(y,Fs)
 
-save('/Users/robot/car_sim_mat_Files/flow_change_09_05_0_0_fall_off40xlongroad_morepoints.mat','prescription','carTypeRatios','dt','t_rng',...
+% load handel
+% sound(y,Fs)
+beep
+save('O:/Desktop/car_sim_mat_Files/flow_change_09_05_0_0_.mat','prescription','carTypeRatios','dt','t_rng',...
     'plotFlag','distributionMean','priority','road','runTime','numberOfSimRuns','sim','-v7.3')
 
 

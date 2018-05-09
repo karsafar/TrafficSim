@@ -5,7 +5,7 @@
 % load('/Users/robot/car_sim_mat_Files/density_02_05_1_1.mat');
 if strcmpi(prescription,'flow')
     for i = 1:numel(sim)
-        horizNumCars(i) = mean(sim(i).horizArm.numCarsHistory);
+        horizNumCars(i) = mean(sim(i).horizArm.numCarsHistory(10000:end));
 %         vertNumCars(i) = mean(sim(i).vertArm.numCarsHistory);
         
         density.horizontal(i) = horizNumCars(i)/(road.Length(1));
@@ -14,7 +14,7 @@ if strcmpi(prescription,'flow')
 end
 
 for iSim = 1:numel(sim)  
-    averagesAcrossSimulations.horizontal(iSim) = mean(sim(iSim).horizArm.averageVelocityHistory);
+    averagesAcrossSimulations.horizontal(iSim) = mean(sim(iSim).horizArm.averageVelocityHistory(10000:end));
 %     averagesAcrossSimulations.vertical(iSim) = mean(sim(iSim).vertArm.averageVelocityHistory);
 end
 

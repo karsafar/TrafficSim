@@ -69,7 +69,7 @@ classdef FiniteRoad < Road
             if obj.numCars > 1
                 obj.allCars(1).Next.leaderFlag = true;
             end
-            if t > 1000 && any(~isnan(obj.allCars(1).timeHistory))
+            if t > 1000 && any(~isnan(obj.allCars(1).timeHistory)
                 obj.collect_car_history(obj.allCars(1));
             end
             obj.allCars(1).removeNode;

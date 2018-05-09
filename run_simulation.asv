@@ -69,6 +69,32 @@ for jCar = 1:VerticalArm.numCars
 end
 sim.horizArm = cast_output(HorizontalArm);
 %  sim.vertArm = cast_output(VerticalArm);
+
+% sim.horizArm.numCars = HorizontalArm.numCars;
+% sim.horizArm.nCarHistory = HorizontalArm.nCarHistory;
+% sim.horizArm.numCarsHistory = HorizontalArm.numCarsHistory;
+% for iCar = 1:sim.horizArm.nCarHistory
+%     temp1 = HorizontalArm.carHistory{1,iCar}(1,:);
+%     temp2 = HorizontalArm.carHistory{1,iCar}(2,:);
+%     temp3 = HorizontalArm.carHistory{1,iCar}(3,:);
+%     temp4 = HorizontalArm.carHistory{1,iCar}(4,:);
+%     sim.horizArm.car(iCar).times = temp1(~isnan(temp1));
+%     sim.horizArm.car(iCar).positions = temp2(~isnan(temp2));
+%     sim.horizArm.car(iCar).velocities = temp3(~isnan(temp3));
+%     sim.horizArm.car(iCar).accelerations = temp4(~isnan(temp4));    
+% end
+% sim.horizArm.averageVelocityHistory = HorizontalArm.averageVelocityHistory;
+
+% sim.vertArm.numCars =  VerticalArm.numCars;
+% sim.vertArm.nCarHistory = VerticalArm.nCarHistory;
+% sim.vertArm.numCarsHistory = VerticalArm.numCarsHistory;
+% for iCar = 1:sim.vertArm.nCarHistory
+%     sim.vertArm.car(iCar).times = VerticalArm.carHistory{1,iCar}(1,:);
+%     sim.vertArm.car(iCar).positions = VerticalArm.carHistory{1,iCar}(2,:);
+%     sim.vertArm.car(iCar).velocities = VerticalArm.carHistory{1,iCar}(3,:);
+%     sim.vertArm.car(iCar).accelerations = VerticalArm.carHistory{1,iCar}(4,:);
+% end
+% sim.vertArm.averageVelocityHistory = VerticalArm.averageVelocityHistory;
 end
 function tempArm = cast_output(arm)
 % tempArm.numCars = arm.numCars;
@@ -84,5 +110,5 @@ for iCar = 1:tempArm.nCarHistory
     tempArm.car(iCar).velocities = temp3(~isnan(temp3));
     tempArm.car(iCar).accelerations = temp4(~isnan(temp4));    
 end
-tempArm.averageVelocityHistory = arm.averageVelocityHistory(~isnan(arm.averageVelocityHistory));
+tempArm.averageVelocityHistory = arm.averageVelocityHistory;
 end
