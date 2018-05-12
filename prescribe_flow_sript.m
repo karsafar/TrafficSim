@@ -1,12 +1,11 @@
 clc
 close all
 clear
-
 prescription = 'flow';
 roadTypes = {@LoopRoad @FiniteRoad};
 carTypes = {@Car, @IdmCar, @BtCar};
 
-HorizArmCarRatios = [0 1 0];
+HorizArmCarRatios = [0 0.5 0.5];
 VertArmCarRatios = [0 1 0];
 carTypeRatios = zeros(2,3);
 for i = 1:numel(carTypes)
@@ -14,7 +13,7 @@ for i = 1:numel(carTypes)
     carTypeRatios(2,i) = sum(VertArmCarRatios(1:i)) - carTypeRatios(2,i); 
 end
 
-plotFlag = false;
+plotFlag = true;
 runTime = 14400; % in seconds
 dt = 0.1; % in seconds
 numberOfSimRuns = 10;
@@ -39,10 +38,9 @@ for k = 1:numberOfSimRuns
     [sim(k)] = run_simulation({roadTypes{2},roadTypes{2}},carTypes,subRoadArgs,t_rng,plotFlag,priority,road,nIterations,dt);
 end
 
-% load handel
-% sound(y,Fs)
 beep
-save('O:/Desktop/car_sim_mat_Files/flow_change_09_05_0_0_.mat','prescription','carTypeRatios','dt','t_rng',...
+
+save('/Users/robot/car_sim_mat_Files/flow_change_09_05_0_0_.mat','prescription','carTypeRatios','dt','t_rng',...
     'plotFlag','distributionMean','priority','road','runTime','numberOfSimRuns','sim','-v7.3')
 
 

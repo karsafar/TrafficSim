@@ -27,7 +27,7 @@ classdef IdmCar < Car & matlab.mixin.Heterogeneous
             end
             if junc_flag 
                 s = obj.s_in - obj.pose(1);
-                dV = (obj.velocity - 0); 
+                dV = obj.velocity; 
             elseif obj.leaderFlag == 0 
                 s = obj.Prev.pose(1) - obj.pose(1);
                 dV = (obj.velocity - obj.Prev.velocity);
@@ -41,7 +41,7 @@ classdef IdmCar < Car & matlab.mixin.Heterogeneous
             
             dynamicBehaviour = obj.velocity*obj.timeGap + (obj.velocity*dV)/(2*sqrt(obj.a*obj.b));
             if junc_flag
-                ss = obj.ownDistfromRearToFront;
+                ss = dynamicBehaviour;
             elseif dynamicBehaviour > 0
                 ss = obj.minimumGap + dynamicBehaviour;
             else
@@ -56,19 +56,7 @@ classdef IdmCar < Car & matlab.mixin.Heterogeneous
                 obj.idmAcceleration =  obj.maximumAcceleration(2);
             end
         end
-        function decide_acceleration(obj,oppositeRoad,t,dt)
-%             crossingBegin = obj.s_in;
-%             crossingEnd = obj.s_out;
-%             if (isempty(obj.Prev) || obj.Prev.pose(1)>crossingBegin) && obj.pose(1) <= crossingBegin
-%                 oppositeCars = oppositeRoad.allCars;
-%                 for jCar = 1:oppositeRoad.numCars
-%                     if oppositeCars(jCar).pose(1) > crossingBegin && oppositeCars(jCar).pose(1) < crossingEnd
-%                         roadLength = oppositeRoad.endPoint - oppositeRoad.startPoint;
-%                         calculate_idm_accel(obj,roadLength,1)    
-%                     end
-%                 end
-% 
-%             end
+        function decide_acceleration(obj,varargin)
             obj.acceleration = obj.idmAcceleration;
         end
     end

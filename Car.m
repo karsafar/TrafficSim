@@ -26,6 +26,7 @@ classdef Car < dlnode
     methods
         function obj = Car(car_args)
             if numel(car_args) == 2
+                % remove later if using only loop road
                 obj.pose(1) = car_args(1);
                 obj.velocity = car_args(2);
             else
@@ -43,10 +44,7 @@ classdef Car < dlnode
                 obj.s_out = roadWidth/2+obj.ownDistfromRearToBack;
             end
         end
-        function move_car(obj,t,dt)
-            if t > 1000
-                obj.store_state_data(t)
-            end
+        function move_car(obj,dt)
             obj.pose(1) = obj.pose(1) + obj.velocity*dt + 0.5*obj.acceleration*dt^2;
             obj.velocity = obj.velocity + obj.acceleration*dt;
             if obj.velocity > obj.maximumVelocity

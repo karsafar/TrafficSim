@@ -20,21 +20,21 @@ for iIteration = 1:nIterations
     % update time
     t = t_rng(iIteration);
     
-    HorizontalArm.move_all_cars(t,dt,iIteration)
-    VerticalArm.move_all_cars(t,dt,iIteration)
+    HorizontalArm.move_all_cars(t,dt,iIteration,nIterations)
+    VerticalArm.move_all_cars(t,dt,iIteration,nIterations)
    
     % draw cars
     if plotFlag
         junc.draw_all_cars(HorizontalArm,VerticalArm)
     end
     
-%     % check for collision
-%     junc.collision_check(...
-%         allCarsHoriz,...
-%         allCarsVert,...
-%         horizontalArm.numCars,...
-%         verticalArm.numCars,...
-%         plotFlag);
+    % check for collision
+    junc.collision_check(...
+        HorizontalArm.allCars,...
+        VerticalArm.allCars,...
+        HorizontalArm.numCars,...
+        VerticalArm.numCars,...
+        plotFlag);
     
     % calculate IDM acceleration
     for iCar = 1:HorizontalArm.numCars
@@ -57,21 +57,10 @@ for iIteration = 1:nIterations
         junc.delete_car_images();
     end
 end
-for iCar = 1:HorizontalArm.numCars
-    if HorizontalArm.allCars(iCar).pose(1) >= -500 && HorizontalArm.allCars(iCar).pose(1) <= 500
-        HorizontalArm.collect_car_history(HorizontalArm.allCars(iCar));
-    end
-end
-for jCar = 1:VerticalArm.numCars
-    if VerticalArm.allCars(jCar).pose(1) >= -500 && VerticalArm.allCars(jCar).pose(1) <= 500
-        VerticalArm.collect_car_history(VerticalArm.allCars(jCar));
-    end
-end
 sim.horizArm = cast_output(HorizontalArm);
 %  sim.vertArm = cast_output(VerticalArm);
 end
 function tempArm = cast_output(arm)
-% tempArm.numCars = arm.numCars;
 tempArm.nCarHistory = arm.nCarHistory;
 tempArm.numCarsHistory = arm.numCarsHistory(~isnan(arm.numCarsHistory));
 for iCar = 1:tempArm.nCarHistory

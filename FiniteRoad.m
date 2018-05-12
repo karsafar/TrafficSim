@@ -82,12 +82,12 @@ classdef FiniteRoad < Road
                 obj.numCars = obj.numCars - 1;
             else
                 obj.numCars = obj.numCars - 1;
-                %                 obj.allCars(1).Prev = Car([obj.endPoint,nanmean(obj.averageVelocityHistory)]);
-                %                 obj.allCars(1).targetVelocity = nanmean(obj.averageVelocityHistory);
+                obj.allCars(1).Prev = Car([obj.endPoint,nanmean(obj.averageVelocityHistory)]);
+                obj.allCars(1).targetVelocity = nanmean(obj.averageVelocityHistory);
                 
             end
         end
-        function move_all_cars(obj,t,dt,iIteration)
+        function move_all_cars(obj,t,dt,iIteration,nIterations)
             
             obj.spawn_car(t);
             
@@ -98,16 +98,25 @@ classdef FiniteRoad < Road
                 aggregatedVelocities = 0;
                 cutNumCars = 0;
                 for iCar = 1:obj.numCars
-                    obj.allCars(iCar).move_car(t,dt)
                     if t > 1000 &&  obj.allCars(iCar).pose(1) >= -500 && obj.allCars(iCar).pose(1) <= 500
+                        obj.allCars(iCar).store_state_data(t)
                         aggregatedVelocities = aggregatedVelocities + obj.allCars(iCar).velocity;
                         cutNumCars = cutNumCars + 1;
                     end
+                    obj.allCars(iCar).move_car(dt)
                 end
                 if t > 1000 
                     obj.averageVelocityHistory(iIteration) = aggregatedVelocities/cutNumCars;
                     obj.numCarsHistory(iIteration,1) = cutNumCars;
                 end
+                if iIteration == nIterations
+                    for iCar = 1:obj.numCars
+                        if obj.allCars(iCar).pose(1) >= (obj.startPoint+100) && obj.allCars(iCar).pose(1) <= (obj.endPoint-100)
+                            obj.collect_car_history(obj.allCars(iCar));
+                        end
+                    end
+                end
+                
             end
         end
     end

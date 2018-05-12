@@ -4,6 +4,7 @@ classdef Road < handle
         startPoint = 0
         endPoint = 0
         Width = 0
+        Length = 0
         priority = false
         orientation = ''
         crossingBeginPosition = NaN
@@ -28,11 +29,13 @@ classdef Road < handle
                 obj.startPoint = road_args{3}.Start(1);
                 obj.endPoint = road_args{3}.End(1);
                 obj.Width = road_args{3}.Width(1);
+                obj.Length = road_args{3}.Length(1);
             else
                 obj.orientation = 'vertical';
                 obj.startPoint = road_args{3}.Start(2);
                 obj.endPoint = road_args{3}.End(2);
                 obj.Width = road_args{3}.Width(2);
+                obj.Length = road_args{3}.Length(2);
                 obj.priority = road_args{4};
             end
             obj.crossingBeginPosition = -obj.Width/2;

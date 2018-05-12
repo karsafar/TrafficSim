@@ -95,7 +95,8 @@ classdef LoopRoad < Road
                 if obj.allCars(iCar).pose(1) >= obj.endPoint
                     obj.respawn_car(obj.allCars(iCar));
                 end
-                obj.allCars(iCar).move_car(t,dt);
+                obj.allCars(iCar).store_state_data(t)
+                obj.allCars(iCar).move_car(dt);
                 aggregatedVelocities = aggregatedVelocities + obj.allCars(iCar).velocity;
             end
             obj.averageVelocityHistory(iIteration) = aggregatedVelocities/obj.numCars;
