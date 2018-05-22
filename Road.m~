@@ -20,10 +20,10 @@ classdef Road < handle
         carType = 0
         carTypes = {}
         FixedDistr = false
-        times %= NaN(1000,100000)
-        poses %= NaN(1000,100000)
-        vels %= NaN(1000,100000)
-        accels% = NaN(1000,100000)
+        times = NaN(1000,100000)
+        poses = NaN(1000,100000)
+        vels = NaN(1000,100000)
+        accels = NaN(1000,100000)
     end
     methods
         function obj = Road(road_args)
@@ -56,7 +56,21 @@ classdef Road < handle
         end
         function collect_car_history(obj,iCar)
             i = obj.nCarHistory + 1;
+            tic
             obj.carHistory{i} = [iCar.timeHistory; iCar.locationHistory; iCar.velocityHistory; iCar.accelerationHistory];
+            toc
+            tic
+            temp2.times(i,:) = iCar.timeHistory;
+            temp2.poses(i,:) = iCar.locationHistory;
+            temp2.vels(i,:) = iCar.velocityHistory;
+            temp2.accels(i,:) = iCar.accelerationHistory;
+            toc
+            tic
+            obj(i,:).times = iCar.timeHistory(~isnan(iCar.timeHistory));
+            obj(i,:).poses = iCar.locationHistory(~isnan(iCar.locationHistory));
+            obj(i,:).vels = iCar.velocityHistory(~isnan(iCar.velocityHistory));
+            obj(i,:).accels = iCar.accelerationHistory(~isnan(iCar.accelerationHistory));
+            toc
             obj.nCarHistory = i;
         end
     end

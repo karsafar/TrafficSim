@@ -2,7 +2,7 @@ close all
 clear 
 % % % 
 % load('/Users/robot/car_sim_mat_Files/flow_change_07_05_0_0_fall_off40xlongroad_morepoints.mat');
-load('/Users/robot/car_sim_mat_Files/density_02_05_1_1.mat');
+load('/Users/robot/car_sim_mat_Files/density_21_05_passive_Idm.mat');
 if strcmpi(prescription,'flow')
     for i = 1:numel(sim)
         horizNumCars(i) = mean(sim(i).horizArm.numCarsHistory);

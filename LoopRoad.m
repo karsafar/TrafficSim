@@ -7,10 +7,11 @@ classdef LoopRoad < Road
     methods
         function obj = LoopRoad(road_args,loop_road_args)
             obj = obj@Road(road_args);
-           
+            
             obj.allCarsNumArray = loop_road_args{1};
             obj.numCars = loop_road_args{2};
             obj.averageVelocityHistory = NaN(loop_road_args{3},1);
+            obj.FixedDistr = loop_road_args{4};
             obj.spawn_initial_cars();
         end
         function spawn_initial_cars(obj)
@@ -24,22 +25,25 @@ classdef LoopRoad < Road
                 end
             end
             unoccupiedSpace =  obj.endPoint - allCarsPoseArray(end) - 20;
+            if obj.FixedDistr
+                rng(1);
+            end
             obj.initPoseProbDist = makedist('uniform','lower',0,'upper',unoccupiedSpace);
-            randomPosition = NaN(1,obj.numCars);
-            for iCar = 1:obj.numCars
-                randomPosition(iCar) = random(obj.initPoseProbDist);
-            end
-            randomPosition = sort(randomPosition);
-            deltaD = NaN(1,obj.numCars);
-            for iCar = 1:obj.numCars
-                if iCar == 1
-                    deltaD(iCar) = randomPosition(iCar);
-                elseif iCar == obj.numCars
-                    deltaD(iCar) = unoccupiedSpace - randomPosition(iCar);
-                else
-                    deltaD(iCar) = randomPosition(iCar) - randomPosition(iCar-1);
+                addonPositions = NaN(1,obj.numCars);
+                for iCar = 1:obj.numCars
+                    addonPositions(iCar) = random(obj.initPoseProbDist);
                 end
-            end
+                addonPositions = sort(addonPositions);
+                deltaD = NaN(1,obj.numCars);
+                for iCar = 1:obj.numCars
+                    if iCar == 1
+                        deltaD(iCar) = addonPositions(iCar);
+                    elseif iCar == obj.numCars
+                        deltaD(iCar) = unoccupiedSpace - addonPositions(iCar);
+                    else
+                        deltaD(iCar) = addonPositions(iCar) - addonPositions(iCar-1);
+                    end
+                end
             for iCar = 1:obj.numCars
                 allCarsPoseArray(iCar:end) = allCarsPoseArray(iCar:end)+deltaD(iCar);
                 if allCarsPoseArray(iCar) > -10 && allCarsPoseArray(iCar) < 10
@@ -47,7 +51,6 @@ classdef LoopRoad < Road
                     allCarsPoseArray(iCar:end) = allCarsPoseArray(iCar:end)+diff;
                 end
             end
-            
             allCarsArray = [];
             for i = 1:numel(obj.allCarsNumArray)
                 if obj.allCarsNumArray(i) > 0
@@ -58,7 +61,7 @@ classdef LoopRoad < Road
                 end
             end
             
-            obj.allCars = allCarsArray(randperm(length(allCarsArray)));            
+            obj.allCars = allCarsArray(randperm(length(allCarsArray)));
             allCarsPoseArray = flip(allCarsPoseArray);
             for iCar = 1:obj.numCars
                 obj.allCars(iCar).pose(1) = allCarsPoseArray(iCar);

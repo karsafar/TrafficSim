@@ -1,4 +1,3 @@
-clc
 close all
 clear
 prescription = 'flow';
@@ -14,12 +13,13 @@ for i = 1:numel(carTypes)
 end
 
 plotFlag = true;
-runTime = 14400; % in seconds
+runTime = 144; % in seconds
 dt = 0.1; % in seconds
 numberOfSimRuns = 10;
 distributionMean.horizontal = logspace(log10(3),log10(10),numberOfSimRuns);
-distributionMean.vertical = logspace(log10(30),log10(30),numberOfSimRuns);
+distributionMean.vertical = logspace(log10(3),log10(10),numberOfSimRuns);
 priority = true;
+fixedDistribution = [true true];
 
 % road dimensions
 road.Start = [-600; -600];
@@ -32,8 +32,8 @@ nDigits = numel(num2str(dt))-2;
 t_rng = round(linspace(0,runTime,nIterations),nDigits);
 
 for k = 1:numberOfSimRuns
-    subRoadArgs.Horizontal = [{carTypeRatios(1,:)},distributionMean.horizontal(k),nIterations];
-    subRoadArgs.Vertical = [{carTypeRatios(2,:)},distributionMean.vertical(k),nIterations];
+    subRoadArgs.Horizontal = [{carTypeRatios(1,:)},distributionMean.horizontal(k),nIterations,fixedDistribution(1)];
+    subRoadArgs.Vertical = [{carTypeRatios(2,:)},distributionMean.vertical(k),nIterations,fixedDistribution(2)];
         
     [sim(k)] = run_simulation({roadTypes{2},roadTypes{2}},carTypes,subRoadArgs,t_rng,plotFlag,priority,road,nIterations,dt);
 end

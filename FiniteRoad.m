@@ -7,6 +7,7 @@ classdef FiniteRoad < Road
         verticalQueue = []
         numCarsHistory
         carRatios
+        spawningInterval
     end
     
     methods
@@ -15,6 +16,10 @@ classdef FiniteRoad < Road
             
             % distribution - mean interval is distributionMean secs
             obj.carRatios = finite_road_args{1};
+            obj.FixedDistr = finite_road_args{4};
+            if obj.FixedDistr
+                rng(1);
+            end
             obj.spawnTimeProbDist = makedist('Exponential','mu',finite_road_args{2});
             obj.numCarsHistory = NaN(finite_road_args{3},1);
             obj.averageVelocityHistory = NaN(finite_road_args{3},1);
@@ -98,7 +103,7 @@ classdef FiniteRoad < Road
                 aggregatedVelocities = 0;
                 cutNumCars = 0;
                 for iCar = 1:obj.numCars
-                    if t > 1000 &&  obj.allCars(iCar).pose(1) >= -500 && obj.allCars(iCar).pose(1) <= 500
+                    if t > 1000 &&  obj.allCars(iCar).pose(1) >= (obj.startPoint+100) && obj.allCars(iCar).pose(1) <= (obj.endPoint-100)
                         obj.allCars(iCar).store_state_data(t)
                         aggregatedVelocities = aggregatedVelocities + obj.allCars(iCar).velocity;
                         cutNumCars = cutNumCars + 1;
