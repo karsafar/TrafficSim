@@ -47,7 +47,7 @@ classdef HesitantCar < IdmCar
             aheadCar = BtSequence(...
                 obj.it_A_min_ahead>=0,...
                 obj.it_A_min_ahead<=obj.maximumAcceleration(1)+0.1,...
-                obj.it_A_max_behind < obj.b,...
+                obj.it_A_max_behind < obj.maximumAcceleration(2)-0.1,...
                 A6);
             
             p71 = BtSequence(...
@@ -75,11 +75,11 @@ classdef HesitantCar < IdmCar
             
             behindCar = BtSequence(...
                 obj.it_A_max_behind<=0,...
-                obj.it_A_min_ahead > obj.a,...
+                obj.it_A_min_ahead > obj.maximumAcceleration(1)+0.1,...
                 obj.it_A_max_behind>=(obj.maximumAcceleration(2)-0.1),...
                 A9);
             
-            Crossing = BtSelector(aheadCar,stopCar,behindCar);
+            Crossing = BtSelector(aheadCar,behindCar);
             
             % front car not passed junction
             idmAfterjunction = BtAssign(obj.it_accel,obj.it_idmAccel);
@@ -123,20 +123,20 @@ classdef HesitantCar < IdmCar
                     
                     if 0.001 < oppositeCars(ind).acceleration
                         t_in = (-oppositeCars(ind).velocity+sqrt((oppositeCars(ind).velocity)^2+2*oppositeCars(ind).acceleration...
-                            *(crossingBegin-oppositeCarPose)))/oppositeCars(ind).acceleration+t-0.1;
+                            *(crossingBegin-oppositeCarPose)))/oppositeCars(ind).acceleration+t-0.3;
                         t_out = (-oppositeCars(ind).velocity+sqrt((oppositeCars(ind).velocity)^2+2*oppositeCars(ind).acceleration...
-                            *(crossingEnd-oppositeCarPose)))/oppositeCars(ind).acceleration+t+0.1;
+                            *(crossingEnd-oppositeCarPose)))/oppositeCars(ind).acceleration+t+0.3;
                     else
-                        t_in = (crossingBegin - oppositeCarPose)/oppositeCars(ind).velocity+t - 0.1;
-                        t_out = (crossingEnd - oppositeCarPose)/oppositeCars(ind).velocity+t + 0.1;
+                        t_in = (crossingBegin - oppositeCarPose)/oppositeCars(ind).velocity+t - 0.3;
+                        t_out = (crossingEnd - oppositeCarPose)/oppositeCars(ind).velocity+t + 0.3;
                     end
                     
                     if ~isempty(oppositeCars(ind).Next) && oppositeCars(ind).Next.pose(1) <= obj.s_in
                         if 0.001 < oppositeCars(ind).Next.acceleration
                             t_in_next = (-oppositeCars(ind).Next.velocity+sqrt((oppositeCars(ind).Next.velocity)^2+2*oppositeCars(ind).Next.acceleration...
-                                *(crossingBegin-oppositeCars(ind).Next.pose(1))))/oppositeCars(ind).Next.acceleration+t-0.1;
+                                *(crossingBegin-oppositeCars(ind).Next.pose(1))))/oppositeCars(ind).Next.acceleration+t-0.3;
                         else
-                            t_in_next = (crossingBegin - oppositeCars(ind).Next.pose(1))/oppositeCars(ind).Next.velocity+t - 0.1;
+                            t_in_next = (crossingBegin - oppositeCars(ind).Next.pose(1))/oppositeCars(ind).Next.velocity+t - 0.3;
                         end
                         
                         A_min_ahead_next = obj.calc_a_min_ahead(...

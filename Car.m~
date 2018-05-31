@@ -45,10 +45,13 @@ classdef Car < dlnode
             end
         end
         function move_car(obj,dt)
-%             if obj.acceleration < 0.0001
-%                 obj.acceleration = 0;
-%             end
+            
             obj.pose(1) = obj.pose(1) + obj.velocity*dt + 0.5*obj.acceleration*dt^2;
+            if obj.pose(1) <= new_pose
+                obj.pose(1) = new_pose;
+            else
+                1;
+            end
             obj.velocity = obj.velocity + obj.acceleration*dt;
             if obj.velocity > obj.maximumVelocity
                 obj.velocity = obj.maximumVelocity;

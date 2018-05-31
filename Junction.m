@@ -64,10 +64,12 @@ classdef Junction < handle
                 disp(msg);
                 if plotFlag
                     junctionAxesHandle = text(obj.junctionPlotHandle,3,-7,msg,'Color','red');
-                    pause(0.001)
+%                     pause()
                     delete(junctionAxesHandle);
+                    beep;
                 else
                     %pause();
+                    beep;
                 end
             end
         end

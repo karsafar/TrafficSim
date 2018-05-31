@@ -27,8 +27,8 @@ classdef IdmCar < Car & matlab.mixin.Heterogeneous
                junc_flag = varargin{2};
             end
             if junc_flag 
-                obj.s = obj.s_in - obj.pose(1);
-                dV = obj.velocity-0.01; 
+                obj.s = obj.s_in - obj.pose(1)-;
+                dV = obj.velocity; 
             elseif obj.leaderFlag == 0 
                 obj.s = obj.Prev.pose(1) - obj.pose(1);
                 dV = (obj.velocity - obj.Prev.velocity);
@@ -42,7 +42,7 @@ classdef IdmCar < Car & matlab.mixin.Heterogeneous
             
             dynamicBehaviour = obj.velocity*obj.timeGap + (obj.velocity*dV)/(2*sqrt(obj.a*obj.b));
             if junc_flag
-                ss = 1+dynamicBehaviour;
+                ss = dynamicBehaviour;
             elseif dynamicBehaviour > 0
                 ss = obj.minimumGap + dynamicBehaviour;
             else

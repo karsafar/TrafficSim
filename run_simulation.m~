@@ -43,10 +43,12 @@ for iIteration = 1:nIterations
     for jCar = 1:VerticalArm.numCars
         calculate_idm_accel(VerticalArm.allCars(jCar),roadDims.Length(2));
     end
-    
+    if iIteration == 6693
+        1;
+    end
     % Itersection Collision Avoidance (ICA)
     for iCar = 1:HorizontalArm.numCars
-        HorizontalArm.allCars(iCar).decide_acceleration(VerticalArm,t,dt);
+        HorizontalArm.allCars(20).decide_acceleration(VerticalArm,t,dt);
     end
     for jCar = 1:VerticalArm.numCars
         VerticalArm.allCars(jCar).decide_acceleration(HorizontalArm,t,dt);
