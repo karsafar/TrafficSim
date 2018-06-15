@@ -2,26 +2,25 @@ close all
 clear
 prescription = 'density';
 roadTypes = {@LoopRoad @FiniteRoad};
-% carTypes = {@Car, @DummyCar, @BtCar};
-carTypes = {@IdmCar, @DummyCar, @AggressiveCar, @PassiveCar, @HesitantCar};
+carTypes = {@IdmCar, @DummyCar, @AggressiveCar, @PassiveCar, @HesitantCar, @ManualCar};
 
-carTypeRatios = [0 0 0 0 1;1 0 0 0 0];
+carTypeRatios = [0 0 0 0 0 1;0 0 1 0 0 0];
 plotFlag = true;
 runTime = 3600; % in seconds
-dt = 0.1; % in seconds
+dt = 0.1;       % in seconds
 priority = true;
 repeatableDistribution = [true true];
 % road dimensions
-road.Start = [-100; -100];
-road.End = [100; 100];
+road.Start = [-150; -150];
+road.End = [150; 150];
 road.Width = [4; 4];
 road.Length = road.End - road.Start;
 
 InitNumberOfSimRuns = 30;
 noSpawnAreaLength = 20; % length of no spawn area around the junction
 
-init_density.horizontal = 0.079-logspace(log10(0.0001),log10(0.035),InitNumberOfSimRuns);
-init_density.vertical = 0.043-logspace(log10(0.0001),log10(0.00001),InitNumberOfSimRuns);
+init_density.horizontal = 0.032-logspace(log10(0.0001),log10(0.095),InitNumberOfSimRuns);
+init_density.vertical = 0.032-logspace(log10(0.0001),log10(0.00001),InitNumberOfSimRuns);
 
 [numCars.horizontal(:), idx]= unique(round(init_density.horizontal(:) * (road.Length(1) - noSpawnAreaLength)),'first');
 [numCars.vertical(:), idx1] = unique(round(init_density.vertical(:) * (road.Length(2) - noSpawnAreaLength)),'first');
@@ -58,7 +57,7 @@ for k = 1:numberOfSimRuns
     
 end
 
-save('/Users/robot/car_sim_mat_Files/density_30_05_aggressive_Idm.mat','prescription','carTypeRatios','carTypes','numCars','allCarsNumArray',...
+save('/Users/robot/car_sim_mat_Files/density_31_05_dummy_Idm.mat','prescription','carTypeRatios','carTypes','numCars','allCarsNumArray',...
     'runTime','dt','t_rng','plotFlag','priority','density','road','numberOfSimRuns','nIterations','sim','-v7.3')
 beep
 % save real_data

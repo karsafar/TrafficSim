@@ -99,14 +99,26 @@ classdef Junction < handle
                 
                 plotVectorX(:) = [transformation(1,1:end-1) transformation(1,1)];
                 plotVectorY(:) = [transformation(2,1:end-1) transformation(2,1)];
-                if obj.allCars(iCar).acceleration > 0
+                %                 if obj.allCars(iCar).acceleration > 0
+                %                     carColour = 'g';
+                %                 elseif obj.allCars(iCar).acceleration == 0
+                %                     carColour = 'k';
+                %                 else
+                %                     carColour = 'r';
+                %                 end
+                if strcmpi(class(obj.allCars(iCar)),'ManualCar')
                     carColour = 'g';
-                elseif obj.allCars(iCar).acceleration == 0
-                    carColour = 'k';
-                else
+                elseif strcmpi(class(obj.allCars(iCar)),'AggressiveCar')
                     carColour = 'r';
+                elseif strcmpi(class(obj.allCars(iCar)),'PassiveCar')
+                    carColour = 'b';
+                elseif strcmpi(class(obj.allCars(iCar)),'HesitantCar')
+                    carColour = 'y';
+                elseif strcmpi(class(obj.allCars(iCar)),'DummyCar')
+                    carColour = 'm';
+                else
+                    carColour = 'k';
                 end
-                
                 CarsImageHandle(iCar) = fill(junctionAxesHandle,plotVectorX',plotVectorY',carColour);
             end
             

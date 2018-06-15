@@ -15,13 +15,13 @@ classdef LoopRoad < Road
             obj.spawn_initial_cars();
         end
         function spawn_initial_cars(obj)
-            minimumSpacing = IdmCar.minimumGap;
+            minimumSpacing = IdmCar.minimumGap+Car.dimension(2);
             allCarsPoseArray = NaN(obj.numCars,1);
             for iCar = 1:obj.numCars
                 if iCar == 1
                     allCarsPoseArray(iCar) = obj.startPoint;
                 else
-                    allCarsPoseArray(iCar) = allCarsPoseArray(iCar-1)+minimumSpacing;
+                    allCarsPoseArray(iCar) = allCarsPoseArray(iCar-1) + minimumSpacing;
                 end
             end
             unoccupiedSpace =  obj.endPoint - allCarsPoseArray(end) - 20;

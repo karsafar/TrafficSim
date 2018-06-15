@@ -55,6 +55,12 @@ classdef DummyCar < IdmCar
             oppositeCars = oppositeRoad.allCars;
             crossingBegin = obj.s_in-0.5;
             crossingEnd = obj.s_out+0.5;
+%             
+%             if obj.pose(1) > -60 && obj.pose(1) < obj.s_in - 10
+%                 obj.targetVelocity = 6;
+%             else
+%                 obj.targetVelocity = 8;
+%             end
             
             obj.a = 2;
             obj.b = 2;
@@ -113,12 +119,10 @@ classdef DummyCar < IdmCar
             if ~isempty(oppositeCars(ind).Next) && oppositeCars(ind).Next.pose(1) <= crossingBegin
                 if 0.001 < oppositeCars(ind).Next.acceleration
                     t_in_next = (-oppositeCars(ind).Next.velocity+sqrt((oppositeCars(ind).Next.velocity)^2+2*oppositeCars(ind).Next.acceleration...
-                        *(crossingBegin-oppositeCars(ind).Next.pose(1))))/oppositeCars(ind).Next.acceleration+t - dt;
+                        *(crossingBegin-oppositeCars(ind).Next.pose(1))))/oppositeCars(ind).Next.acceleration+t-3*dt;
                 else
-                    t_in_next = (crossingBegin - oppositeCars(ind).Next.pose(1))/oppositeCars(ind).Next.velocity+t - dt;
+                    t_in_next = (crossingBegin - oppositeCars(ind).Next.pose(1))/oppositeCars(ind).Next.velocity+t - 3*dt;
                 end
-            else
-                t_in_next = inf;
             end
             
             caPassAhead = (t_in > t_out_self);

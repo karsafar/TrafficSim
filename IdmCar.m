@@ -1,18 +1,18 @@
 classdef IdmCar < Car & matlab.mixin.Heterogeneous
     properties (Constant)
-        a = 1
-        b = 1.5
         delta = 2
-        timeGap  = 1.6
-        minimumGap = 6
+        minimumGap = 2
     end
     properties (SetAccess = protected)
         idmAcceleration = NaN
         s = NaN
+        a = 1
+        b = 1.5
+        timeGap  = 1.6
     end
     properties (Access = public)
         leaderFlag = true
-        targetVelocity = 8
+        targetVelocity = 6
     end
     
     methods
@@ -26,14 +26,15 @@ classdef IdmCar < Car & matlab.mixin.Heterogeneous
             else
                junc_flag = varargin{2};
             end
+
             if junc_flag 
                 obj.s = obj.s_in - obj.pose(1);
                 dV = obj.velocity-0.01; 
             elseif obj.leaderFlag == 0 
-                obj.s = obj.Prev.pose(1) - obj.pose(1);
+                obj.s = obj.Prev.pose(1) - obj.pose(1) - obj.dimension(2);
                 dV = (obj.velocity - obj.Prev.velocity);
             elseif ~isempty(obj.Prev)
-                obj.s = obj.Prev.pose(1) - obj.pose(1) + roadLength;
+                obj.s = obj.Prev.pose(1) - obj.pose(1) - obj.dimension(2) + roadLength;
                 dV = (obj.velocity - obj.Prev.velocity);
             else
                 obj.s = Inf;
@@ -42,15 +43,16 @@ classdef IdmCar < Car & matlab.mixin.Heterogeneous
             
             dynamicBehaviour = obj.velocity*obj.timeGap + (obj.velocity*dV)/(2*sqrt(obj.a*obj.b));
             if junc_flag
-                ss = 1+dynamicBehaviour;
-            elseif dynamicBehaviour > 0
-                ss = obj.minimumGap + dynamicBehaviour;
+                s_star = 1 + dynamicBehaviour;
+                
             else
-                ss = obj.minimumGap;
+                s_star = obj.minimumGap + max(0,dynamicBehaviour);
             end
             
             
-            obj.idmAcceleration = obj.a*(1 - (obj.velocity/obj.targetVelocity)^obj.delta - (ss/obj.s)^2);
+            obj.idmAcceleration = obj.a*(1 - (obj.velocity/obj.targetVelocity)^obj.delta - (s_star/obj.s)^2);
+            
+            
 %             if 0.01 > obj.s  
 %                 obj.idmAcceleration = 0;
 %             else

@@ -13,11 +13,11 @@ grid on
 plot(ha1,k,v,'k')
 load('/Users/robot/cross_sim/3dplot/vel_idm.mat');
 plot(ha1,density.horizontal,averagesAcrossSimulations.horizontal,'--');
-load('/Users/robot/cross_sim/3dplot/vel_aggressive.mat');
+load('/Users/robot/cross_sim/3dplot/vel_aggressive1.mat');
 plot(ha1,density.horizontal,averagesAcrossSimulations.horizontal,'b^-');
-load('/Users/robot/cross_sim/3dplot/vel_passive.mat');
+load('/Users/robot/cross_sim/3dplot/vel_passive1.mat');
 plot(ha1,density.horizontal,averagesAcrossSimulations.horizontal,'r-s');
-load('/Users/robot/cross_sim/3dplot/vel_hesitant.mat');
+load('/Users/robot/cross_sim/3dplot/vel_hesitant1.mat');
 plot(ha1,density.horizontal,averagesAcrossSimulations.horizontal,'go-');
 legend(ha1,{'Analytical curve','Idm Cars','Aggressive Cars','Passive Cars','Hesitant Cars'},'FontSize',18)
 
@@ -32,10 +32,10 @@ grid on
 plot(ha2,k,q,'k')
 load('/Users/robot/cross_sim/3dplot/flow_idm.mat');
 plot(ha2,density.horizontal,flow.horizontal,'--');
-load('/Users/robot/cross_sim/3dplot/flow_aggresive.mat');
+load('/Users/robot/cross_sim/3dplot/flow_aggressive1.mat');
 plot(ha2,density.horizontal,flow.horizontal,'b^-');
-load('/Users/robot/cross_sim/3dplot/flow_passive.mat');
+load('/Users/robot/cross_sim/3dplot/flow_passive1.mat');
 plot(ha2,density.horizontal,flow.horizontal,'r-s');
-load('/Users/robot/cross_sim/3dplot/flow_hesitant.mat');
+load('/Users/robot/cross_sim/3dplot/flow_hesitant1.mat');
 plot(ha2,density.horizontal,flow.horizontal,'go-');
 legend(ha2,{'Analytical curve','Idm Cars','Aggressive Cars','Passive Cars','Hesitant Cars'},'FontSize',18)

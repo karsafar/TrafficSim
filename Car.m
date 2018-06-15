@@ -19,7 +19,7 @@ classdef Car < dlnode
         s_out = []
     end
     properties (Constant)
-        maximumAcceleration = [4.5 -6.5]
+        maximumAcceleration = [3.5 -4.5]
         maximumVelocity = 13
         dimension = [2.16 4.4 2.75];
     end
@@ -45,17 +45,13 @@ classdef Car < dlnode
             end
         end
         function move_car(obj,dt)
-%             if obj.acceleration < 0.0001
-%                 obj.acceleration = 0;
-%             end
             obj.pose(1) = obj.pose(1) + obj.velocity*dt + 0.5*obj.acceleration*dt^2;
             obj.velocity = obj.velocity + obj.acceleration*dt;
+            
             if obj.velocity > obj.maximumVelocity
                 obj.velocity = obj.maximumVelocity;
             elseif obj.velocity < 0
                 obj.velocity = 0;
-            else
-                obj.velocity = obj.velocity;
             end
         end
         function store_state_data(obj,t)
