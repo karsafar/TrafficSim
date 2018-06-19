@@ -70,10 +70,10 @@ classdef ManualCar < DummyCar
                 currentCarVelJ = obj.velocityHistory(obj.historyIndex-obj.J);
                 currentCarAccelJ = obj.accelerationHistory(obj.historyIndex-obj.J);
             end
-            if ~isempty(obj.Prev)
+            if ~isempty(obj.Prev) && ~junc_flag
                 leaderCar = obj.Prev;
                 nCarLength = obj.dimension(2);
-                while count <= obj.n_a && leaderCar.pose(1) ~= obj.pose(1) 
+                while count <= obj.n_a && leaderCar.pose(1) ~= obj.pose(1) && ~junc_flag
                     if leaderCar.historyIndex <= obj.J
                         leaderCarPoseJ = leaderCar.pose(1);
                         leaderCarVelJ = leaderCar.velocity;
@@ -106,9 +106,9 @@ classdef ManualCar < DummyCar
             end
             if junc_flag
                 obj.s = obj.s_in - obj.pose(1);
-                dV = obj.velocity-0.01;
+                dV = obj.velocity;
                 dynamicBehaviour = obj.velocity*obj.timeGap + (obj.velocity*dV)/(2*sqrt(obj.a*obj.b));
-                s_star = 1 + dynamicBehaviour;
+                s_star = 0.5 + max(0,dynamicBehaviour);
                 obj.idmAcceleration = obj.a*(1 - (obj.velocity/obj.targetVelocity)^obj.delta - (s_star/obj.s)^2);
             else
                 obj.idmAcceleration = a_idm_free + C_idm*a_int + obj.sigma_a*obj.w_a;

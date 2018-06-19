@@ -1,9 +1,9 @@
 function [k,q, v] = fundamentaldiagram()
 
 delta = 2;
-s0 = 6;     % m
+s0 = 6.4;     % m
 s1 = 0;     % m
-v0 = 8;    % m/s
+v0 = 6;    % m/s
 T = 1.6;    % sec
 
 
@@ -25,7 +25,7 @@ k = densitypoints(v,s0,s1,v0,T,delta);
 
 
 % figure()
-% plot(ha5,k,q,'k')
+% plot(k,q,'k')
 % xlabel(' Density k (veh/m)')
 % ylabel(' Flow q veh/s')
 % grid on

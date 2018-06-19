@@ -5,7 +5,6 @@ classdef PassiveCar < IdmCar
         it_pose
         it_vel
         it_accel
-        it_a_max
         it_t_out
         it_A_min_ahead
         it_A_max_behind
@@ -31,7 +30,6 @@ classdef PassiveCar < IdmCar
             obj.it_idmAccel = obj.bb.add_item('idmAccel',obj.idmAcceleration);
             obj.it_pose = obj.bb.add_item('pose',obj.pose(1));
             obj.it_vel = obj.bb.add_item('vel',obj.velocity);
-            obj.it_a_max = obj.bb.add_item('A_max',obj.maximumAcceleration(1));
             
             if ~isempty(obj.Prev)
                 if obj.Prev.pose(1) > obj.s_out
@@ -48,12 +46,12 @@ classdef PassiveCar < IdmCar
             A6 = BtAssign(obj.it_accel,obj.it_A_min_ahead);
             aheadCar = BtSequence(...
                 obj.it_A_min_ahead>=0,...
-                obj.it_A_min_ahead<=(obj.it_a_max),... %%%%%%%
+                obj.it_A_min_ahead<=(obj.maximumAcceleration(1)+0.1),... %%%%%%%
                 A6);
             
             p71 = BtSequence(...
                 obj.it_A_min_ahead<obj.maximumAcceleration(2)-0.1,...
-                obj.it_A_max_behind>obj.it_a_max);
+                obj.it_A_max_behind>obj.maximumAcceleration(1)+0.1);
             p7 = BtSelector(...
                 p71,...
                 obj.it_A_min_ahead<=0);%,...
@@ -118,6 +116,7 @@ classdef PassiveCar < IdmCar
                 obj.maximumAcceleration(1) = 3.5;
             end
             
+            
             if obj.pose(1) > crossingEnd
                 obj.acceleration = obj.idmAcceleration;
             else
@@ -145,7 +144,7 @@ classdef PassiveCar < IdmCar
                         obj.acceleration = 0;
                     end
                 else %-----------------Collision Avoidance BT------------------%
-                    T_safe = 0.15;
+                    T_safe = 0.1;
                     if 0.001 < oppositeCars(ind).acceleration
                         t_in = (-oppositeCars(ind).velocity+sqrt((oppositeCars(ind).velocity)^2+2*oppositeCars(ind).acceleration...
                             *(crossingBegin-oppositeCarPose)))/oppositeCars(ind).acceleration+t-3*T_safe;
@@ -210,8 +209,7 @@ classdef PassiveCar < IdmCar
                     obj.it_idmAccel.set_value(obj.idmAcceleration);
                     obj.it_pose.set_value(obj.pose(1));
                     obj.it_vel.set_value(obj.velocity);
-                    obj.it_a_max = obj.bb.add_item('A_max',obj.maximumAcceleration(1)+0.1);
-
+                    
                     if ~isempty(obj.Prev)
                         if obj.Prev.pose(1) > crossingEnd || obj.Prev.pose(1) < obj.pose(1)
                             obj.it_frontCarPassedJunction.set_value(true);

@@ -1,6 +1,7 @@
 classdef Car < dlnode
     properties (SetAccess = protected)
         acceleration = 1
+        maximumAcceleration = [3.670092447686557 -3.5]
     end
     properties (Access = public)
         pose = NaN(1,2)
@@ -19,7 +20,6 @@ classdef Car < dlnode
         s_out = []
     end
     properties (Constant)
-        maximumAcceleration = [3.5 -4.5]
         maximumVelocity = 13
         dimension = [2.16 4.4 2.75];
     end

@@ -29,7 +29,7 @@ classdef IdmCar < Car & matlab.mixin.Heterogeneous
 
             if junc_flag 
                 obj.s = obj.s_in - obj.pose(1);
-                dV = obj.velocity-0.01; 
+                dV = obj.velocity; 
             elseif obj.leaderFlag == 0 
                 obj.s = obj.Prev.pose(1) - obj.pose(1) - obj.dimension(2);
                 dV = (obj.velocity - obj.Prev.velocity);
@@ -43,7 +43,7 @@ classdef IdmCar < Car & matlab.mixin.Heterogeneous
             
             dynamicBehaviour = obj.velocity*obj.timeGap + (obj.velocity*dV)/(2*sqrt(obj.a*obj.b));
             if junc_flag
-                s_star = 1 + dynamicBehaviour;
+                s_star = 0.5 + max(0,dynamicBehaviour);
                 
             else
                 s_star = obj.minimumGap + max(0,dynamicBehaviour);
@@ -51,19 +51,7 @@ classdef IdmCar < Car & matlab.mixin.Heterogeneous
             
             
             obj.idmAcceleration = obj.a*(1 - (obj.velocity/obj.targetVelocity)^obj.delta - (s_star/obj.s)^2);
-            
-            
-%             if 0.01 > obj.s  
-%                 obj.idmAcceleration = 0;
-%             else
-%             obj.idmAcceleration = obj.a*(1 - (obj.velocity/obj.targetVelocity)^obj.delta - (ss/obj.s)^2);
-%             end
-%             calcIdmAccel = obj.a*(1 - (obj.velocity/obj.targetVelocity)^obj.delta - (ss/obj.s)^2);
-%             if 0.0001 >= abs(0-calcIdmAccel)
-%                 obj.idmAcceleration = 0;
-%             else
-%                 obj.idmAcceleration = calcIdmAccel;
-%             end
+
             if obj.idmAcceleration > obj.maximumAcceleration(1)
                 obj.idmAcceleration = obj.maximumAcceleration(1);
             elseif obj.idmAcceleration < obj.maximumAcceleration(2)
