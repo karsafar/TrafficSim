@@ -1,7 +1,7 @@
-classdef IdmCar < Car & matlab.mixin.Heterogeneous
+classdef IdmCar < Car  & matlab.mixin.Heterogeneous
     properties (Constant)
         delta = 2
-        minimumGap = 2
+        minimumGap = 6.4
     end
     properties (SetAccess = protected)
         idmAcceleration = NaN
@@ -31,22 +31,22 @@ classdef IdmCar < Car & matlab.mixin.Heterogeneous
                 obj.s = obj.s_in - obj.pose(1);
                 dV = obj.velocity; 
             elseif obj.leaderFlag == 0 
-                obj.s = obj.Prev.pose(1) - obj.pose(1) - obj.dimension(2);
+                obj.s = obj.Prev.pose(1) - obj.pose(1);
                 dV = (obj.velocity - obj.Prev.velocity);
             elseif ~isempty(obj.Prev)
-                obj.s = obj.Prev.pose(1) - obj.pose(1) - obj.dimension(2) + roadLength;
+                obj.s = obj.Prev.pose(1) - obj.pose(1) + roadLength;
                 dV = (obj.velocity - obj.Prev.velocity);
             else
                 obj.s = Inf;
                 dV = 0;
             end
-            
-            dynamicBehaviour = obj.velocity*obj.timeGap + (obj.velocity*dV)/(2*sqrt(obj.a*obj.b));
+
+            intelligentBreaking = obj.velocity*obj.timeGap + (obj.velocity*dV)/(2*sqrt(obj.a*obj.b));
             if junc_flag
-                s_star = 0.5 + max(0,dynamicBehaviour);
+                s_star = 0.5 + max(0,intelligentBreaking);
                 
             else
-                s_star = obj.minimumGap + max(0,dynamicBehaviour);
+                s_star = obj.minimumGap + max(0,intelligentBreaking);
             end
             
             
