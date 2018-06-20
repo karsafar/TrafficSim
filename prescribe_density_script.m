@@ -4,9 +4,9 @@ prescription = 'density';
 roadTypes = {@LoopRoad @FiniteRoad};
 carTypes = {@IdmCar, @DummyCar, @AggressiveCar, @PassiveCar, @HesitantCar, @ManualCar};
 
-carTypeRatios = [1 0 0 0 0 0; 1 0 0 0 0 0];
+carTypeRatios = [0 0 0 0 0 1; 1 0 0 0 0 0];
 % carTypeRatios = [0 0 0 0 0 1;0 0 0.25 0.15 0.15 0.45];
-plotFlag = false;
+plotFlag = true;
 runTime = 3600; % in seconds
 dt = 0.1;       % in seconds
 priority = true;
@@ -21,7 +21,7 @@ InitNumberOfSimRuns = 30;
 noSpawnAreaLength = 24.4; % length of no spawn area around the junction + length of a car for safe respawn
 max_density = 1/6.4;    % number of cars per metre
 
-densityRange = [0.03, 0.109;
+densityRange = [0.02, 0.09;
                 0.0001, 0.001];
 init_density.horizontal = sum(densityRange(1,:))-logspace(log10(densityRange(1,1)),log10(densityRange(1,2)),InitNumberOfSimRuns);
 init_density.vertical = sum(densityRange(2,:))-logspace(log10(densityRange(2,1)),log10(densityRange(2,2)),InitNumberOfSimRuns);

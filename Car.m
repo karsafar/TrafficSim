@@ -30,7 +30,7 @@ classdef Car < dlnode
                 obj.pose(1) = car_args(1);
                 obj.velocity = car_args(2);
             else
-                obj.parentRoad = car_args{1};               
+                obj.parentRoad = car_args{1};
                 obj.pose(1) = car_args{2};
                 if strcmpi(obj.parentRoad,'horizontal')
                     obj.pose(2) = 0;
@@ -45,6 +45,7 @@ classdef Car < dlnode
             end
         end
         function move_car(obj,dt)
+            
             obj.pose(1) = obj.pose(1) + obj.velocity*dt + 0.5*obj.acceleration*dt^2;
             obj.velocity = obj.velocity + obj.acceleration*dt;
             
@@ -55,14 +56,12 @@ classdef Car < dlnode
             end
         end
         function store_state_data(obj,t)
-            if obj.pose(1) >= -500 && obj.pose(1) <= 500
-                i = obj.historyIndex;
-                obj.locationHistory(i) = obj.pose(1);
-                obj.velocityHistory(i) = obj.velocity;
-                obj.accelerationHistory(i) = obj.acceleration;
-                obj.timeHistory(i) = t;
-                obj.historyIndex = i + 1;
-            end
+            i = obj.historyIndex;
+            obj.locationHistory(i) = obj.pose(1);
+            obj.velocityHistory(i) = obj.velocity;
+            obj.accelerationHistory(i) = obj.acceleration;
+            obj.timeHistory(i) = t;
+            obj.historyIndex = i + 1;
         end
     end
 end

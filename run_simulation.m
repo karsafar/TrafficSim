@@ -19,20 +19,20 @@ junc = Junction(roadDims, plotFlag);
 for iIteration = 1:nIterations
     % update time
     t = t_rng(iIteration);
-
+    
     % draw cars
     if plotFlag
         junc.draw_all_cars(HorizontalArm,VerticalArm)
     end
     
     % check for collision
-%     junc.collision_check(...
-%         HorizontalArm.allCars,...
-%         VerticalArm.allCars,...
-%         HorizontalArm.numCars,...
-%         VerticalArm.numCars,...
-%         plotFlag);
-
+    %     junc.collision_check(...
+    %         HorizontalArm.allCars,...
+    %         VerticalArm.allCars,...
+    %         HorizontalArm.numCars,...
+    %         VerticalArm.numCars,...
+    %         plotFlag);
+    
     % calculate IDM acceleration
     for iCar = 1:HorizontalArm.numCars
         calculate_idm_accel(HorizontalArm.allCars(iCar),roadDims.Length(1));
@@ -40,7 +40,7 @@ for iIteration = 1:nIterations
     for jCar = 1:VerticalArm.numCars
         calculate_idm_accel(VerticalArm.allCars(jCar),roadDims.Length(2));
     end
-
+    
     % Itersection Collision Avoidance (ICA)
     for iCar = 1:HorizontalArm.numCars
         HorizontalArm.allCars(iCar).decide_acceleration(VerticalArm,t,dt);

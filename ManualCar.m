@@ -72,7 +72,7 @@ classdef ManualCar < DummyCar
             end
             if ~isempty(obj.Prev) && ~junc_flag
                 leaderCar = obj.Prev;
-                nCarLength = obj.dimension(2);
+                nCarLength = 0;
                 while count <= obj.n_a && leaderCar.pose(1) ~= obj.pose(1) && ~junc_flag
                     if leaderCar.historyIndex <= obj.J
                         leaderCarPoseJ = leaderCar.pose(1);
@@ -82,7 +82,7 @@ classdef ManualCar < DummyCar
                         leaderCarVelJ = leaderCar.velocityHistory(leaderCar.historyIndex-obj.J);
                     end
                     
-                    if obj.leaderFlag == 0
+                    if leaderCarPoseJ > currentCarPoseJ
                         s_ab = leaderCarPoseJ - currentCarPoseJ - nCarLength;
                     else
                         s_ab = leaderCarPoseJ - currentCarPoseJ + roadLength - nCarLength;
@@ -93,9 +93,9 @@ classdef ManualCar < DummyCar
                     v_prog = currentCarVelJ + obj.Tr*currentCarAccelJ;
                     v_l_prog = leaderCarVelJ - s_ab*obj.sigma_r*obj.w_l;
                     
-                    dynamicBehaviour = v_prog*obj.timeGap + (v_prog*(v_prog-v_l_prog))/(2*sqrt(obj.a*obj.b));
+                    intelligentBreaking = v_prog*obj.timeGap + (v_prog*(v_prog-v_l_prog))/(2*sqrt(obj.a*obj.b));
                     
-                    s_star = obj.minimumGap + max(0,dynamicBehaviour);
+                    s_star = obj.minimumGap + max(0,intelligentBreaking);
                     
                     a_int = a_int - obj.a*(s_star/s_ab_prog)^2;
                     
@@ -107,8 +107,8 @@ classdef ManualCar < DummyCar
             if junc_flag
                 obj.s = obj.s_in - obj.pose(1);
                 dV = obj.velocity;
-                dynamicBehaviour = obj.velocity*obj.timeGap + (obj.velocity*dV)/(2*sqrt(obj.a*obj.b));
-                s_star = 0.5 + max(0,dynamicBehaviour);
+                intelligentBreaking = obj.velocity*obj.timeGap + (obj.velocity*dV)/(2*sqrt(obj.a*obj.b));
+                s_star = 0.5 + max(0,intelligentBreaking);
                 obj.idmAcceleration = obj.a*(1 - (obj.velocity/obj.targetVelocity)^obj.delta - (s_star/obj.s)^2);
             else
                 obj.idmAcceleration = a_idm_free + C_idm*a_int + obj.sigma_a*obj.w_a;
