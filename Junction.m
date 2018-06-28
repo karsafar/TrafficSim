@@ -58,7 +58,7 @@ classdef Junction < handle
             text(obj.junctionPlotHandle,x, y(4)+0.5, '- HesitantCar');
             
             fill(obj.junctionPlotHandle,x1+[carRectangle(:,1); carRectangle(1,1)],y(5)+[carRectangle(:,2); carRectangle(1,2)],'m');
-            text(obj.junctionPlotHandle,x, y(5)+0.5, '- DummyCar');
+            text(obj.junctionPlotHandle,x, y(5)+0.5, '- HdmCar');
             
             fill(obj.junctionPlotHandle,x1+[carRectangle(:,1); carRectangle(1,1)],y(6)+[carRectangle(:,2); carRectangle(1,2)],'k');
             text(obj.junctionPlotHandle,x, y(6)+0.5, '- IdmCar');
@@ -147,7 +147,7 @@ classdef Junction < handle
                     carColour = 'b';
                 elseif strcmpi(class(obj.allCars(iCar)),'HesitantCar')
                     carColour = 'y';
-                elseif strcmpi(class(obj.allCars(iCar)),'DummyCar')
+                elseif strcmpi(class(obj.allCars(iCar)),'HdmCar')
                     carColour = 'm';
                 else
                     carColour = 'k';

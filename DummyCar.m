@@ -1,4 +1,4 @@
-classdef DummyCar < IdmCar
+classdef ManualCar < HdmCar
     properties(SetAccess = private)
         bb
         it_accel
@@ -13,13 +13,13 @@ classdef DummyCar < IdmCar
     end
     
     methods
-        function obj = DummyCar(varargin)
+        function obj = ManualCar(varargin)
             if nargin == 3
                 orientation = varargin{1};
                 startPoint = varargin{2};
                 Width = varargin{3};
             end
-            obj = obj@IdmCar(orientation, startPoint, Width);
+            obj = obj@HdmCar(orientation, startPoint, Width);
             
             %-----------------Initialize Blackboard------------------
             obj.bb = BtBlackboard;
@@ -31,7 +31,7 @@ classdef DummyCar < IdmCar
             obj.it_canPassBehind = obj.bb.add_item('canPassBehind',false);
             obj.it_canPassAheadNext = obj.bb.add_item('canPassAheadNext',false);
             
-            if obj.pose(1) > -30 && obj.pose(1) < obj.s_out && (isempty(obj.Prev) || obj.Prev.pose(1) > obj.s_out || obj.Prev.pose(1) < obj.pose(1))
+            if obj.pose(1) > -40 && obj.pose(1) < obj.s_out && (isempty(obj.Prev) || obj.Prev.pose(1) > obj.s_out || obj.Prev.pose(1) < obj.pose(1))
                 obj.it_isJunctionCrossingTime = obj.bb.add_item('isJunctionCrossingTime',true);
             else
                 obj.it_isJunctionCrossingTime = obj.bb.add_item('isJunctionCrossingTime',false);
@@ -60,19 +60,14 @@ classdef DummyCar < IdmCar
                 
                 obj.it_cruise_idm = obj.bb.add_item('Acruise',obj.idmAcceleration);
                 
-                obj.a = 2;
-                obj.b = 2;
-                obj.timeGap = 1;
+                obj.modifyIdm(1);
                 calculate_idm_accel(obj,oppositeRoad.Length)
                 obj.it_junc_idm = obj.bb.add_item('AJunc',obj.idmAcceleration);
                 
                 calculate_idm_accel(obj,oppositeRoad.Length,1)
                 obj.it_stop_idm = obj.bb.add_item('Astop',obj.idmAcceleration);
                 
-                obj.a = 1;
-                obj.b = 1.5;
-                obj.timeGap  = 1.6;
-                
+                obj.modifyIdm(0);
                 for jCar = 1:oppositeRoad.numCars
                     oppositeDistToJunc(jCar) = crossingEnd - oppositeCars(jCar).pose(1);
                 end
@@ -94,7 +89,7 @@ classdef DummyCar < IdmCar
                 T_safe = 0.1;
                 pass_ahead_accel = obj.it_junc_idm.get_value;
                 cruise_accel = obj.it_cruise_idm.get_value;
-                if 0.1 > abs(crossingBegin - obj.pose(1)-0.1) && 0.001 > abs(obj.acceleration)
+                if 0.1 > abs(crossingBegin - obj.pose(1)-0.1) && 0.01 > abs(obj.acceleration)
                     if 0.01 > abs(obj.velocity)
                         t_in_self = (-obj.velocity+sqrt((obj.velocity)^2+2*pass_ahead_accel...
                             *(crossingBegin-obj.pose(1))))/pass_ahead_accel+t;
@@ -114,12 +109,12 @@ classdef DummyCar < IdmCar
                         *(crossingEnd-obj.pose(1))))/cruise_accel+t;
                 end
                 
-                if 0.001 < oppositeCarAcceleration
+                if 0.01 < abs(oppositeCarAcceleration)
                     t_in = (-oppositeCars(ind).velocity+sqrt((oppositeCars(ind).velocity)^2+2*oppositeCarAcceleration...
                         *(crossingBegin-oppositeCarPose)))/oppositeCarAcceleration+t-3*T_safe;
                     t_out = (-oppositeCars(ind).velocity+sqrt((oppositeCars(ind).velocity)^2+2*oppositeCarAcceleration...
                         *(crossingEnd-oppositeCarPose)))/oppositeCarAcceleration+t+3*T_safe;
-                elseif eps > oppositeCarAcceleration && eps > oppositeCars(ind).velocity
+                elseif eps > abs(oppositeCarAcceleration) && eps > oppositeCars(ind).velocity
                     t_in = 99999;
                     t_out = 99999;
                 else
@@ -128,7 +123,7 @@ classdef DummyCar < IdmCar
                 end
                 
                 if ~isempty(oppositeCars(ind).Next) && oppositeCars(ind).Next.pose(1) <= crossingBegin
-                    if 0.001 < oppositeNextCarAcceleration
+                    if 0.01 < abs(oppositeNextCarAcceleration)
                         t_in_next = (-oppositeCars(ind).Next.velocity+sqrt((oppositeCars(ind).Next.velocity)^2+2*oppositeNextCarAcceleration...
                             *(crossingBegin-oppositeCars(ind).Next.pose(1))))/oppositeNextCarAcceleration+t-3*T_safe;
                     else
@@ -147,7 +142,7 @@ classdef DummyCar < IdmCar
                 canPassAheadNext = (t_in_next > t_out_self);
                 obj.it_canPassAheadNext = obj.bb.add_item('canPassAheadNext',canPassAheadNext);
                 
-                if obj.pose(1) > -60 && obj.pose(1) < crossingEnd && (isempty(obj.Prev) || obj.Prev.pose(1) > crossingEnd || obj.Prev.pose(1) < obj.pose(1))
+                if obj.pose(1) > -40 && obj.pose(1) < crossingEnd && (isempty(obj.Prev) || obj.Prev.pose(1) > crossingEnd || obj.Prev.pose(1) < obj.pose(1))
                     obj.it_isJunctionCrossingTime = obj.bb.add_item('isJunctionCrossingTime',true);
                 else
                     obj.it_isJunctionCrossingTime = obj.bb.add_item('isJunctionCrossingTime',false);

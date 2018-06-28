@@ -51,7 +51,9 @@ classdef Car < dlnode
             
             if obj.velocity > obj.maximumVelocity
                 obj.velocity = obj.maximumVelocity;
-            elseif obj.velocity < 0
+            elseif obj.velocity < 0 
+                obj.acceleration =-(obj.velocityHistory(obj.historyIndex-1)/dt);
+                obj.accelerationHistory(obj.historyIndex-1) = obj.acceleration;
                 obj.velocity = 0;
             end
         end

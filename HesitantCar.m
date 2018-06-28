@@ -128,7 +128,7 @@ classdef HesitantCar < IdmCar
                     [m, ind] = min(oppositeDistToJunc);
                     oppositeCarPose = oppositeCars(ind).pose(1);
                     if ~isempty(obj.Prev) && (obj.Prev.pose(1) - crossingEnd) < 10 && abs(obj.Prev.s) < 15 &&(obj.Prev.pose(1) > crossingEnd) &&...
-                            (obj.pose(1) < crossingBegin) && (obj.pose(1) > -30) && 0.01 < (oppositeCars(ind).velocity - 0) && 0 > oppositeCars(ind).acceleration
+                            (obj.pose(1) < crossingBegin) && (obj.pose(1) > -40) && 0.01 < (oppositeCars(ind).velocity - 0) && 0 > oppositeCars(ind).acceleration
                         calculate_idm_accel(obj,oppositeRoad.Length,1);
                         obj.acceleration = obj.idmAcceleration;
                     elseif eps > (oppositeCars(ind).velocity - 0) && eps > (obj.velocity - 0)&&...  %
@@ -146,7 +146,7 @@ classdef HesitantCar < IdmCar
                         end
                     else %-----------------Collision Avoidance BT------------------%
                         T_safe = 0.15;
-                        if 0.001 < oppositeCars(ind).acceleration
+                        if 0.01 < oppositeCars(ind).acceleration
                             t_in = (-oppositeCars(ind).velocity+sqrt((oppositeCars(ind).velocity)^2+2*oppositeCars(ind).acceleration...
                                 *(crossingBegin-oppositeCarPose)))/oppositeCars(ind).acceleration+t-3*T_safe;
                             t_out = (-oppositeCars(ind).velocity+sqrt((oppositeCars(ind).velocity)^2+2*oppositeCars(ind).acceleration...
@@ -157,7 +157,7 @@ classdef HesitantCar < IdmCar
                         end
                         
                         if ~isempty(oppositeCars(ind).Next) && oppositeCars(ind).Next.pose(1) <= obj.s_in
-                            if 0.001 < oppositeCars(ind).Next.acceleration
+                            if 0.01 < oppositeCars(ind).Next.acceleration
                                 t_in_next = (-oppositeCars(ind).Next.velocity+sqrt((oppositeCars(ind).Next.velocity)^2+2*oppositeCars(ind).Next.acceleration...
                                     *(crossingBegin-oppositeCars(ind).Next.pose(1))))/oppositeCars(ind).Next.acceleration+t-3*T_safe;
                             else
