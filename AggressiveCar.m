@@ -18,12 +18,13 @@ classdef AggressiveCar < IdmCar
     end
     methods
         function obj = AggressiveCar(varargin)
-            if nargin == 3
+            if nargin == 4
                 orientation = varargin{1};
                 startPoint = varargin{2};
                 Width = varargin{3};
+                dt = varargin{4};
             end
-            obj = obj@IdmCar(orientation, startPoint, Width);
+            obj = obj@IdmCar(orientation, startPoint, Width,dt);
             
             %-----------------Initialize Blackboard------------------
             obj.bb = BtBlackboard;
@@ -96,11 +97,11 @@ classdef AggressiveCar < IdmCar
             crossingBegin = obj.s_in;
             crossingEnd = obj.s_out;
             oppositeDistToJunc = NaN(oppositeRoad.numCars,1);
-            epsCustom = 0.001;
+            tol = 1e-3;
             
             % unpatiance parameter
-            if obj.historyIndex >= 50 && obj.pose(1) <= crossingBegin && epsCustom > abs(obj.velocity) && epsCustom > abs(obj.acceleration) && obj.maximumAcceleration(1) < 8 &&...
-                    (isempty(obj.Prev) || obj.Prev.pose(1) < obj.pose(1) ||  obj.Prev.pose(1)> crossingBegin )
+            if obj.historyIndex >= 50 && obj.pose(1) <= crossingBegin && tol > abs(obj.velocity) && tol > abs(obj.acceleration) && obj.maximumAcceleration(1) < 8 &&...
+                    (isempty(obj.Prev) || obj.Prev.pose(1) < obj.pose(1) ||  obj.Prev.pose(1)> crossingEnd )
                obj.maximumAcceleration(1) = obj.maximumAcceleration(1) + 0.05;
             elseif obj.maximumAcceleration(1) ~= 3.5 && obj.pose(1) > crossingEnd
                 obj.maximumAcceleration(1) = 3.5;
@@ -108,6 +109,11 @@ classdef AggressiveCar < IdmCar
             %% seperate function find opposite car
             for jCar = 1:oppositeRoad.numCars
                 oppositeDistToJunc(jCar) = crossingEnd - oppositeCars(jCar).pose(1);
+            end
+            if  all(oppositeDistToJunc <= 0)
+                allPassedJunction = 1;
+            else
+                allPassedJunction = 0;
             end
             oppositeDistToJunc(oppositeDistToJunc<0) = inf;
             [m, ind] = min(oppositeDistToJunc);
@@ -125,7 +131,7 @@ classdef AggressiveCar < IdmCar
             end
             %%
             %%
-            if epsCustom > (oppositeCars(ind).velocity - 0) && epsCustom > abs(obj.velocity) &&...
+            if tol > (oppositeCars(ind).velocity - 0) && tol > abs(obj.velocity) &&...
                     t > 0 && (isempty(obj.Prev) || obj.Prev.pose(1) < obj.pose(1) ||  obj.Prev.pose(1)>crossingBegin )
                 %%  %-----------------Both cars stopped at junction------------------%
                 if oppositeRoad.priority == false
@@ -142,14 +148,14 @@ classdef AggressiveCar < IdmCar
             else
                 %% %-----------------Collision Avoidance BT------------------%
                 T_safe = 0.1;
-                epsCustom = 0.0001;
-                if epsCustom < abs(oppositeCarAcceleration) && ((oppositeCars(ind).velocity)^2+2*oppositeCarAcceleration*(crossingBegin-oppositeCarPose)) > 0
+                tol = 1e-4;
+                if tol < abs(oppositeCarAcceleration) && ((oppositeCars(ind).velocity)^2+2*oppositeCarAcceleration*(crossingBegin-oppositeCarPose)) > 0
                     t_in = (-oppositeCars(ind).velocity+sqrt((oppositeCars(ind).velocity)^2+2*oppositeCarAcceleration...
                         *(crossingBegin-oppositeCarPose)))/oppositeCarAcceleration+t-3*T_safe;
                     
                     t_out = (-oppositeCars(ind).velocity+sqrt((oppositeCars(ind).velocity)^2+2*oppositeCarAcceleration...
                         *(crossingEnd-oppositeCarPose)))/oppositeCarAcceleration+t+3*T_safe*0;
-                elseif epsCustom > abs(oppositeCarAcceleration) && epsCustom > oppositeCars(ind).velocity || ((oppositeCars(ind).velocity)^2+2*oppositeCarAcceleration*(crossingBegin-oppositeCarPose)) > 0
+                elseif tol > abs(oppositeCarAcceleration) && tol > oppositeCars(ind).velocity || ((oppositeCars(ind).velocity)^2+2*oppositeCarAcceleration*(crossingBegin-oppositeCarPose)) > 0
                     t_in = 99999;
                     t_out = 99999;
                 else
@@ -158,10 +164,10 @@ classdef AggressiveCar < IdmCar
                 end
                 
                 if ~isempty(oppositeCars(ind).Next) && oppositeCars(ind).Next.pose(1) <= obj.s_in && ((oppositeCars(ind).Next.velocity)^2+2*oppositeNextCarAcceleration*(crossingBegin-oppositeCars(ind).Next.pose(1))) > 0
-                    if epsCustom < abs(oppositeNextCarAcceleration)
+                    if tol < abs(oppositeNextCarAcceleration)
                         t_in_next = (-oppositeCars(ind).Next.velocity+sqrt((oppositeCars(ind).Next.velocity)^2+2*oppositeNextCarAcceleration...
                             *(crossingBegin-oppositeCars(ind).Next.pose(1))))/oppositeNextCarAcceleration+t-3*T_safe;
-                    elseif epsCustom > abs(oppositeNextCarAcceleration) && epsCustom > oppositeCars(ind).Next.velocity || ((oppositeCars(ind).Next.velocity)^2+2*oppositeNextCarAcceleration*(crossingBegin-oppositeCars(ind).Next.pose(1))) > 0
+                    elseif tol > abs(oppositeNextCarAcceleration) && tol > oppositeCars(ind).Next.velocity || ((oppositeCars(ind).Next.velocity)^2+2*oppositeNextCarAcceleration*(crossingBegin-oppositeCars(ind).Next.pose(1))) > 0
                         t_in_next = 99999;
                     else
                         t_in_next = (crossingBegin - oppositeCars(ind).Next.pose(1))/oppositeCars(ind).Next.velocity+t+3*T_safe*0;
@@ -213,7 +219,7 @@ classdef AggressiveCar < IdmCar
                 obj.it_a_max_accel.set_value(obj.maximumAcceleration(1)+0.1);
                 obj.it_a_max_decel.set_value(obj.maximumAcceleration(2)-0.1);
                 obj.it_pose.set_value(obj.pose(1));
-                obj.it_CarsOpposite.set_value(~isempty(oppositeCars));
+                obj.it_CarsOpposite.set_value(~isempty(oppositeCars) && allPassedJunction==0);
                 obj.it_dist_gap.set_value(obj.s);
                 
                 if isempty(obj.Prev)

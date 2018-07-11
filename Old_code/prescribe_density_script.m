@@ -1,28 +1,35 @@
 close all
 clear
-prescription = 'density';
+%% INPUT PARAMETERS
+% prescription = 'density'; % remove this and use class check in the plotting function
+
 roadTypes = {@LoopRoad @FiniteRoad};
 carTypes = {@IdmCar, @HdmCar, @AggressiveCar, @PassiveCar, @HesitantCar, @ManualCar};
-
 carTypeRatios = [0 0 1 0 0 0; 0 0 1 0 0 0];
 % carTypeRatios = [0 0 0 0 0 1;0 0 0.25 0.15 0.15 0.45];
+assert(sum(carTypeRatios(1,:)) == 1,'Wrong distribution of horizontal arm rations');
+assert(sum(carTypeRatios(2,:)) == 1,'Wrong distribution of vertical arm rations');
 plotFlag = true;
 runTime = 3600; % in seconds
 dt = 0.1;       % in seconds
 priority = true;
 repeatableDistribution = [true true];
 % road dimensions
-road.Start = [-100; -100];
-road.End = [100; 100];
+road.Start = [-150; -150];
+road.End = [150; 150];
 road.Width = [4; 4];
 road.Length = road.End - road.Start;
 
 InitNumberOfSimRuns = 30;
 noSpawnAreaLength = 24.4; % length of no spawn area around the junction + length of a car for safe respawn
-max_density = 1/6.4;    % number of cars per metre
+max_density = 1/6.4;    % number of cars per metre (0.1562)
 
-densityRange = [0.02, 0.16;
-                0.02, 0.03];
+densityRange = [0.00001, 0.04;
+                0.00002, 0.04];
+assert(all(densityRange(:,2) <= max_density),'wrong max limit of densities. Have to be 0.1562 max');
+assert(all(densityRange(:,1) >= 0),'wrong min limit of densities. have to be positive');
+
+%%            
 init_density.horizontal = sum(densityRange(1,:))-logspace(log10(densityRange(1,1)),log10(densityRange(1,2)),InitNumberOfSimRuns);
 init_density.vertical = sum(densityRange(2,:))-logspace(log10(densityRange(2,1)),log10(densityRange(2,2)),InitNumberOfSimRuns);
 

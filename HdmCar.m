@@ -23,24 +23,24 @@ classdef HdmCar < IdmCar
     end
     methods
         function obj = HdmCar(varargin)
-            if nargin == 3
+            if nargin == 4
                 orientation = varargin{1};
                 startPoint = varargin{2};
                 Width = varargin{3};
+                dt = varargin{4};
             end
-            dt = 0.1;
-            obj = obj@IdmCar(orientation, startPoint, Width);
-            obj.k1 = exp(-dt/obj.tau_tilda);
-            obj.k2 = sqrt((2*dt)/obj.tau_tilda);
-            obj.k11 = exp(-dt/obj.tau_tilda_a);
-            obj.k12 = sqrt((2*dt)/obj.tau_tilda_a);
+            obj = obj@IdmCar(orientation, startPoint, Width,dt);
+            obj.k1 = exp(-obj.dt/obj.tau_tilda);
+            obj.k2 = sqrt((2*obj.dt)/obj.tau_tilda);
+            obj.k11 = exp(-obj.dt/obj.tau_tilda_a);
+            obj.k12 = sqrt((2*obj.dt)/obj.tau_tilda_a);
             obj.pd_s = makedist('normal',0,1);
             obj.pd_l = makedist('normal',0,1);
             obj.pd_a = makedist('normal',0,1);
             obj.w_s = random(obj.pd_s);
             obj.w_l = random(obj.pd_l);
             obj.w_a = random(obj.pd_a);
-            obj.J = round(obj.Tr/dt);
+            obj.J = round(obj.Tr/obj.dt);
         end
         function calculate_idm_accel(obj,varargin)
             roadLength = varargin{1};

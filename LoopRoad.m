@@ -5,17 +5,18 @@ classdef LoopRoad < Road
     end
     
     methods
-        function obj = LoopRoad(road_args,loop_road_args)
+        function obj = LoopRoad(road_args,loop_road_args,dt)
             obj = obj@Road(road_args);
             
             obj.allCarsNumArray = loop_road_args{1};
             obj.numCars = loop_road_args{2};
             obj.averageVelocityHistory = NaN(loop_road_args{3},1);
-            obj.FixedDistr = loop_road_args{4};
-            obj.spawn_initial_cars();
+            obj.FixedSeed = loop_road_args{4};
+            obj.spawn_initial_cars(dt);
         end
-        function spawn_initial_cars(obj)
-            minimumSpacing = IdmCar.minimumGap;%+Car.dimension(2);
+        function spawn_initial_cars(obj,dt)
+            %%
+            minimumSpacing = IdmCar.minimumGap;
             if obj.numCars ~= 0
                 allCarsPoseArray = NaN(obj.numCars,1);
                 for iCar = 1:obj.numCars
@@ -26,7 +27,7 @@ classdef LoopRoad < Road
                     end
                 end
                 unoccupiedSpace =  obj.endPoint - allCarsPoseArray(end) - 24.4;
-                if obj.FixedDistr
+                if obj.FixedSeed
                     rng(1);
                 end
                 obj.initPoseProbDist = makedist('uniform','lower',0,'upper',unoccupiedSpace);
@@ -56,7 +57,7 @@ classdef LoopRoad < Road
                 for i = 1:numel(obj.allCarsNumArray)
                     if obj.allCarsNumArray(i) > 0
                         for j = 1:obj.allCarsNumArray(i)
-                            new_car = add_car(obj,i);
+                            new_car = add_car(obj,i,dt);
                             allCarsArray = [allCarsArray new_car];
                         end
                     end

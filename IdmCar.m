@@ -1,4 +1,4 @@
-classdef IdmCar < Car  & matlab.mixin.Heterogeneous
+classdef IdmCar < Car & matlab.mixin.Heterogeneous
     properties (Constant)
         delta = 2
         minimumGap = 6.4

@@ -86,8 +86,8 @@ classdef Junction < handle
                 end
             end
             for jCar = 1:mCars
-                if allCarsVert(jCar).pose(1) > allCarsHoriz(iCar).s_in &&...
-                        allCarsVert(jCar).pose(1) < allCarsHoriz(iCar).s_out
+                if allCarsVert(jCar).pose(1) > allCarsVert(jCar).s_in &&...
+                        allCarsVert(jCar).pose(1) < allCarsVert(jCar).s_out
                     bothCarsAtCrossing(2) = true;
                     break;
                 end

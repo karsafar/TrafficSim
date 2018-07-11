@@ -18,6 +18,7 @@ junc = Junction(roadDims, plotFlag);
 
 finishup = onCleanup(@() myCleanupFun(HorizontalArm, VerticalArm));
 
+
 for iIteration = 1:nIterations
     % update time
     t = t_rng(iIteration);
@@ -67,12 +68,7 @@ end
 function myCleanupFun(HorizontalArm, VerticalArm)
 sim.horizArm = cast_output(HorizontalArm);
 sim.vertArm = cast_output(VerticalArm);
-iSim = 1;
-% Arm = 'horizontal';
-Arm = 'vertical';
-iCar = 1;
-figure(3);
-time_velocity_plot(iCar,iSim,sim,Arm)
+disp('Data sav')
 end
 
 function tempArm = cast_output(arm)

@@ -16,12 +16,13 @@ classdef HesitantCar < IdmCar
     end
     methods
         function obj = HesitantCar(varargin)
-            if nargin == 3
+            if nargin == 4
                 orientation = varargin{1};
                 startPoint = varargin{2};
                 Width = varargin{3};
+                dt = varargin{4};
             end
-            obj = obj@IdmCar(orientation, startPoint, Width);
+            obj = obj@IdmCar(orientation, startPoint, Width,dt);
             
             %-----------------Initialize Blackboard------------------
             obj.bb = BtBlackboard;

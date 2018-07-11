@@ -19,7 +19,7 @@ classdef Road < handle
         averageVelocityHistory = []
         carType = 0
         carTypes = {}
-        FixedDistr = false
+        FixedSeed = false
     end
     methods
         function obj = Road(road_args)
@@ -42,8 +42,8 @@ classdef Road < handle
             obj.crossingBeginPosition = -obj.Width/2;
             obj.crossingEndPosition = obj.Width/2;
         end
-        function new_car = add_car(obj,i)
-            new_car = obj.carTypes{i}(obj.orientation, obj.startPoint, obj.Width);
+        function new_car = add_car(obj,i,dt)
+            new_car = obj.carTypes{i}(obj.orientation, obj.startPoint, obj.Width,dt);
         end
         function move_all_cars(obj,dt)
             for iCar = 1:obj.numCars

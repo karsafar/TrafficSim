@@ -14,12 +14,13 @@ classdef ManualCar < HdmCar
     
     methods
         function obj = ManualCar(varargin)
-            if nargin == 3
+            if nargin == 4
                 orientation = varargin{1};
                 startPoint = varargin{2};
                 Width = varargin{3};
+                dt = varargin{4};
             end
-            obj = obj@HdmCar(orientation, startPoint, Width);
+            obj = obj@HdmCar(orientation, startPoint, Width,dt);
             
             %-----------------Initialize Blackboard------------------
             obj.bb = BtBlackboard;
