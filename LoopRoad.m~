@@ -8,12 +8,12 @@ classdef LoopRoad < Road
         function obj = LoopRoad(road_args,loop_road_args,dt)
             obj = obj@Road(road_args);
             
-%             obj.allCarsNumArray = loop_road_args{1};
-%             obj.numCars = loop_road_args{2};
+            obj.allCarsNumArray = loop_road_args{1};
+            obj.numCars = loop_road_args{2};
             obj.averageVelocityHistory = NaN(loop_road_args{3},1);
             obj.FixedSeed = loop_road_args{4};
 %             obj.spawn_initial_cars(dt);
-            obj.controlled_spawn(2,[20,-20],[5,7],[1,1],[3,3],dt)
+            obj.controlled_spawn(2,[20,-20],[5,7],[1,1],[3,1],dt)
         end
         function spawn_initial_cars(obj,dt)
             %%
@@ -82,14 +82,18 @@ classdef LoopRoad < Road
         end
         function controlled_spawn(obj,nCars,positions,velocities,accelerations,types,dt)
             %%
-            obj.numCars = nCars;
             for iCar = 1:nCars
                 new_car = add_car(obj,types(iCar),dt);
                 new_car.pose(1) = positions(iCar);
                 new_car.velocity = velocities(iCar);
-                new_car.acceleration = accelerations(iCar);
                 obj.allCars = [obj.allCars new_car];
-                if iCar  > 1
+            end
+            
+            obj.allCars = allCarsArray(randperm(length(allCarsArray)));
+            allCarsPoseArray = flip(allCarsPoseArray);
+            for iCar = 1:obj.numCars
+                obj.allCars(iCar).pose(1) = allCarsPoseArray(iCar);
+                if iCar > 1
                     insertAfter(obj.allCars(iCar),obj.allCars(iCar-1));
                     obj.allCars(iCar).leaderFlag = false;
                 end
