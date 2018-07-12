@@ -5,7 +5,7 @@ classdef FiniteRoad < Road
         spawnTimeProbDist = 0
         carTypePd = 0
         verticalQueue = []
-        numCarsHistory
+        numCarsHistory = NaN(1,100000)
         carRatios
         spawningInterval
         tolerance = 100
@@ -22,8 +22,8 @@ classdef FiniteRoad < Road
                 rng(1);
             end
             obj.spawnTimeProbDist = makedist('Exponential','mu',finite_road_args{2});
-            obj.numCarsHistory = NaN(finite_road_args{3},1);
-            obj.averageVelocityHistory = NaN(finite_road_args{3},1);
+%             obj.numCarsHistory = NaN(finite_road_args{3},1);
+%             obj.averageVelocityHistory = NaN(finite_road_args{3},1);
             obj.carTypePd = makedist('uniform',0,1);
             obj.spawn_car(0,dt);
         end

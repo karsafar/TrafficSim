@@ -148,7 +148,7 @@ classdef AggressiveCar < IdmCar
             else
                 %% %-----------------Collision Avoidance BT------------------%
                 T_safe = 0.1;
-                tol = 1e-4;
+                tol = 1e-6;
                 if tol < abs(oppositeCarAcceleration) && ((oppositeCars(ind).velocity)^2+2*oppositeCarAcceleration*(crossingBegin-oppositeCarPose)) > 0
                     t_in = (-oppositeCars(ind).velocity+sqrt((oppositeCars(ind).velocity)^2+2*oppositeCarAcceleration...
                         *(crossingBegin-oppositeCarPose)))/oppositeCarAcceleration+t-3*T_safe;

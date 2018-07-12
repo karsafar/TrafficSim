@@ -20,7 +20,7 @@ roadDims.Start = [-150; -150];
 roadDims.End = [150; 150];
 roadDims.Width = [4; 4];
 roadDims.Length = roadDims.End - roadDims.Start;
-selectRoadTypes = [1 1] ;
+selectRoadTypes = [1 2] ;
 
 nIterations = runTime/dt;
 nDigits = numel(num2str(dt))-2;
