@@ -17,7 +17,7 @@ classdef FiniteRoad < Road
             
             % distribution - mean interval is distributionMean secs
             obj.carRatios = finite_road_args{1};
-            obj.FixedSeed = finite_road_args{4};
+            obj.FixedSeed = finite_road_args{3};
             if obj.FixedSeed
                 rng(1);
             end
@@ -51,7 +51,7 @@ classdef FiniteRoad < Road
                     obj.carType = obj.verticalQueue(1);
                     obj.verticalQueue(1) = [];
                 end
-                new_car = add_car(obj,obj.carType,dt);
+                new_car = add_car(obj.carType,dt);
                 new_car.velocity = 6;
                 obj.allCars = [obj.allCars new_car];
                 obj.numCars = obj.numCars + 1;

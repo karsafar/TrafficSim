@@ -7,14 +7,13 @@ classdef LoopRoad < Road
     methods
         function obj = LoopRoad(road_args,loop_road_args,dt)
             obj = obj@Road(road_args);
-            if numel(loop_road_args) == 4
-%             obj.allCarsNumArray = loop_road_args{1};
-%             obj.numCars = loop_road_args{2};
-%             obj.FixedSeed = loop_road_args{4};
-%             obj.spawn_initial_cars(dt);
-            else
-            end
-            obj.controlled_spawn(2,[20,-20],[5,7],[1,1],[3,3],dt)
+            
+            obj.allCarsNumArray = loop_road_args{1};
+            obj.numCars = sum(obj.allCarsNumArray);
+            obj.FixedSeed = loop_road_args{2};
+            obj.spawn_initial_cars(dt);
+
+%             obj.controlled_spawn(2,[20,-20],[5,7],[1,1],[3,3],dt)
         end
         function spawn_initial_cars(obj,dt)
             %%

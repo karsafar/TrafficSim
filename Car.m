@@ -6,7 +6,7 @@ classdef Car < dlnode
         dt = 0
         pose = NaN(1,2)
         velocity = 0
-        acceleration = 1
+        acceleration = 1.0
         locationHistory = NaN(1,100000)
         velocityHistory = NaN(1,100000)
         accelerationHistory = NaN(1,100000)

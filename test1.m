@@ -6,7 +6,7 @@ roadTypes = {@LoopRoad @FiniteRoad};
 carTypes = {@IdmCar, @HdmCar, @AggressiveCar, @PassiveCar, @HesitantCar, @ManualCar};
 
 % carTypeRatios = [0 0 1 0 0 0; 0 0 1 0 0 0];
-carTypeRatios = [0 0 0 0 0 1;0 0 0.25 0.15 0.15 0.45];
+carTypeRatios = [0 0 0.5 0 0 0.5;0 0 0.25 0.15 0.15 0.45];
 assert(sum(carTypeRatios(1,:)) == 1,'Wrong distribution of horizontal arm rations');
 assert(sum(carTypeRatios(2,:)) == 1,'Wrong distribution of vertical arm rations');
 
@@ -26,11 +26,24 @@ nIterations = runTime/dt;
 nDigits = numel(num2str(dt))-2;
 t_rng = round(linspace(0,runTime,nIterations),nDigits);
 numberOfSimRuns = 20;
-densityRange = [0.04, 0.04; 0.04, 0.04];
+densityRange = [0.02, 0.04; 0.02, 0.04];
 distMeanRange = [7, 10; 7, 10];
 
 %% Decide type of road parameters
-[subRoadArgs,numberOfSimRuns] = prescribe_traffic(selectRoadTypes,numberOfSimRuns,carTypes,carTypeRatios,nIterations,fixedSeed,roadDims,densityRange,distMeanRange);
+[subRoadArgs,numberOfSimRuns] = prescribe_traffic(selectRoadTypes,numberOfSimRuns,carTypes,carTypeRatios,fixedSeed,roadDims,densityRange,distMeanRange);
+
+
+sz = [2 4];
+varTypes = {'double','double','double','function_handle'};
+varNames = {'position','velocity','acceleration','carType'};
+% table of all cars inputed manually
+T = table('Size',sz,'VariableTypes',varTypes,'VariableNames',varNames);
+T.position = [20;-20];
+T.velocity = [5;7];
+T.acceleration = [1;1];
+T.carType = {carTypes{3};carTypes{3}};
+H_Arm = SpawnCars(T,'horizontal',roadDims.Start(1),roadDims.Width(1),dt);
+V_arm = SpawnCars(T,'vertical',roadDims.Start(1),roadDims.Width(1),dt);
 
 %% run simulations
 for k = 1:numberOfSimRuns
