@@ -17,11 +17,11 @@ classdef SpawnCars < handle
             if isa(SpawnData,'table')
                 obj.controlled_spawn(SpawnData,dt)
             else
-                allCarsNumArray = SpawnData{1};
-                obj.numCars = sum(allCarsNumArray);
+                everyCarNum = SpawnData{1};
+                obj.numCars = sum(everyCarNum);
                 FixedSeed = SpawnData{2};
                 carTypes = SpawnData{3};
-                obj.randomSpawn(allCarsNumArray,carTypes,FixedSeed,dt)
+                obj.randomSpawn(everyCarNum,carTypes,FixedSeed,dt)
             end
         end
         
@@ -46,7 +46,7 @@ classdef SpawnCars < handle
                 obj.allCars(iCar).Next = leaderCar;
             end
         end
-        function randomSpawn(obj,allCarsNumArray,carTypes,FixedSeed,dt)
+        function randomSpawn(obj,everyCarNum,carTypes,FixedSeed,dt)
             %%
             minimumSpacing = IdmCar.minimumGap;
             if obj.numCars ~= 0
@@ -86,9 +86,9 @@ classdef SpawnCars < handle
                     end
                 end
                 allCarsArray = [];
-                for i = 1:numel(allCarsNumArray)
-                    if allCarsNumArray(i) > 0
-                        for j = 1:allCarsNumArray(i)
+                for i = 1:numel(everyCarNum)
+                    if everyCarNum(i) > 0
+                        for j = 1:everyCarNum(i)
                              new_car = carTypes{i}(obj.roadOrientation, obj.roadStart,obj.roadWidth,dt);
                             allCarsArray = [allCarsArray new_car];
                         end

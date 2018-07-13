@@ -1,19 +1,19 @@
 classdef LoopRoad < Road
     properties (SetAccess = protected)
-        initPoseProbDist = []
-        allCarsNumArray = 0
+       % initPoseProbDist = []
+       % allCarsNumArray = 0
     end
     
     methods
-        function obj = LoopRoad(road_args,loop_road_args,dt)
+        function obj = LoopRoad(road_args,arm)
             obj = obj@Road(road_args);
             
-            obj.allCarsNumArray = loop_road_args{1};
-            obj.numCars = sum(obj.allCarsNumArray);
-            obj.FixedSeed = loop_road_args{2};
-            obj.spawn_initial_cars(dt);
-
-%             obj.controlled_spawn(2,[20,-20],[5,7],[1,1],[3,3],dt)
+%             obj.allCarsNumArray = loop_road_args{1};
+%             obj.numCars = sum(obj.allCarsNumArray);
+%             obj.FixedSeed = loop_road_args{2};
+%             obj.spawn_initial_cars(dt);
+            obj.numCars = arm.numCars;
+            obj.allCars = arm.allCars;
         end
         function spawn_initial_cars(obj,dt)
             %%
