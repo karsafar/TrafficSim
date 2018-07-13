@@ -17,7 +17,7 @@ VerticalArm = roadTypes{2}([{carTypes},90,roadDims,priority],Arm.V);
 junc = Junction(roadDims, plotFlag);
 
 % controlled break of the simulation
-finishup = onCleanup(@() myCleanupFun(HorizontalArm, VerticalArm));
+% finishup = onCleanup(@() myCleanupFun(HorizontalArm, VerticalArm));
 
 for iIteration = 1:nIterations
     % update time
