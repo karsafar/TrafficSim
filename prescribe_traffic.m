@@ -25,7 +25,7 @@ for i = 1:numel(selectRoadTypes)
         
         numberOfSimRuns = min(numberOfSimRuns,numel(numCars));
         density = numCars/roadDims.Length(1);
-        fprintf('Real density Range for arm %i :\n',i);
+        fprintf('Real density values for the arm %i :\n',i);
         fprintf('%.3g\n',density);
         allCarsNumArray = zeros(numberOfSimRuns,numel(carTypes));
         for k = 1:numberOfSimRuns
@@ -46,7 +46,7 @@ for i = 1:numel(selectRoadTypes)
             end
         end
         
-    elseif selectRoadTypes(i) == 2
+    elseif selectRoadTypes(i) == 0
         %%
         distributionMean = logspace(log10(distMeanRange(i,1)),log10(distMeanRange(i,2)),numberOfSimRuns);
         
