@@ -8,3 +8,5 @@ Old_code/
 Simple IDM/
 
 \.DS_Store
+
+*.m~
