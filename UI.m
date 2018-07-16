@@ -22,7 +22,7 @@ function varargout = UI(varargin)
 
 % Edit the above text to modify the response to help UI
 
-% Last Modified by GUIDE v2.5 15-Jul-2018 19:12:58
+% Last Modified by GUIDE v2.5 16-Jul-2018 14:05:53
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -347,6 +347,17 @@ function pushbutton1_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+sz = [str2num(get(handles.edit4,'String')) 4];
+varTypes = {'double','double','double','function_handle'};
+varNames = {'position','velocity','acceleration','carType'};
+
+T = table('Size',sz,'VariableTypes',varTypes,'VariableNames',varNames);
+T.position = [str2num(get(handles.edit5,'String'))'];
+T.velocity = [str2num(get(handles.edit6,'String'))'];
+T.acceleration = [str2num(get(handles.edit7,'String'))'];
+T.carType = {carTypes{str2num(get(handles.edit8,'String'))'}}';
+
+handles.Arm.H = SpawnCars(T,'horizontal',roadDims.Start(1),roadDims.End(1),roadDims.Width(1),dt);
 
 
 % --- Executes on button press in pushbutton2.
@@ -522,3 +533,58 @@ function edit15_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in radiobutton19.
+function radiobutton19_Callback(hObject, eventdata, handles)
+% hObject    handle to radiobutton19 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+set([ handles.edit11,handles.edit12,handles.edit13,handles.edit14,handles.edit15],'Enable','off')
+set([ handles.edit9,handles.edit10],'Enable','on');
+% Hint: get(hObject,'Value') returns toggle state of radiobutton19
+
+
+% --- Executes on button press in radiobutton18.
+function radiobutton18_Callback(hObject, eventdata, handles)
+% hObject    handle to radiobutton18 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+set([ handles.edit11,handles.edit12,handles.edit13,handles.edit14,handles.edit15],'Enable','on')
+set([ handles.edit9,handles.edit10],'Enable','off');
+% Hint: get(hObject,'Value') returns toggle state of radiobutton18
+
+
+% --- Executes on button press in radiobutton17.
+function radiobutton17_Callback(hObject, eventdata, handles)
+% hObject    handle to radiobutton17 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+p = get(handles.radiobutton18,'Value');
+if p == 0
+    set([ handles.edit9],'Enable','off');
+    set([ handles.edit10],'Enable','on');
+end
+% Hint: get(hObject,'Value') returns toggle state of radiobutton17
+
+
+% --- Executes on button press in radiobutton16.
+function radiobutton16_Callback(hObject, eventdata, handles)
+% hObject    handle to radiobutton16 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+p = get(handles.radiobutton18,'Value');
+if p == 0
+    set([ handles.edit10],'Enable','off');
+    set([ handles.edit9],'Enable','on');
+end
+% Hint: get(hObject,'Value') returns toggle state of radiobutton16
+
+
+% --- Executes on button press in pushbutton4.
+function pushbutton4_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% handles.Arm.V = 
