@@ -66,6 +66,10 @@ classdef Car < dlnode
             obj.accelerationHistory(i) = obj.acceleration;
             obj.timeHistory(i) = t;
             obj.historyIndex = i + 1;
+            
+            % unit test the constraints
+            assert(obj.velocity >= 0 && obj.velocity <= 13,'Velocity is out of limit');
+            assert(obj.acceleration >= obj.maximumAcceleration(2) && obj.acceleration <= obj.maximumAcceleration(1) ,'Acceleration contraints are violated');            
         end
     end
 end

@@ -65,14 +65,14 @@ sim.vertArm = cast_output(VerticalArm);
 end
 
 function myCleanupFun(HorizontalArm, VerticalArm)
-sim.horizArm = cast_output(HorizontalArm);
-sim.vertArm = cast_output(VerticalArm);
-iSim = 1;
-% Arm = 'horizontal';
-Arm = 'vertical';
-iCar = 1;
-figure(3);
-time_velocity_plot(iCar,iSim,sim,Arm)
+% sim.horizArm = cast_output(HorizontalArm);
+% sim.vertArm = cast_output(VerticalArm);
+% iSim = 1;
+% % Arm = 'horizontal';
+% Arm = 'vertical';
+% iCar = 1;
+% figure(3);
+% time_velocity_plot(iCar,iSim,sim,Arm)
 end
 
 function tempArm = cast_output(arm)
