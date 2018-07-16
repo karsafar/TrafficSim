@@ -12,20 +12,22 @@ classdef FiniteRoad < Road
     end
     
     methods
-        function obj = FiniteRoad(road_args,finite_road_args,dt)
+        function obj = FiniteRoad(road_args,arm)
             obj = obj@Road(road_args);
             
             % distribution - mean interval is distributionMean secs
-            obj.carRatios = finite_road_args{1};
-            obj.FixedSeed = finite_road_args{3};
-            if obj.FixedSeed
-                rng(1);
-            end
-            obj.spawnTimeProbDist = makedist('Exponential','mu',finite_road_args{2});
-%             obj.numCarsHistory = NaN(finite_road_args{3},1);
-%             obj.averageVelocityHistory = NaN(finite_road_args{3},1);
-            obj.carTypePd = makedist('uniform',0,1);
-            obj.spawn_car(0,dt);
+%             obj.carRatios = finite_road_args{1};
+%             obj.FixedSeed = finite_road_args{3};
+%             if obj.FixedSeed
+%                 rng(1);
+%             end
+%             obj.spawnTimeProbDist = makedist('Exponential','mu',finite_road_args{2});
+% % % %             obj.numCarsHistory = NaN(finite_road_args{3},1);
+% % % %             obj.averageVelocityHistory = NaN(finite_road_args{3},1);
+%             obj.carTypePd = makedist('uniform',0,1);
+%             obj.spawn_car(0,dt);
+            obj.numCars = arm.numCars;
+            obj.allCars = arm.allCars;
         end
         function spawn_car(obj,time,dt)
             isTimeForNewEntry = (time >= obj.nextEntry);
@@ -92,7 +94,7 @@ classdef FiniteRoad < Road
         end
         function move_all_cars(obj,t,dt,iIteration,nIterations)
             
-            obj.spawn_car(t,dt);
+%             obj.spawn_car(t,dt);
             
             for iCar = 1:obj.numCars
                 if obj.allCars(1).pose(1) >= obj.endPoint
