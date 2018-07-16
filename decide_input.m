@@ -1,4 +1,4 @@
-function [Arm] = decide_input(carTypes,roadDims,subRoadArgs,dt)
+function [Arm] = decide_input(carTypes,roadDims,dt)
 title = 'Select road type';
 prompt = {'Horizontal arm','Veritcal arm'};
 dims = [1 50; 1 50;];
@@ -81,16 +81,17 @@ for i = 1:2
             end
         end
     elseif selectRoadTypes(i) == 0
-        %% flow prescription
-        distributionMean = logspace(log10(distMeanRange(i,1)),log10(distMeanRange(i,2)),numberOfSimRuns);
+        %% need to fix this before running the code
         
-        for k = 1:numberOfSimRuns
-            if i == 1
-                subRoadArgs(k).Horizontal = [{carTypeRatios(1,:)},distributionMean(k),fixedSeed(1)];
-            elseif i == 2
-                subRoadArgs(k).Vertical = [{carTypeRatios(2,:)},distributionMean(k),fixedSeed(2)];
-            end
-        end
+%         distributionMean = logspace(log10(distMeanRange(i,1)),log10(distMeanRange(i,2)),numberOfSimRuns);
+%         
+%         for k = 1:numberOfSimRuns
+%             if i == 1
+%                 subRoadArgs(k).Horizontal = [{carTypeRatios(1,:)},distributionMean(k),fixedSeed(1)];
+%             elseif i == 2
+%                 subRoadArgs(k).Vertical = [{carTypeRatios(2,:)},distributionMean(k),fixedSeed(2)];
+%             end
+%         end
     end
 end
 end
