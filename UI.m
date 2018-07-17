@@ -100,13 +100,13 @@ set(hObject, 'String', density);
 assert(density <= handles.max_density,'wrong max limit of densities. Have to be 0.1562 max');
 assert(density >= 0,'wrong min limit of densities. have to be positive');
 
-carTypeRatios = str2double(get(handles.edit28,'String'));
-handles.allCarsNumArray = zeros(1,numel(handles.carTypes));
+carTypeRatios = str2num(get(handles.edit28,'String'));
+handles.allCarsNumArray_H = zeros(1,numel(handles.carTypes));
 for j = 1:numel(handles.carTypes)
     if j == numel(handles.carTypes)
-        handles.allCarsNumArray(j) = numCars - sum(handles.allCarsNumArray(1:j-1));
+        handles.allCarsNumArray_H(j) = numCars - sum(handles.allCarsNumArray_H(1:j-1));
     else
-        handles.allCarsNumArray(j) = round(numCars*carTypeRatios(j));
+        handles.allCarsNumArray_H(j) = round(numCars*carTypeRatios(j));
     end
 end
 guidata(hObject,handles)
@@ -134,6 +134,9 @@ function edit3_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of edit3 as text
 %        str2double(get(hObject,'String')) returns contents of edit3 as a double
+                
+                
+
 
 
 % --- Executes during object creation, after setting all properties.
@@ -333,8 +336,16 @@ function radiobutton10_Callback(hObject, eventdata, handles)
 % hObject    handle to radiobutton10 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+p = get(handles.radiobutton14,'Value');
+if p == 0
+    set([ handles.edit2],'Enable','off');
+    set([ handles.edit3],'Enable','on');
+else
+    set([ handles.edit2],'Enable','on');
+    set([ handles.edit3],'Enable','off');
+end
 set([ handles.edit4,handles.edit5,handles.edit6,handles.edit7,handles.edit8],'Enable','off')
-set([ handles.edit2,handles.edit3,handles.edit28,handles.checkbox2],'Enable','on');
+set([ handles.edit28,handles.checkbox2],'Enable','on');
 % Hint: get(hObject,'Value') returns toggle state of radiobutton10
 
 
@@ -399,10 +410,18 @@ if get(handles.radiobutton11,'Value')
    
     handles.Arm.H = SpawnCars(T,'horizontal',roadStart,roadEnd,roadWidth,dt);
 else
-    
     fixedSeed = get(handles.checkbox2,'Value');
-    handles.Arm.H = SpawnCars([{handles.allCarsNumArray},fixedSeed,{handles.carTypes}],'horizontal',roadStart,roadEnd,roadWidth,dt);    
+    if get(handles.radiobutton14,'Value')
+        handles.Arm.H = SpawnCars([{handles.allCarsNumArray_H},fixedSeed,{handles.carTypes}],'horizontal',roadStart,roadEnd,roadWidth,dt);
+    else
+        spawnRate = str2double(get(handles.edit3,'String'));
+        carTypeRatios = str2num(get(handles.edit28,'String'));
+        dt = str2double(get(handles.edit17,'String'));
+        handles.Arm.H =  [{carTypeRatios},spawnRate,fixedSeed,dt];
+    end
 end
+
+
 
 
 
@@ -494,6 +513,22 @@ density = numCars/roadLength;
 set(hObject, 'String', density);
 assert(density <= handles.max_density,'wrong max limit of densities. Have to be 0.1562 max');
 assert(density >= 0,'wrong min limit of densities. have to be positive'); 
+
+carTypeRatios = str2num(get(handles.edit29,'String'));
+handles.allCarsNumArray_V = zeros(1,numel(handles.carTypes));
+for j = 1:numel(handles.carTypes)
+    if j == numel(handles.carTypes)
+        handles.allCarsNumArray_V(j) = numCars - sum(handles.allCarsNumArray_V(1:j-1));
+    else
+        handles.allCarsNumArray_V(j) = round(numCars*carTypeRatios(j));
+    end
+end
+guidata(hObject,handles)
+
+
+
+
+
 
 % --- Executes during object creation, after setting all properties.
 function edit10_CreateFcn(hObject, eventdata, handles)
@@ -628,8 +663,16 @@ function radiobutton19_Callback(hObject, eventdata, handles)
 % hObject    handle to radiobutton19 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+p = get(handles.radiobutton17,'Value');
+if p == 0
+    set([ handles.edit10],'Enable','off');
+    set([ handles.edit9],'Enable','on');
+else
+    set([ handles.edit10],'Enable','on');
+    set([ handles.edit9],'Enable','off');
+end
 set([ handles.edit11,handles.edit12,handles.edit13,handles.edit14,handles.edit15],'Enable','off')
-set([ handles.edit9,handles.edit10,handles.edit29,handles.checkbox3],'Enable','on');
+set([ handles.edit29,handles.checkbox3],'Enable','on');
 % Hint: get(hObject,'Value') returns toggle state of radiobutton19
 
 
@@ -680,18 +723,36 @@ function pushbutton4_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton4 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+roadStart = str2num(get(handles.edit24,'String'));
+roadEnd = str2num(get(handles.edit25,'String'));
+roadWidth = str2num(get(handles.edit26,'String'));
+dt = str2num(get(handles.edit17,'String'));
+if get(handles.radiobutton11,'Value')
+    sz = [str2num(get(handles.edit15,'String')) 4];
+    varTypes = {'double','double','double','function_handle'};
+    varNames = {'position','velocity','acceleration','carType'};
+    
+    T = table('Size',sz,'VariableTypes',varTypes,'VariableNames',varNames);
+    T.position = [str2num(get(handles.edit14,'String'))'];
+    T.velocity = [str2num(get(handles.edit13,'String'))'];
+    T.acceleration = [str2num(get(handles.edit12,'String'))'];
+    T.carType = {handles.carTypes{str2num(get(handles.edit11,'String'))'}}';
+    
+    handles.Arm.V = SpawnCars(T,'vertical',roadStart,roadEnd,roadWidth,dt);
+else
+    fixedSeed = get(handles.checkbox3,'Value');
+    if get(handles.radiobutton17,'Value')
+        handles.Arm.V = SpawnCars([{handles.allCarsNumArray_V},fixedSeed,{handles.carTypes}],'vertical',roadStart,roadEnd,roadWidth,dt);
+    else
+        spawnRate = str2double(get(handles.edit9,'String'));
+        carTypeRatios = str2num(get(handles.edit29,'String'));
+        dt = str2double(get(handles.edit17,'String'));
+        handles.Arm.V =  [{carTypeRatios},spawnRate,fixedSeed,dt];
+    end
+end
+    
 
-sz = [str2num(get(handles.edit15,'String')) 4];
-varTypes = {'double','double','double','function_handle'};
-varNames = {'position','velocity','acceleration','carType'};
 
-T = table('Size',sz,'VariableTypes',varTypes,'VariableNames',varNames);
-T.position = [str2num(get(handles.edit14,'String'))'];
-T.velocity = [str2num(get(handles.edit13,'String'))'];
-T.acceleration = [str2num(get(handles.edit12,'String'))'];
-T.carType = {handles.carTypes{str2num(get(handles.edit11,'String'))'}}';
-
-handles.Arm.V = SpawnCars(T,'vertical',str2num(get(handles.edit24,'String')),str2num(get(handles.edit25,'String')),str2num(get(handles.edit26,'String')),str2num(get(handles.edit17,'String')));
 guidata(hObject,handles)
 
 
@@ -893,7 +954,7 @@ function edit28_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-assert(sum(str2double(get(hObject,'String'))) == 1,'Wrong distribution of horizontal arm rations');
+assert(sum(str2num(get(hObject,'String'))) == 1,'Wrong distribution of horizontal arm rations');
 % Hints: get(hObject,'String') returns contents of edit28 as text
 %        str2double(get(hObject,'String')) returns contents of edit28 as a double
 
@@ -1024,7 +1085,7 @@ function edit29_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-assert(sum(str2double(get(hObject,'String'))) == 1,'Wrong distribution of vertical arm rations');
+assert(sum(str2num(get(hObject,'String'))) == 1,'Wrong distribution of vertical arm rations');
 
 % Hints: get(hObject,'String') returns contents of edit29 as text
 %        str2double(get(hObject,'String')) returns contents of edit29 as a double

@@ -9,27 +9,34 @@ classdef FiniteRoad < Road
         carRatios
         spawningInterval
         tolerance = 100
+        testFlag = 1
     end
     
     methods
-        function obj = FiniteRoad(road_args,arm)
-            obj = obj@Road(road_args);
+        function obj = FiniteRoad(road_args,finite_road_args)
+            obj = obj@Road(road_args);          
+            % % % %             obj.numCarsHistory = NaN(finite_road_args{3},1);
+            % % % %             obj.averageVelocityHistory = NaN(finite_road_args{3},1);
             
-            % distribution - mean interval is distributionMean secs
-%             obj.carRatios = finite_road_args{1};
-%             obj.FixedSeed = finite_road_args{3};
-%             if obj.FixedSeed
-%                 rng(1);
-%             end
-%             obj.spawnTimeProbDist = makedist('Exponential','mu',finite_road_args{2});
-% % % %             obj.numCarsHistory = NaN(finite_road_args{3},1);
-% % % %             obj.averageVelocityHistory = NaN(finite_road_args{3},1);
-%             obj.carTypePd = makedist('uniform',0,1);
-%             obj.spawn_car(0,dt);
-            obj.numCars = arm.numCars;
-            obj.allCars = arm.allCars;
+            if numel(finite_road_args) == 1
+                obj.numCars = finite_road_args.numCars;
+                obj.allCars = finite_road_args.allCars;
+            else
+                % distribution - mean interval is distributionMean secs
+                obj.carRatios = finite_road_args{1};
+                obj.FixedSeed = finite_road_args{3};
+                if obj.FixedSeed
+                    rng(1);
+                end
+                obj.spawnTimeProbDist = makedist('Exponential','mu',finite_road_args{2});
+                obj.carTypePd = makedist('uniform',0,1);
+                obj.spawn_car(0,finite_road_args{4});
+            end
         end
         function spawn_car(obj,time,dt)
+            if time == 0
+                obj.testFlag = 0;
+            end
             isTimeForNewEntry = (time >= obj.nextEntry);
             isVerticalQueueNotEmpty = (~isempty(obj.verticalQueue));
             if isempty(obj.allCars)
@@ -53,7 +60,7 @@ classdef FiniteRoad < Road
                     obj.carType = obj.verticalQueue(1);
                     obj.verticalQueue(1) = [];
                 end
-                new_car = add_car(obj.carType,dt);
+                new_car = obj.add_car(obj.carType,dt);
                 new_car.velocity = 6;
                 obj.allCars = [obj.allCars new_car];
                 obj.numCars = obj.numCars + 1;
@@ -93,9 +100,9 @@ classdef FiniteRoad < Road
             obj.numCars = obj.numCars - 1;
         end
         function move_all_cars(obj,t,dt,iIteration,nIterations)
-            
-%             obj.spawn_car(t,dt);
-            
+            if obj.testFlag == 0
+                obj.spawn_car(t,dt);
+            end
             for iCar = 1:obj.numCars
                 if obj.allCars(1).pose(1) >= obj.endPoint
                     obj.delete_car(t)
