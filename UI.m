@@ -58,6 +58,10 @@ handles.output = hObject;
 handles.carTypes = {@IdmCar, @HdmCar, @AggressiveCar, @PassiveCar, @HesitantCar, @ManualCar};
 handles.roadTypes = {@LoopRoad @FiniteRoad};
 
+
+handles.noSpawnAreaLength = 24.4;   % length of no spawn area around the junction + length of a car for safe respawn
+handles.max_density = 1/6.4;        % number of cars per metre (0.1562)
+  
 % Update handles structure
 guidata(hObject, handles);
 
@@ -84,6 +88,29 @@ function edit2_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of edit2 as text
 %        str2double(get(hObject,'String')) returns contents of edit2 as a double
+
+init_density = str2double(get(hObject,'String'));
+
+roadLength = str2double(get(handles.text18,'String'));
+
+numCars = round(init_density * (roadLength - handles.noSpawnAreaLength));
+
+density = numCars/roadLength;
+set(hObject, 'String', density);
+assert(density <= handles.max_density,'wrong max limit of densities. Have to be 0.1562 max');
+assert(density >= 0,'wrong min limit of densities. have to be positive');
+
+carTypeRatios = str2double(get(handles.edit28,'String'));
+handles.allCarsNumArray = zeros(1,numel(handles.carTypes));
+for j = 1:numel(handles.carTypes)
+    if j == numel(handles.carTypes)
+        handles.allCarsNumArray(j) = numCars - sum(handles.allCarsNumArray(1:j-1));
+    else
+        handles.allCarsNumArray(j) = round(numCars*carTypeRatios(j));
+    end
+end
+guidata(hObject,handles)
+
 
 
 % --- Executes during object creation, after setting all properties.
@@ -355,18 +382,31 @@ function pushbutton1_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+roadStart = str2num(get(handles.edit18,'String'));
+roadEnd = str2num(get(handles.edit19,'String'));
+roadWidth = str2num(get(handles.edit20,'String'));
+dt = str2num(get(handles.edit17,'String'));
+if get(handles.radiobutton11,'Value')
+    sz = [str2num(get(handles.edit4,'String')) 4];
+    varTypes = {'double','double','double','function_handle'};
+    varNames = {'position','velocity','acceleration','carType'};
+    
+    T = table('Size',sz,'VariableTypes',varTypes,'VariableNames',varNames);
+    T.position = [str2num(get(handles.edit5,'String'))'];
+    T.velocity = [str2num(get(handles.edit6,'String'))'];
+    T.acceleration = [str2num(get(handles.edit7,'String'))'];
+    T.carType = {handles.carTypes{str2num(get(handles.edit8,'String'))'}}';
+   
+    handles.Arm.H = SpawnCars(T,'horizontal',roadStart,roadEnd,roadWidth,dt);
+else
+    
+    fixedSeed = get(handles.checkbox2,'Value');
+    handles.Arm.H = SpawnCars([{handles.allCarsNumArray},fixedSeed,{handles.carTypes}],'horizontal',roadStart,roadEnd,roadWidth,dt);    
+end
 
-sz = [str2num(get(handles.edit4,'String')) 4];
-varTypes = {'double','double','double','function_handle'};
-varNames = {'position','velocity','acceleration','carType'};
 
-T = table('Size',sz,'VariableTypes',varTypes,'VariableNames',varNames);
-T.position = [str2num(get(handles.edit5,'String'))'];
-T.velocity = [str2num(get(handles.edit6,'String'))'];
-T.acceleration = [str2num(get(handles.edit7,'String'))'];
-T.carType = {handles.carTypes{str2num(get(handles.edit8,'String'))'}}';
 
-handles.Arm.H = SpawnCars(T,'horizontal',str2num(get(handles.edit18,'String')),str2num(get(handles.edit19,'String')),str2num(get(handles.edit20,'String')),str2num(get(handles.edit17,'String')));
+
 guidata(hObject,handles)
 
 % --- Executes on button press in pushbutton2.
@@ -444,7 +484,16 @@ function edit10_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of edit10 as text
 %        str2double(get(hObject,'String')) returns contents of edit10 as a double
+init_density = str2double(get(hObject,'String'));
 
+roadLength = str2double(get(handles.edit27,'String'));
+
+numCars = round(init_density * (roadLength - handles.noSpawnAreaLength));
+
+density = numCars/roadLength;
+set(hObject, 'String', density);
+assert(density <= handles.max_density,'wrong max limit of densities. Have to be 0.1562 max');
+assert(density >= 0,'wrong min limit of densities. have to be positive'); 
 
 % --- Executes during object creation, after setting all properties.
 function edit10_CreateFcn(hObject, eventdata, handles)
