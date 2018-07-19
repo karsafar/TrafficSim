@@ -10,7 +10,3 @@ Simple IDM/
 \.DS_Store
 
 *.m~
-
-nCarsVsTime\.fig
-
-*.fig
