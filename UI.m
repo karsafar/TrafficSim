@@ -22,7 +22,7 @@ function varargout = UI(varargin)
 
 % Edit the above text to modify the response to help UI
 
-% Last Modified by GUIDE v2.5 16-Jul-2018 15:44:10
+% Last Modified by GUIDE v2.5 18-Jul-2018 19:57:39
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -54,16 +54,21 @@ function UI_OpeningFcn(hObject, eventdata, handles, varargin)
 %            command line (see VARARGIN)
 
 % Choose default command line output for UI
-handles.output = hObject;
 handles.carTypes = {@IdmCar, @HdmCar, @AggressiveCar, @PassiveCar, @HesitantCar, @ManualCar};
 handles.roadTypes = {@LoopRoad @FiniteRoad};
 
 
 handles.noSpawnAreaLength = 24.4;   % length of no spawn area around the junction + length of a car for safe respawn
 handles.max_density = 1/6.4;        % number of cars per metre (0.1562)
-  
+
+handles.allCarsNumArray_H = zeros(1,numel(handles.carTypes));
+handles.allCarsNumArray_V = zeros(1,numel(handles.carTypes));
+handles.t_rng = [];
 % Update handles structure
+handles.output = hObject;
 guidata(hObject, handles);
+% start the timer
+
 
 % UIWAIT makes UI wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
@@ -80,8 +85,17 @@ function varargout = UI_OutputFcn(hObject, eventdata, handles)
 varargout{1} = handles.output;
 
 
+function timerCallback(hTimer, eventdata, hFigure)
+handles = guidata(hFigure);
+str = handles.myCellData{handles.strIdx};
+set(handles.pushbutton1,'String',str);
+handles.strIdx = handles.strIdx + 1;
+if handles.strIdx > length(handles.myCellData)
+    handles.strIdx = 1;
+end
+guidata(hFigure,handles);
 
-function edit2_Callback(hObject, eventdata, handles)
+function handles = edit2_Callback(hObject, eventdata, handles)
 % hObject    handle to edit2 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -101,7 +115,7 @@ assert(density <= handles.max_density,'wrong max limit of densities. Have to be 
 assert(density >= 0,'wrong min limit of densities. have to be positive');
 
 carTypeRatios = str2num(get(handles.edit28,'String'));
-handles.allCarsNumArray_H = zeros(1,numel(handles.carTypes));
+
 for j = 1:numel(handles.carTypes)
     if j == numel(handles.carTypes)
         handles.allCarsNumArray_H(j) = numCars - sum(handles.allCarsNumArray_H(1:j-1));
@@ -109,8 +123,7 @@ for j = 1:numel(handles.carTypes)
         handles.allCarsNumArray_H(j) = round(numCars*carTypeRatios(j));
     end
 end
-guidata(hObject,handles)
-
+guidata(hObject, handles);
 
 
 % --- Executes during object creation, after setting all properties.
@@ -134,8 +147,8 @@ function edit3_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of edit3 as text
 %        str2double(get(hObject,'String')) returns contents of edit3 as a double
-                
-                
+
+
 
 
 
@@ -389,10 +402,13 @@ function uipanel3_CreateFcn(hObject, eventdata, handles)
 
 
 % --- Executes on button press in pushbutton1.
-function pushbutton1_Callback(hObject, eventdata, handles)
+function handles = pushbutton1_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+handles = text18_Callback(handles.text18,eventdata,handles);
+handles = edit2_Callback(handles.edit2,eventdata,handles);
+
 roadStart = str2num(get(handles.edit18,'String'));
 roadEnd = str2num(get(handles.edit19,'String'));
 roadWidth = str2num(get(handles.edit20,'String'));
@@ -407,7 +423,7 @@ if get(handles.radiobutton11,'Value')
     T.velocity = [str2num(get(handles.edit6,'String'))'];
     T.acceleration = [str2num(get(handles.edit7,'String'))'];
     T.carType = {handles.carTypes{str2num(get(handles.edit8,'String'))'}}';
-   
+    
     handles.Arm.H = SpawnCars(T,'horizontal',roadStart,roadEnd,roadWidth,dt);
 else
     fixedSeed = get(handles.checkbox2,'Value');
@@ -422,17 +438,17 @@ else
 end
 
 
-
-
-
-
 guidata(hObject,handles)
 
 % --- Executes on button press in pushbutton2.
-function pushbutton2_Callback(hObject, eventdata, handles)
+function handles = pushbutton2_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton2 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+handles = pushbutton1_Callback(handles.pushbutton1, eventdata, handles);
+handles = pushbutton4_Callback(handles.pushbutton4, eventdata, handles);
+handles = edit23_Callback(handles.edit23,eventdata,handles);
+
 if get(handles.radiobutton14,'Value') && get(handles.radiobutton15,'Value') == 0
     roadType.H = 1;
 else
@@ -496,7 +512,7 @@ end
 
 
 
-function edit10_Callback(hObject, eventdata, handles)
+function handles = edit10_Callback(hObject, eventdata, handles)
 % hObject    handle to edit10 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -512,10 +528,10 @@ numCars = round(init_density * (roadLength - handles.noSpawnAreaLength));
 density = numCars/roadLength;
 set(hObject, 'String', density);
 assert(density <= handles.max_density,'wrong max limit of densities. Have to be 0.1562 max');
-assert(density >= 0,'wrong min limit of densities. have to be positive'); 
+assert(density >= 0,'wrong min limit of densities. have to be positive');
 
 carTypeRatios = str2num(get(handles.edit29,'String'));
-handles.allCarsNumArray_V = zeros(1,numel(handles.carTypes));
+% handles.allCarsNumArray_V = zeros(1,numel(handles.carTypes));
 for j = 1:numel(handles.carTypes)
     if j == numel(handles.carTypes)
         handles.allCarsNumArray_V(j) = numCars - sum(handles.allCarsNumArray_V(1:j-1));
@@ -719,10 +735,15 @@ end
 
 
 % --- Executes on button press in pushbutton4.
-function pushbutton4_Callback(hObject, eventdata, handles)
+function handles = pushbutton4_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton4 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+handles = edit27_Callback(handles.edit27,eventdata,handles);
+handles = edit10_Callback(handles.edit10,eventdata,handles);
+
+
 roadStart = str2num(get(handles.edit24,'String'));
 roadEnd = str2num(get(handles.edit25,'String'));
 roadWidth = str2num(get(handles.edit26,'String'));
@@ -750,7 +771,7 @@ else
         handles.Arm.V =  [{carTypeRatios},spawnRate,fixedSeed,dt];
     end
 end
-    
+
 
 
 guidata(hObject,handles)
@@ -851,16 +872,18 @@ function edit22_CreateFcn(hObject, eventdata, handles)
 
 
 
-function edit23_Callback(hObject, eventdata, handles)
+function handles = edit23_Callback(hObject, eventdata, handles)
 % hObject    handle to edit23 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
 runTime = str2double(get(handles.edit16,'String'));
 dt = str2double(get(handles.edit17,'String'));
 nIterations = runTime/dt;
 set(hObject,'String',nIterations);
 nDigits = numel(num2str(dt))-2;
 handles.t_rng = round(linspace(0,runTime,nIterations),nDigits);
+
 guidata(hObject,handles);
 % Hints: get(hObject,'String') returns contents of edit23 as text
 %        str2double(get(hObject,'String')) returns contents of edit23 as a double
@@ -982,7 +1005,7 @@ function checkbox2_Callback(hObject, eventdata, handles)
 
 
 
-function edit27_Callback(hObject, eventdata, handles)
+function handles = edit27_Callback(hObject, eventdata, handles)
 % hObject    handle to edit27 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -1114,7 +1137,7 @@ function checkbox3_Callback(hObject, eventdata, handles)
 
 
 
-function text18_Callback(hObject, eventdata, handles)
+function handles = text18_Callback(hObject, eventdata, handles)
 % hObject    handle to text18 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -1136,3 +1159,21 @@ function text18_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on key press with focus on text18 and none of its controls.
+function text18_KeyPressFcn(hObject, eventdata, handles)
+% hObject    handle to text18 (see GCBO)
+% eventdata  structure with the following fields (see MATLAB.UI.CONTROL.UICONTROL)
+%	Key: name of the key that was pressed, in lower case
+%	Character: character interpretation of the key(s) that was pressed
+%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over text18.
+function text18_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to text18 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
