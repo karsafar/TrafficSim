@@ -10,3 +10,5 @@ Simple IDM/
 \.DS_Store
 
 *.m~
+
+*.fig
