@@ -13,10 +13,10 @@ classdef Road < handle
     properties (SetAccess = protected)
         numCars = 0
         allCars = []
-        nextCarApproachingCrossing = []
+        %nextCarApproachingCrossing = []
         carHistory = {}
         nCarHistory = 0
-        averageVelocityHistory = []
+        averageVelocityHistory = NaN(1,100000)
         carType = 0
         carTypes = {}
         FixedSeed = false

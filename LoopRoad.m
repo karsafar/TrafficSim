@@ -1,18 +1,19 @@
 classdef LoopRoad < Road
     properties (SetAccess = protected)
-        initPoseProbDist = []
-        allCarsNumArray = 0
+       % initPoseProbDist = []
+       % allCarsNumArray = 0
     end
     
     methods
-        function obj = LoopRoad(road_args,loop_road_args,dt)
+        function obj = LoopRoad(road_args,arm)
             obj = obj@Road(road_args);
             
-            obj.allCarsNumArray = loop_road_args{1};
-            obj.numCars = loop_road_args{2};
-            obj.averageVelocityHistory = NaN(loop_road_args{3},1);
-            obj.FixedSeed = loop_road_args{4};
-            obj.spawn_initial_cars(dt);
+%             obj.allCarsNumArray = loop_road_args{1};
+%             obj.numCars = sum(obj.allCarsNumArray);
+%             obj.FixedSeed = loop_road_args{2};
+%             obj.spawn_initial_cars(dt);
+            obj.numCars = arm.numCars;
+            obj.allCars = arm.allCars;
         end
         function spawn_initial_cars(obj,dt)
             %%
@@ -77,6 +78,26 @@ classdef LoopRoad < Road
                     leaderCar.Prev = obj.allCars(iCar);
                     obj.allCars(iCar).Next = leaderCar;
                 end
+            end
+        end
+        function controlled_spawn(obj,nCars,positions,velocities,accelerations,types,dt)
+            %%
+            obj.numCars = nCars;
+            for iCar = 1:nCars
+                new_car = add_car(obj,types(iCar),dt);
+                new_car.pose(1) = positions(iCar);
+                new_car.velocity = velocities(iCar);
+                new_car.acceleration = accelerations(iCar);
+                obj.allCars = [obj.allCars new_car];
+                if iCar  > 1
+                    insertAfter(obj.allCars(iCar),obj.allCars(iCar-1));
+                    obj.allCars(iCar).leaderFlag = false;
+                end
+            end
+            leaderCar = obj.allCars(1);
+            if obj.numCars > 1
+                leaderCar.Prev = obj.allCars(iCar);
+                obj.allCars(iCar).Next = leaderCar;
             end
         end
         function respawn_car(obj,leaderCar)

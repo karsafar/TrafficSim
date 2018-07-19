@@ -1,17 +1,18 @@
 classdef Car < dlnode
     properties (SetAccess = protected)
-        acceleration = 1
         maximumAcceleration = [3.5 -3.5]
     end
     properties (Access = public)
         dt = 0
         pose = NaN(1,2)
         velocity = 0
+        acceleration = 1.0
         locationHistory = NaN(1,100000)
         velocityHistory = NaN(1,100000)
         accelerationHistory = NaN(1,100000)
         timeHistory = NaN(1,100000)
-        historyIndex = 1
+        historyIndex = 1.0
+        leaderFlag = true
     end
     properties (SetAccess = immutable)
         ownDistfromRearToBack = NaN

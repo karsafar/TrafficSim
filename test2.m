@@ -27,10 +27,11 @@ nIterations = runTime/dt;
 nDigits = numel(num2str(dt))-2;
 t_rng = round(linspace(0,runTime,nIterations),nDigits);
 numberOfSimRuns = 20;
+distMeanRange = [7, 10; 7, 10];
 
 
 %% Decide type of road parameters
-[subRoadArgs,numberOfSimRuns] = prescribe_traffic(selectRoadTypes,numberOfSimRuns,carTypes,carTypeRatios,nIterations,fixedSeed,roadDims,PrescriptionRange);
+[subRoadArgs,numberOfSimRuns] = prescribe_traffic(selectRoadTypes,numberOfSimRuns,carTypes,carTypeRatios,fixedSeed,roadDims,PrescriptionRange,distMeanRange);
 
 %% run simulations
 for k = 1:numberOfSimRuns
@@ -64,8 +65,8 @@ elseif selectRoadTypes(1) == 2 && selectRoadTypes(2) == 1
     definput = {'7','0.04'};
     answer = inputdlg(prompt,title,dims,definput);
 end
-horiz = str2num(answer{1});
-vert = str2num(answer{2});
+horiz = [str2num(answer{1});str2num(answer{1})];
+vert = [str2num(answer{2});str2num(answer{2})];
 end
 
 
