@@ -1,6 +1,6 @@
 function [subRoadArgs,numberOfSimRuns] = prescribe_traffic(selectRoadTypes,numberOfSimRuns,carTypes,carTypeRatios,nIterations,fixedSeed,roadDims,densityRange,distMeanRange)
 
-%% 
+%%
 for i = 1:numel(selectRoadTypes)
     if selectRoadTypes(i) == 1
         
@@ -17,8 +17,20 @@ for i = 1:numel(selectRoadTypes)
         [numCars, idx]= unique(round(init_density(:) * (roadDims.Length(1) - noSpawnAreaLength)),'first');
         
         numCars = flip(numCars);
-     
-        numberOfSimRuns = min(numberOfSimRuns,numel(numCars));
+        if all(numCars) == 0 && numberOfSimRuns > 0
+            numberOfSimRuns = numberOfSimRuns;
+            allCarsNumArray = zeros(numberOfSimRuns,numel(carTypes));
+            for k = 1:numberOfSimRuns
+                if i == 1
+                    subRoadArgs(k).Horizontal = [{allCarsNumArray(k,:)},numCars,nIterations,fixedSeed(1)];
+                elseif i == 2
+                    subRoadArgs(k).Vertical = [{allCarsNumArray(k,:)},numCars,nIterations,fixedSeed(2)];
+                end
+            end
+            break
+        else
+            numberOfSimRuns = min(numberOfSimRuns,numel(numCars));
+        end
         density = numCars/roadDims.Length(1);
         fprintf('Real density Range for arm %i :\n',i);
         fprintf('%.3g\n',density);
@@ -32,7 +44,7 @@ for i = 1:numel(selectRoadTypes)
                 end
             end
         end
-         
+        
         for k = 1:numberOfSimRuns
             if i == 1
                 subRoadArgs(k).Horizontal = [{allCarsNumArray(k,:)},numCars(k),nIterations,fixedSeed(1)];
@@ -41,7 +53,7 @@ for i = 1:numel(selectRoadTypes)
             end
         end
     elseif selectRoadTypes(i) == 2
-
+        
         distributionMean = logspace(log10(distMeanRange(i,1)),log10(distMeanRange(i,2)),numberOfSimRuns);
         
         for k = 1:numberOfSimRuns
