@@ -1,4 +1,4 @@
-function varargout = UI(varargin)
+function varargout = microSim(varargin)
 %UI MATLAB code file for UI.fig
 %      UI, by itself, creates a new UI or raises the existing
 %      singleton*.
