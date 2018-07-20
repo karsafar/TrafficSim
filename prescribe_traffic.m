@@ -53,7 +53,7 @@ for i = 1:numel(selectRoadTypes)
         
         for k = 1:numberOfFlowValues
             if i == 1
-                subRoadAorgs(k).H = [{carTypeRatios(1,:)},distributionMean(k),fixedSeed(1),dt,nIterations];
+                subRoadArgs(k).H = [{carTypeRatios(1,:)},distributionMean(k),fixedSeed(1),dt,nIterations];
             elseif i == 2
                 subRoadArgs(k).V = [{carTypeRatios(2,:)},distributionMean(k),fixedSeed(2),dt,nIterations];
             end
