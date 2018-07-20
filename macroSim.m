@@ -20,6 +20,7 @@ roadDims.Start = [-500; -150];
 roadDims.End = [500; 150];
 roadDims.Width = [4; 4];
 roadDims.Length = roadDims.End - roadDims.Start;
+selectRoadTypes = [1 1] ;
 
 nIterations = runTime/dt;
 nDigits = numel(num2str(dt))-2;
@@ -29,17 +30,7 @@ densityRange = [0.03, 0.001; 0.0001, 0.0001];
 distMeanRange = [7, 10; 7, 10];
 
 %% Decide type of road parameters
-% [subRoadArgs,numberOfSimRuns] = prescribe_traffic(selectRoadTypes,...
-%                                                     numberOfSimRuns,...
-%                                                     carTypes,...
-%                                                     carTypeRatios,...
-%                                                     fixedSeed,...
-%                                                     roadDims,...
-%                                                     densityRange,...
-%                                                     distMeanRange);
-
-% swich to manual spawn
-Arm = decide_input(carTypes,roadDims,dt);
+[subRoadArgs,numberOfSimRuns] = prescribe_traffic(selectRoadTypes,numberOfSimRuns,carTypes,carTypeRatios,nIterations,fixedSeed,roadDims,densityRange,distMeanRange);
 
 %% run simulations
 for k = 1:numberOfSimRuns
