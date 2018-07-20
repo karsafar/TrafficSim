@@ -6,10 +6,11 @@ classdef SpawnCars < handle
         roadStart
         roadEnd
         roadWidth
+        nIterations
     end
     
     methods
-        function obj = SpawnCars(SpawnData,orientation, startPoint,endPoint, Width,dt)
+        function obj = SpawnCars(SpawnData,orientation, startPoint,endPoint, Width,dt,nIterations)
             obj.roadOrientation = orientation;
             obj.roadStart = startPoint;
             obj.roadEnd = endPoint;
@@ -22,6 +23,7 @@ classdef SpawnCars < handle
                 FixedSeed = SpawnData{2};
                 carTypes = SpawnData{3};
                 obj.randomSpawn(everyCarNum,carTypes,FixedSeed,dt)
+                obj.nIterations = nIterations;
             end
         end
         

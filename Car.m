@@ -24,6 +24,7 @@ classdef Car < dlnode
     properties (Constant)
         maximumVelocity = 13
         dimension = [2.16 4.4 2.75];
+        tol = 1e-3
     end
     methods
         
@@ -54,7 +55,7 @@ classdef Car < dlnode
             if obj.velocity > obj.maximumVelocity
                 obj.velocity = obj.maximumVelocity;
             elseif obj.velocity < 0 
-                obj.acceleration =-(obj.velocityHistory(obj.historyIndex-1)/dt);
+                obj.acceleration = -(obj.velocityHistory(obj.historyIndex-1)/dt);
                 obj.accelerationHistory(obj.historyIndex-1) = obj.acceleration;
                 obj.velocity = 0;
             end
@@ -69,8 +70,8 @@ classdef Car < dlnode
             obj.historyIndex = i + 1;
             
             % unit test the constraints
-            assert(obj.velocity >= 0 && obj.velocity <= 13,'Velocity is out of limit');
-            assert(obj.acceleration >= obj.maximumAcceleration(2) && obj.acceleration <= obj.maximumAcceleration(1) ,'Acceleration contraints are violated');            
+            assert(obj.velocity >= 0 && obj.velocity <= obj.maximumVelocity,'Velocity is out of limit');
+            assert(obj.tol >=(obj.maximumAcceleration(2) - obj.acceleration) && obj.tol >= (obj.acceleration - 8) ,'Acceleration contraints are violated');            
         end
     end
 end

@@ -408,6 +408,7 @@ function handles = pushbutton1_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 handles = text18_Callback(handles.text18,eventdata,handles);
 handles = edit2_Callback(handles.edit2,eventdata,handles);
+handles = edit23_Callback(handles.edit23,eventdata,handles);
 
 roadStart = str2num(get(handles.edit18,'String'));
 roadEnd = str2num(get(handles.edit19,'String'));
@@ -426,14 +427,15 @@ if get(handles.radiobutton11,'Value')
     
     handles.Arm.H = SpawnCars(T,'horizontal',roadStart,roadEnd,roadWidth,dt);
 else
+    nIterations = str2double(get(handles.edit23,'String'));
     fixedSeed = get(handles.checkbox2,'Value');
     if get(handles.radiobutton14,'Value')
-        handles.Arm.H = SpawnCars([{handles.allCarsNumArray_H},fixedSeed,{handles.carTypes}],'horizontal',roadStart,roadEnd,roadWidth,dt);
+        handles.Arm.H = SpawnCars([{handles.allCarsNumArray_H},fixedSeed,{handles.carTypes}],'horizontal',roadStart,roadEnd,roadWidth,dt,nIterations);
     else
         spawnRate = str2double(get(handles.edit3,'String'));
         carTypeRatios = str2num(get(handles.edit28,'String'));
         dt = str2double(get(handles.edit17,'String'));
-        handles.Arm.H =  [{carTypeRatios},spawnRate,fixedSeed,dt];
+        handles.Arm.H =  [{carTypeRatios},spawnRate,fixedSeed,dt,nIterations];
     end
 end
 
@@ -742,7 +744,7 @@ function handles = pushbutton4_Callback(hObject, eventdata, handles)
 
 handles = edit27_Callback(handles.edit27,eventdata,handles);
 handles = edit10_Callback(handles.edit10,eventdata,handles);
-
+handles = edit23_Callback(handles.edit23,eventdata,handles);
 
 roadStart = str2num(get(handles.edit24,'String'));
 roadEnd = str2num(get(handles.edit25,'String'));
@@ -761,14 +763,15 @@ if get(handles.radiobutton11,'Value')
     
     handles.Arm.V = SpawnCars(T,'vertical',roadStart,roadEnd,roadWidth,dt);
 else
+    nIterations = str2double(get(handles.edit23,'String'));
     fixedSeed = get(handles.checkbox3,'Value');
     if get(handles.radiobutton17,'Value')
-        handles.Arm.V = SpawnCars([{handles.allCarsNumArray_V},fixedSeed,{handles.carTypes}],'vertical',roadStart,roadEnd,roadWidth,dt);
+        handles.Arm.V = SpawnCars([{handles.allCarsNumArray_V},fixedSeed,{handles.carTypes}],'vertical',roadStart,roadEnd,roadWidth,dt,nIterations);
     else
         spawnRate = str2double(get(handles.edit9,'String'));
         carTypeRatios = str2num(get(handles.edit29,'String'));
         dt = str2double(get(handles.edit17,'String'));
-        handles.Arm.V =  [{carTypeRatios},spawnRate,fixedSeed,dt];
+        handles.Arm.V =  [{carTypeRatios},spawnRate,fixedSeed,dt,nIterations];
     end
 end
 

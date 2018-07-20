@@ -221,7 +221,7 @@ classdef AggressiveCar < IdmCar
                     obj.it_a_max_accel.set_value(obj.maximumAcceleration(1)+0.1);
                     obj.it_a_max_decel.set_value(obj.maximumAcceleration(2)-0.1);
                     obj.it_pose.set_value(obj.pose(1));
-                    obj.it_CarsOpposite.set_value(~isempty(oppositeCars) && allPassedJunction==0);
+%                     obj.it_CarsOpposite.set_value(~isempty(oppositeCars) && allPassedJunction==0);
                     obj.it_dist_gap.set_value(obj.s);
                     
                     if isempty(obj.Prev)

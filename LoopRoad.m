@@ -1,19 +1,24 @@
 classdef LoopRoad < Road
     properties (SetAccess = protected)
-       % initPoseProbDist = []
-       % allCarsNumArray = 0
+%          initPoseProbDist = []
+%          allCarsNumArray = 0
     end
     
     methods
-        function obj = LoopRoad(road_args,arm)
+        function obj = LoopRoad(road_args,loop_road_args)
             obj = obj@Road(road_args);
-            
-%             obj.allCarsNumArray = loop_road_args{1};
-%             obj.numCars = sum(obj.allCarsNumArray);
-%             obj.FixedSeed = loop_road_args{2};
-%             obj.spawn_initial_cars(dt);
-            obj.numCars = arm.numCars;
-            obj.allCars = arm.allCars;
+
+            if numel(loop_road_args) == 1
+                obj.numCars = loop_road_args.numCars;
+                obj.allCars = loop_road_args.allCars;
+                obj.averageVelocityHistory = NaN(loop_road_args.nIterations,1);
+            else
+                %% I don't need this part
+                obj.allCarsNumArray = loop_road_args{1};
+                obj.numCars = sum(obj.allCarsNumArray);
+                obj.FixedSeed = loop_road_args{2};
+                obj.spawn_initial_cars(loop_road_args{3});
+            end
         end
         function spawn_initial_cars(obj,dt)
             %%

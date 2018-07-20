@@ -1,4 +1,4 @@
-function [subRoadArgs,numberOfSimRuns] = prescribe_traffic(selectRoadTypes,numberOfSimRuns,carTypes,carTypeRatios,nIterations,fixedSeed,roadDims,densityRange,distMeanRange)
+function [subRoadArgs,numberOfSimRuns] = prescribe_traffic(selectRoadTypes,numberOfSimRuns,carTypes,carTypeRatios,fixedSeed,roadDims,densityRange,distMeanRange,dt,nIterations)
 
 %%
 for i = 1:numel(selectRoadTypes)
@@ -20,36 +20,28 @@ for i = 1:numel(selectRoadTypes)
         if all(numCars) == 0 && numberOfSimRuns > 0
             numberOfSimRuns = numberOfSimRuns;
             allCarsNumArray = zeros(numberOfSimRuns,numel(carTypes));
-            for k = 1:numberOfSimRuns
-                if i == 1
-                    subRoadArgs(k).Horizontal = [{allCarsNumArray(k,:)},numCars,nIterations,fixedSeed(1)];
-                elseif i == 2
-                    subRoadArgs(k).Vertical = [{allCarsNumArray(k,:)},numCars,nIterations,fixedSeed(2)];
-                end
-            end
-            break
         else
             numberOfSimRuns = min(numberOfSimRuns,numel(numCars));
-        end
-        density = numCars/roadDims.Length(1);
-        fprintf('Real density values for the arm %i :\n',i);
-        fprintf('%.3g\n',density);
-        allCarsNumArray = zeros(numberOfSimRuns,numel(carTypes));
-        for k = 1:numberOfSimRuns
-            for j = 1:numel(carTypes)
-                if j == numel(carTypes)
-                    allCarsNumArray(k,j) = numCars(k) - sum(allCarsNumArray(k,1:j-1));
-                else
-                    allCarsNumArray(k,j) = round(numCars(k)*carTypeRatios(i,j));
+            
+            density = numCars/roadDims.Length(1);
+            fprintf('Real density values for the arm %i :\n',i);
+            fprintf('%.3g\n',density);
+            allCarsNumArray = zeros(numberOfSimRuns,numel(carTypes));
+            for k = 1:numberOfSimRuns
+                for j = 1:numel(carTypes)
+                    if j == numel(carTypes)
+                        allCarsNumArray(k,j) = numCars(k) - sum(allCarsNumArray(k,1:j-1));
+                    else
+                        allCarsNumArray(k,j) = round(numCars(k)*carTypeRatios(i,j));
+                    end
                 end
             end
         end
-        
         for k = 1:numberOfSimRuns
             if i == 1
-                subRoadArgs(k).Horizontal = [{allCarsNumArray(k,:)},fixedSeed(1)];
+                subRoadArgs(k).H = SpawnCars([{allCarsNumArray(k,:)},fixedSeed(1),{carTypes}],'horizontal',roadDims.Start(1),roadDims.End(1),roadDims.Width(1),dt,nIterations);
             elseif i == 2
-                subRoadArgs(k).Vertical = [{allCarsNumArray(k,:)},fixedSeed(2)];
+                subRoadArgs(k).V = SpawnCars([{allCarsNumArray(k,:)},fixedSeed(2),{carTypes}],'vertical',roadDims.Start(2),roadDims.End(2),roadDims.Width(2),dt,nIterations);
             end
         end
     elseif selectRoadTypes(i) == 2
@@ -58,9 +50,9 @@ for i = 1:numel(selectRoadTypes)
         
         for k = 1:numberOfSimRuns
             if i == 1
-                subRoadArgs(k).Horizontal = [{carTypeRatios(1,:)},distributionMean(k),fixedSeed(1)];
+                subRoadAorgs(k).H = [{carTypeRatios(1,:)},distributionMean(k),fixedSeed(1),dt,nIterations];
             elseif i == 2
-                subRoadArgs(k).Vertical = [{carTypeRatios(2,:)},distributionMean(k),fixedSeed(2)];
+                subRoadArgs(k).V = [{carTypeRatios(2,:)},distributionMean(k),fixedSeed(2),dt,nIterations];
             end
         end
     end
