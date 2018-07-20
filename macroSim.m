@@ -26,7 +26,7 @@ nIterations = runTime/dt;
 nDigits = numel(num2str(dt))-2;
 t_rng = round(linspace(0,runTime,nIterations),nDigits);
 numberOfSimRuns = 25;
-densityRange = [0.03, 0.03; 0.0001, 0.0001];
+densityRange = [0.03, 0.001; 0.0001, 0.0001];
 distMeanRange = [7, 10; 27, 30];
 
 %% Decide type of road parameters
