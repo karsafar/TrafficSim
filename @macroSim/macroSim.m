@@ -22,16 +22,16 @@ function varargout = macroSim(varargin)
 
 % Edit the above text to modify the response to help macroSim
 
-% Last Modified by GUIDE v2.5 20-Jul-2018 20:31:36
+% Last Modified by GUIDE v2.5 21-Jul-2018 19:54:18
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
-                   'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @macroSim_OpeningFcn, ...
-                   'gui_OutputFcn',  @macroSim_OutputFcn, ...
-                   'gui_LayoutFcn',  [] , ...
-                   'gui_Callback',   []);
+    'gui_Singleton',  gui_Singleton, ...
+    'gui_OpeningFcn', @macroSim_OpeningFcn, ...
+    'gui_OutputFcn',  @macroSim_OutputFcn, ...
+    'gui_LayoutFcn',  [] , ...
+    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
     gui_State.gui_Callback = str2func(varargin{1});
 end
@@ -51,6 +51,10 @@ function macroSim_OpeningFcn(hObject, eventdata, handles, varargin)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to macroSim (see VARARGIN)
+handles.carTypes = {@IdmCar, @HdmCar, @AggressiveCar, @PassiveCar, @HesitantCar, @ManualCar};
+handles.roadTypes = {@LoopRoad @FiniteRoad};
+handles.noSpawnAreaLength = 24.4;   % length of no spawn area around the junction + length of a car for safe respawn
+handles.max_density = 1/6.4; % number of cars per metre (0.1562)
 
 % Choose default command line output for macroSim
 handles.output = hObject;
@@ -63,7 +67,7 @@ guidata(hObject, handles);
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = macroSim_OutputFcn(hObject, eventdata, handles) 
+function varargout = macroSim_OutputFcn(hObject, eventdata, handles)
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -74,19 +78,72 @@ varargout{1} = handles.output;
 
 
 % --- Executes on button press in pushbutton6.
-function pushbutton6_Callback(hObject, eventdata, handles)
+function handles = pushbutton6_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton6 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+handles = pushbutton3_Callback(handles.pushbutton7,eventdata,handles);
+handles = pushbutton1_Callback(handles.pushbutton1,eventdata,handles);
 
+roadStart = str2double(get(handles.edit27,'String'));
+roadEnd = str2double(get(handles.edit28,'String'));
+roadWidth =str2double(get(handles.edit29,'String'));
+dt = str2double(get(handles.edit2,'String'));
+nIterations = str2double(get(handles.pushbutton1,'String'));
+fixedSeed = get(handles.checkbox7,'Value');
+
+densityFlag = get(handles.radiobutton10,'Value');
+
+if densityFlag
+    handles = edit44_Callback(handles.edit44,eventdata,handles);
+    for k = 1:handles.numberOfSimRuns_V
+        handles.Arm(k).V = SpawnCars([{handles.allCarsNumArray_V(k,:)},fixedSeed,{handles.carTypes}],'vertical',roadStart,roadEnd,roadWidth,dt,nIterations);
+    end
+else
+    handles.numberOfSimRuns_V = str2double(get(handles.edit42,'String'));
+    flowRange = str2num(get(handles.edit43,'String'));
+
+    spawnRate = linspace(flowRange(1),flowRange(2),handles.numberOfSimRuns_V);
+    carTypeRatios = str2num(get(handles.edit46,'String'));
+    for k = 1:handles.numberOfSimRuns_V
+        handles.Arm(k).V = [{carTypeRatios},spawnRate(k),fixedSeed,dt,nIterations];
+    end
+end
+guidata(hObject,handles);
 
 % --- Executes on button press in pushbutton2.
-function pushbutton2_Callback(hObject, eventdata, handles)
+function handles = pushbutton2_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton2 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+handles = pushbutton3_Callback(handles.pushbutton3,eventdata,handles);
+handles = pushbutton1_Callback(handles.pushbutton1,eventdata,handles);
 
+roadStart = str2double(get(handles.edit5,'String'));
+roadEnd = str2double(get(handles.edit6,'String'));
+roadWidth =str2double(get(handles.edit7,'String'));
+dt = str2double(get(handles.edit2,'String'));
+nIterations = str2double(get(handles.pushbutton1,'String'));
+fixedSeed = get(handles.checkbox2,'Value');
 
+densityFlag = get(handles.radiobutton3,'Value');
+
+if densityFlag
+    handles = edit_Callback(handles.edit,eventdata,handles);
+    for k = 1:handles.numberOfSimRuns_H
+        handles.Arm(k).H = SpawnCars([{handles.allCarsNumArray_H(k,:)},fixedSeed,{handles.carTypes}],'horizontal',roadStart,roadEnd,roadWidth,dt,nIterations);
+    end
+else
+    handles.numberOfSimRuns_H = str2double(get(handles.edit42,'String'));
+    flowRange = str2num(get(handles.edit8,'String'));
+
+    spawnRate = linspace(flowRange(1),flowRange(2),handles.numberOfSimRuns_H);
+    carTypeRatios = str2num(get(handles.edit10,'String'));
+    for k = 1:handles.numberOfSimRuns_H
+        handles.Arm(k).H = [{carTypeRatios},spawnRate(k),fixedSeed,dt,nIterations];
+    end
+end
+guidata(hObject,handles);
 
 function edit1_Callback(hObject, eventdata, handles)
 % hObject    handle to edit1 (see GCBO)
@@ -134,34 +191,20 @@ end
 
 
 
-function edit3_Callback(hObject, eventdata, handles)
-% hObject    handle to edit3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit3 as text
-%        str2double(get(hObject,'String')) returns contents of edit3 as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function edit3_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
 
 % --- Executes on button press in pushbutton1.
-function pushbutton1_Callback(hObject, eventdata, handles)
+function handles = pushbutton1_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+runTime = str2double(get(handles.edit1,'String'));
+dt = str2double(get(handles.edit2,'String'));
+nIterations = runTime/dt;
+set(hObject,'String',nIterations);
+nDigits = numel(num2str(dt))-2;
+handles.t_rng = round(linspace(0,runTime,nIterations),nDigits);
 
+guidata(hObject,handles);
 
 % --- Executes on button press in checkbox1.
 function checkbox1_Callback(hObject, eventdata, handles)
@@ -242,11 +285,14 @@ end
 
 
 % --- Executes on button press in pushbutton3.
-function pushbutton3_Callback(hObject, eventdata, handles)
+function handles = pushbutton3_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton3 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+p1 = str2double(get(handles.edit6,'String'));
+p2 = str2double(get(handles.edit5,'String'));
+p3 = p1 - p2;
+set(hObject, 'String', p3);
 
 
 function edit8_Callback(hObject, eventdata, handles)
@@ -272,18 +318,48 @@ end
 
 
 
-function edit9_Callback(hObject, eventdata, handles)
-% hObject    handle to edit9 (see GCBO)
+function handles = edit_Callback(hObject, eventdata, handles)
+% hObject    handle to edit (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+densityRange = str2num(get(hObject,'String'));
 
-% Hints: get(hObject,'String') returns contents of edit9 as text
-%        str2double(get(hObject,'String')) returns contents of edit9 as a double
+roadLength = str2double(get(handles.pushbutton3,'String'));
+
+initNumCars = round(densityRange(1) * (roadLength - handles.noSpawnAreaLength));
+endNumCars = round(densityRange(2) * (roadLength - handles.noSpawnAreaLength));
+nCarsRange = initNumCars:1:endNumCars;
+RealDensityRange = nCarsRange/roadLength;
+
+assert(all(RealDensityRange(end) <= handles.max_density),'wrong max limit of densities. Have to be 0.1562 max');
+assert(all(RealDensityRange(1) >= 0),'wrong min limit of densities. have to be positive');
+string1 = sprintf(' %.3f',RealDensityRange);
+set(hObject, 'String', string1);
+if numel(nCarsRange) == 1 && nCarsRange == 0
+    handles.numberOfSimRuns_H = 1;
+    handles.allCarsNumArray_H = zeros(1,numel(handles.carTypes));
+else
+    handles.numberOfSimRuns_H = numel(nCarsRange);
+    carTypeRatios = str2num(get(handles.edit10,'String'));
+    handles.allCarsNumArray_H = zeros(handles.numberOfSimRuns_H,numel(handles.carTypes));
+    for k = 1:handles.numberOfSimRuns_H
+        for j = 1:numel(handles.carTypes)
+            if j == numel(handles.carTypes)
+                handles.allCarsNumArray_H(k,j) = nCarsRange(k) - sum(handles.allCarsNumArray_H(k,1:j-1));
+            else
+                handles.allCarsNumArray_H(k,j) = round(nCarsRange(k)*carTypeRatios(j));
+            end
+        end
+    end
+end
+guidata(hObject,handles)
+% Hints: get(hObject,'String') returns contents of edit as text
+%        str2double(get(hObject,'String')) returns contents of edit as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function edit9_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit9 (see GCBO)
+function edit_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -478,3 +554,287 @@ function pushbutton7_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton7 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+p1 = str2double(get(handles.edit28,'String'));
+p2 = str2double(get(handles.edit27,'String'));
+p3 = p1 - p2;
+set(hObject, 'String', p3);
+
+
+function edit42_Callback(hObject, eventdata, handles)
+% hObject    handle to edit42 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit42 as text
+%        str2double(get(hObject,'String')) returns contents of edit42 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit42_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit42 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function handles = edit43_Callback(hObject, eventdata, handles)
+% hObject    handle to edit43 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit43 as text
+%        str2double(get(hObject,'String')) returns contents of edit43 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit43_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit43 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function handles = edit44_Callback(hObject, eventdata, handles)
+% hObject    handle to edit44 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+densityRange = str2num(get(hObject,'String'));
+
+roadLength = str2double(get(handles.pushbutton3,'String'));
+
+initNumCars = round(densityRange(1) * (roadLength - handles.noSpawnAreaLength));
+endNumCars = round(densityRange(2) * (roadLength - handles.noSpawnAreaLength));
+nCarsRange = initNumCars:1:endNumCars;
+RealDensityRange = nCarsRange/roadLength;
+
+assert(all(RealDensityRange(end) <= handles.max_density),'wrong max limit of densities. Have to be 0.1562 max');
+assert(all(RealDensityRange(1) >= 0),'wrong min limit of densities. have to be positive');
+string1 = sprintf(' %.3f',RealDensityRange);
+set(hObject, 'String', string1);
+if numel(nCarsRange) == 1 && nCarsRange == 0
+    handles.numberOfSimRuns_V = 1;
+    handles.allCarsNumArray_V = zeros(1,numel(handles.carTypes));
+else
+    handles.numberOfSimRuns_V = numel(nCarsRange);
+    carTypeRatios = str2num(get(handles.edit45,'String'));
+    handles.allCarsNumArray_V = zeros(handles.numberOfSimRuns_V,numel(handles.carTypes));
+    for k = 1:handles.numberOfSimRuns_V
+        for j = 1:numel(handles.carTypes)
+            if j == numel(handles.carTypes)
+                handles.allCarsNumArray_V(k,j) = nCarsRange(k) - sum(handles.allCarsNumArray_V(k,1:j-1));
+            else
+                handles.allCarsNumArray_V(k,j) = round(nCarsRange(k)*carTypeRatios(j));
+            end
+        end
+    end
+end
+guidata(hObject,handles)
+% Hints: get(hObject,'String') returns contents of edit44 as text
+%        str2double(get(hObject,'String')) returns contents of edit44 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit44_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit44 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit45_Callback(hObject, eventdata, handles)
+% hObject    handle to edit45 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit45 as text
+%        str2double(get(hObject,'String')) returns contents of edit45 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit45_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit45 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in checkbox7.
+function checkbox7_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox7 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox7
+
+
+
+function edit46_Callback(hObject, eventdata, handles)
+% hObject    handle to edit46 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit46 as text
+%        str2double(get(hObject,'String')) returns contents of edit46 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit46_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit46 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in pushbutton10.
+function handles = pushbutton10_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton10 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+nRuns = handles.numberOfSimRuns_H * handles.numberOfSimRuns_V;
+set(hObject, 'String', nRuns);
+
+% --- Executes on button press in radiobutton3.
+function radiobutton3_Callback(hObject, eventdata, handles)
+% hObject    handle to radiobutton3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+p = get(hObject,'Value');
+if p == 0
+    set([ handles.edit],'Enable','off');
+    set([ handles.edit8,handles.edit42],'Enable','on');
+elseif p == 1
+    set([ handles.edit],'Enable','on');
+    set([ handles.edit8,handles.edit42],'Enable','off');
+end
+% Hint: get(hObject,'Value') returns toggle state of radiobutton3
+
+
+% --- Executes on button press in radiobutton4.
+function radiobutton4_Callback(hObject, eventdata, handles)
+% hObject    handle to radiobutton4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+p = get(hObject,'Value');
+if p == 0
+    set([ handles.edit],'Enable','on');
+    set([ handles.edit8,handles.edit42],'Enable','off');
+elseif p == 1
+    set([ handles.edit],'Enable','off');
+    set([ handles.edit8,handles.edit42],'Enable','on');
+end
+% Hint: get(hObject,'Value') returns toggle state of radiobutton4
+
+
+% --- Executes on button press in radiobutton10.
+function radiobutton10_Callback(hObject, eventdata, handles)
+% hObject    handle to radiobutton10 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+p = get(hObject,'Value');
+if p == 0
+    set([ handles.edit44],'Enable','off');
+    set([ handles.edit43,handles.edit46],'Enable','on');
+elseif p == 1
+    set([ handles.edit44],'Enable','on');
+    set([ handles.edit43,handles.edit46],'Enable','off');
+end
+% Hint: get(hObject,'Value') returns toggle state of radiobutton10
+
+
+% --- Executes on button press in radiobutton9.
+function radiobutton9_Callback(hObject, eventdata, handles)
+% hObject    handle to radiobutton9 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+p = get(hObject,'Value');
+if p == 0
+    set([ handles.edit44],'Enable','on');
+    set([ handles.edit43,handles.edit46],'Enable','off');
+elseif p == 1
+    set([ handles.edit44],'Enable','off');
+    set([ handles.edit43,handles.edit46],'Enable','on');
+end
+% Hint: get(hObject,'Value') returns toggle state of radiobutton9
+
+
+% --- Executes on button press in pushbutton12.
+function handles = pushbutton12_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton12 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+handles = pushbutton2_Callback(handles.pushbutton2, eventdata, handles);
+handles = pushbutton6_Callback(handles.pushbutton6, eventdata, handles);
+handles = pushbutton10_Callback(handles.pushbutton10, eventdata, handles);
+
+if get(handles.radiobutton3,'Value') && get(handles.radiobutton4,'Value') == 0
+    roadType.H = 1;
+else
+    roadType.H = 2;
+end
+if get(handles.radiobutton10,'Value') && get(handles.radiobutton9,'Value') == 0
+    roadType.V = 1;
+else
+    roadType.V = 2;
+end
+
+roadDims.Start = [str2num(get(handles.edit5,'String')); str2num(get(handles.edit27,'String'))];
+roadDims.End = [str2num(get(handles.edit6,'String')); str2num(get(handles.edit28,'String'))];
+roadDims.Width = [str2num(get(handles.edit7,'String')); str2num(get(handles.edit29,'String'))];
+roadDims.Length = roadDims.End - roadDims.Start;
+
+plotFlag = get(handles.checkbox8,'Value');
+priority = get(handles.checkbox1,'Value');
+nIterations = str2double(get(handles.pushbutton1,'String'));
+dt = str2double(get(handles.edit2,'String'));
+for k = 1:handles.numberOfSimRuns_H
+    for l = 1:handles.numberOfSimRuns_V
+        tic
+        sim(k,l) = run_simulation({handles.roadTypes{roadType.H},...
+            handles.roadTypes{roadType.V}},...
+            handles.carTypes,...
+            handles.Arm(k,l),...
+            handles.t_rng,...
+            plotFlag,...
+            priority,...
+            roadDims,...
+            nIterations,...
+            dt);
+        runTime(k,l) = toc;
+    end
+end
+
+% --- Executes on button press in checkbox8.
+function checkbox8_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox8 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox8
