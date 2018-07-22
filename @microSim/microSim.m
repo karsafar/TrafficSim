@@ -22,7 +22,7 @@ function varargout = microSim(varargin)
 
 % Edit the above text to modify the response to help UI
 
-% Last Modified by GUIDE v2.5 21-Jul-2018 23:07:39
+% Last Modified by GUIDE v2.5 22-Jul-2018 16:34:59
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -57,6 +57,12 @@ function UI_OpeningFcn(hObject, eventdata, handles, varargin)
 handles.carTypes = {@IdmCar, @HdmCar, @AggressiveCar, @PassiveCar, @HesitantCar, @ManualCar};
 handles.roadTypes = {@LoopRoad @FiniteRoad};
 
+handles.hPlot7 = plot(handles.axes7, NaN, NaN);
+
+set(findall(handles.uipanel10, '-property', 'enable'), 'enable', 'off')
+handles = text18_Callback(handles.text18,eventdata,handles);
+handles = edit23_Callback(handles.edit23,eventdata,handles);
+handles = edit27_Callback(handles.edit27,eventdata,handles);
 
 handles.noSpawnAreaLength = 24.4;   % length of no spawn area around the junction + length of a car for safe respawn
 handles.max_density = 1/6.4;        % number of cars per metre (0.1562)
@@ -310,11 +316,13 @@ function radiobutton14_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 p = get(handles.radiobutton11,'Value');
 if p == 0
-    set([ handles.edit3],'Enable','off');
-    set([ handles.edit2],'Enable','on');
+    set([ handles.edit3,handles.text4],'Enable','off');
+    set([ handles.edit2,handles.text3],'Enable','on');
 elseif p == 1
-    set([ handles.edit4,handles.edit5,handles.edit6,handles.edit7,handles.edit8],'Enable','on')
-    set([ handles.edit2,handles.edit3,handles.edit28,handles.checkbox2],'Enable','off');
+    set(findall(handles.uipanel3, '-property', 'enable'), 'enable', 'on')
+    set(findall(handles.uipanel4, '-property', 'enable'), 'enable', 'off')
+%     set([ handles.edit4,handles.edit5,handles.edit6,handles.edit7,handles.edit8],'Enable','on')
+%     set([ handles.edit2,handles.edit3,handles.edit28,handles.checkbox2],'Enable','off');
 end
 
 % Hint: get(hObject,'Value') returns toggle state of radiobutton14
@@ -334,11 +342,15 @@ function radiobutton15_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 p = get(handles.radiobutton11,'Value');
 if p == 0
-    set([ handles.edit2],'Enable','off');
-    set([ handles.edit3],'Enable','on');
+    set([ handles.edit3,handles.text4],'Enable','on');
+    set([ handles.edit2,handles.text3],'Enable','off');
+%     set([ handles.edit2],'Enable','off');
+%     set([ handles.edit3],'Enable','on');
 elseif p == 1
-    set([ handles.edit4,handles.edit5,handles.edit6,handles.edit7,handles.edit8],'Enable','on')
-    set([ handles.edit2,handles.edit3,handles.edit28,handles.checkbox2],'Enable','off');
+    set(findall(handles.uipanel3, '-property', 'enable'), 'enable', 'on')
+    set(findall(handles.uipanel4, '-property', 'enable'), 'enable', 'off')
+%     set([ handles.edit4,handles.edit5,handles.edit6,handles.edit7,handles.edit8],'Enable','on')
+%     set([ handles.edit2,handles.edit3,handles.edit28,handles.checkbox2],'Enable','off');
 end
 
 % Hint: get(hObject,'Value') returns toggle state of radiobutton15
@@ -350,15 +362,22 @@ function radiobutton10_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 p = get(handles.radiobutton14,'Value');
+set(findall(handles.uipanel3, '-property', 'enable'), 'enable', 'off')
+set(findall(handles.uipanel4, '-property', 'enable'), 'enable', 'on')
 if p == 0
-    set([ handles.edit2],'Enable','off');
-    set([ handles.edit3],'Enable','on');
+%     set([ handles.edit2],'Enable','off');
+%     set([ handles.edit3],'Enable','on');
+    set([ handles.edit3,handles.text4],'Enable','on');
+    set([ handles.edit2,handles.text3],'Enable','off');
 else
-    set([ handles.edit2],'Enable','on');
-    set([ handles.edit3],'Enable','off');
+    set([ handles.edit3,handles.text4],'Enable','off');
+    set([ handles.edit2,handles.text3],'Enable','on');
+%     set([ handles.edit2],'Enable','on');
+%     set([ handles.edit3],'Enable','off');
 end
-set([ handles.edit4,handles.edit5,handles.edit6,handles.edit7,handles.edit8],'Enable','off')
-set([ handles.edit28,handles.checkbox2],'Enable','on');
+% set([ handles.edit4,handles.edit5,handles.edit6,handles.edit7,handles.edit8],'Enable','off')
+
+% set([ handles.edit28,handles.checkbox2],'Enable','on');
 % Hint: get(hObject,'Value') returns toggle state of radiobutton10
 
 
@@ -374,9 +393,10 @@ function radiobutton11_Callback(hObject, eventdata, handles)
 % hObject    handle to radiobutton11 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-set([ handles.edit4,handles.edit5,handles.edit6,handles.edit7,handles.edit8],'Enable','on')
-set([ handles.edit2,handles.edit3,handles.edit28,handles.checkbox2],'Enable','off');
-
+% set([ handles.edit4,handles.edit5,handles.edit6,handles.edit7,handles.edit8],'Enable','on')
+% set([ handles.edit2,handles.edit3,handles.edit28,handles.checkbox2],'Enable','off');
+set(findall(handles.uipanel3, '-property', 'enable'), 'enable', 'on')
+set(findall(handles.uipanel4, '-property', 'enable'), 'enable', 'off')
 % Hint: get(hObject,'Value') returns toggle state of radiobutton11
 
 
@@ -406,6 +426,7 @@ function handles = pushbutton1_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
 handles = text18_Callback(handles.text18,eventdata,handles);
 handles = edit2_Callback(handles.edit2,eventdata,handles);
 handles = edit23_Callback(handles.edit23,eventdata,handles);
@@ -447,6 +468,7 @@ function handles = pushbutton2_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton2 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
 handles = pushbutton1_Callback(handles.pushbutton1, eventdata, handles);
 handles = pushbutton4_Callback(handles.pushbutton4, eventdata, handles);
 handles = edit23_Callback(handles.edit23,eventdata,handles);
@@ -471,16 +493,81 @@ plotFlag = get(handles.checkbox1,'Value');
 priority = get(handles.edit22,'Value');
 nIterations = str2num(get(handles.edit23,'String'));
 dt = str2num(get(handles.edit17,'String'));
-sim = run_simulation({handles.roadTypes{roadType.H},...
-    handles.roadTypes{roadType.V}},...
-    handles.carTypes,...
-    handles.Arm,...
-    handles.t_rng,...
-    plotFlag,...
-    priority,...
-    roadDims,...
-    nIterations,...
-    dt);
+% handles.sim = run_simulation({handles.roadTypes{roadType.H},...
+%     handles.roadTypes{roadType.V}},...
+%     handles.carTypes,...
+%     handles.Arm,...
+%     handles.t_rng,...
+%     plotFlag,...
+%     priority,...
+%     roadDims,...
+%     nIterations,...
+%     dt);
+
+set(findall(handles.uipanel10, '-property', 'enable'), 'enable', 'off')
+guidata(hObject,handles);
+
+% construct two arms of the junction objects
+HorizontalArm = handles.roadTypes{roadType.H}([{handles.carTypes},0,roadDims,priority],handles.Arm.H);
+VerticalArm = handles.roadTypes{roadType.V}([{handles.carTypes},90,roadDims,priority],handles.Arm.V);
+
+% plot the junction
+junc = Junction(roadDims, plotFlag);
+% set(handles.hPlot1,'XData',[get(handles.hPlot1,'XData') x], ...
+%                          'YData',[get(handles.hPlot1,'YData') a], ...
+%                          'MarkerEdgeColor', 'g');
+
+% controlled break of the simulation
+% finishup = onCleanup(@() myCleanupFun(HorizontalArm, VerticalArm));
+set(handles.pushbutton3,'userdata',0);
+for iIteration = 1:nIterations
+    % update time
+    t = handles.t_rng(iIteration);
+    
+    % draw cars
+    if plotFlag
+        junc.draw_all_cars(HorizontalArm,VerticalArm)
+    end
+    
+    % check for collision
+    junc.collision_check(...
+        HorizontalArm.allCars,...
+        VerticalArm.allCars,...
+        HorizontalArm.numCars,...
+        VerticalArm.numCars,...
+        plotFlag);
+    
+    % calculate IDM acceleration
+    for iCar = 1:HorizontalArm.numCars
+        calculate_idm_accel(HorizontalArm.allCars(iCar),roadDims.Length(1));
+    end
+    for jCar = 1:VerticalArm.numCars
+        calculate_idm_accel(VerticalArm.allCars(jCar),roadDims.Length(2));
+    end
+    
+    % Itersection Collision Avoidance (ICA)
+    for iCar = 1:HorizontalArm.numCars
+        HorizontalArm.allCars(iCar).decide_acceleration(VerticalArm,t,dt);
+    end
+    for jCar = 1:VerticalArm.numCars
+        VerticalArm.allCars(jCar).decide_acceleration(HorizontalArm,t,dt);
+    end
+    
+    % Move all the cars along the road
+    HorizontalArm.move_all_cars(t,dt,iIteration,nIterations)
+    VerticalArm.move_all_cars(t,dt,iIteration,nIterations)
+    
+    if plotFlag
+        pause(0.01)
+        junc.delete_car_images();
+    end
+    if get(handles.pushbutton3,'userdata') % stop condition
+        set(findall(handles.uipanel10, '-property', 'enable'), 'enable', 'on')
+        break;
+    end
+end
+% sim.horizArm = cast_output(HorizontalArm);
+% sim.vertArm = cast_output(VerticalArm);
 
 
 % --- Executes on button press in pushbutton3.
@@ -488,6 +575,9 @@ function pushbutton3_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton3 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+set(hObject,'userdata',1);
+
+% set(findall(handles.uipanel10, '-property', 'enable'), 'enable', 'on')
 
 
 
@@ -682,15 +772,18 @@ function radiobutton19_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 p = get(handles.radiobutton17,'Value');
+set(findall(handles.uipanel5, '-property', 'enable'), 'enable', 'off')
+set(findall(handles.uipanel6, '-property', 'enable'), 'enable', 'on')
 if p == 0
-    set([ handles.edit10],'Enable','off');
-    set([ handles.edit9],'Enable','on');
+    set([ handles.edit10,handles.text11],'Enable','off');
+    set([ handles.edit9,handles.text10],'Enable','on');
 else
-    set([ handles.edit10],'Enable','on');
-    set([ handles.edit9],'Enable','off');
+    set([ handles.edit10,handles.text11],'Enable','on');
+    set([ handles.edit9,handles.text10],'Enable','off');
 end
-set([ handles.edit11,handles.edit12,handles.edit13,handles.edit14,handles.edit15],'Enable','off')
-set([ handles.edit29,handles.checkbox3],'Enable','on');
+% set([ handles.edit11,handles.edit12,handles.edit13,handles.edit14,handles.edit15],'Enable','off')
+% set([ handles.edit29,handles.checkbox3],'Enable','on');
+
 % Hint: get(hObject,'Value') returns toggle state of radiobutton19
 
 
@@ -699,8 +792,10 @@ function radiobutton18_Callback(hObject, eventdata, handles)
 % hObject    handle to radiobutton18 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-set([ handles.edit11,handles.edit12,handles.edit13,handles.edit14,handles.edit15],'Enable','on')
-set([ handles.edit9,handles.edit10,handles.edit29,handles.checkbox3],'Enable','off');
+set(findall(handles.uipanel5, '-property', 'enable'), 'enable', 'on')
+set(findall(handles.uipanel6, '-property', 'enable'), 'enable', 'off')
+% set([ handles.edit11,handles.edit12,handles.edit13,handles.edit14,handles.edit15],'Enable','on')
+% set([ handles.edit9,handles.edit10,handles.edit29,handles.checkbox3],'Enable','off');
 % Hint: get(hObject,'Value') returns toggle state of radiobutton18
 
 
@@ -711,11 +806,15 @@ function radiobutton17_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 p = get(handles.radiobutton18,'Value');
 if p == 0
-    set([ handles.edit9],'Enable','off');
-    set([ handles.edit10],'Enable','on');
+    set([ handles.edit10,handles.text11],'Enable','on');
+    set([ handles.edit9,handles.text10],'Enable','off');
+%     set([ handles.edit9],'Enable','off');
+%     set([ handles.edit10],'Enable','on');
 elseif p == 1
-    set([ handles.edit11,handles.edit12,handles.edit13,handles.edit14,handles.edit15],'Enable','on')
-    set([ handles.edit9,handles.edit10,handles.edit29,handles.checkbox3],'Enable','off');
+    set(findall(handles.uipanel5, '-property', 'enable'), 'enable', 'on')
+    set(findall(handles.uipanel6, '-property', 'enable'), 'enable', 'off')
+%     set([ handles.edit11,handles.edit12,handles.edit13,handles.edit14,handles.edit15],'Enable','on')
+%     set([ handles.edit9,handles.edit10,handles.edit29,handles.checkbox3],'Enable','off');
 end
 % Hint: get(hObject,'Value') returns toggle state of radiobutton17
 
@@ -727,11 +826,15 @@ function radiobutton16_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 p = get(handles.radiobutton18,'Value');
 if p == 0
-    set([ handles.edit10],'Enable','off');
-    set([ handles.edit9],'Enable','on');
+    set([ handles.edit10,handles.text11],'Enable','off');
+    set([ handles.edit9,handles.text10],'Enable','on');
+%     set([ handles.edit10],'Enable','off');
+%     set([ handles.edit9],'Enable','on');
 elseif p == 1
-    set([ handles.edit11,handles.edit12,handles.edit13,handles.edit14,handles.edit15],'Enable','on')
-    set([ handles.edit9,handles.edit10,handles.edit29,handles.checkbox3],'Enable','off');
+    set(findall(handles.uipanel5, '-property', 'enable'), 'enable', 'on')
+    set(findall(handles.uipanel6, '-property', 'enable'), 'enable', 'off')
+%     set([ handles.edit11,handles.edit12,handles.edit13,handles.edit14,handles.edit15],'Enable','on')
+%     set([ handles.edit9,handles.edit10,handles.edit29,handles.checkbox3],'Enable','off');
 end
 % Hint: get(hObject,'Value') returns toggle state of radiobutton16
 
@@ -794,6 +897,9 @@ function edit16_Callback(hObject, eventdata, handles)
 % hObject    handle to edit16 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+handles = edit23_Callback(handles.edit23,eventdata,handles);
+
+guidata(hObject,handles)
 
 % Hints: get(hObject,'String') returns contents of edit16 as text
 %        str2double(get(hObject,'String')) returns contents of edit16 as a double
@@ -817,6 +923,8 @@ function edit17_Callback(hObject, eventdata, handles)
 % hObject    handle to edit17 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+handles = edit23_Callback(handles.edit23,eventdata,handles);
+guidata(hObject,handles)
 
 % Hints: get(hObject,'String') returns contents of edit17 as text
 %        str2double(get(hObject,'String')) returns contents of edit17 as a double
@@ -910,7 +1018,9 @@ function edit18_Callback(hObject, eventdata, handles)
 % hObject    handle to edit18 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+handles = text18_Callback(handles.text18,eventdata,handles);
 
+guidata(hObject,handles)
 % Hints: get(hObject,'String') returns contents of edit18 as text
 %        str2double(get(hObject,'String')) returns contents of edit18 as a double
 
@@ -933,7 +1043,9 @@ function edit19_Callback(hObject, eventdata, handles)
 % hObject    handle to edit19 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+handles = text18_Callback(handles.text18,eventdata,handles);
 
+guidata(hObject,handles)
 % Hints: get(hObject,'String') returns contents of edit19 as text
 %        str2double(get(hObject,'String')) returns contents of edit19 as a double
 
@@ -1064,7 +1176,9 @@ function edit25_Callback(hObject, eventdata, handles)
 % hObject    handle to edit25 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+handles = edit27_Callback(handles.edit27,eventdata,handles);
 
+guidata(hObject,handles)
 % Hints: get(hObject,'String') returns contents of edit25 as text
 %        str2double(get(hObject,'String')) returns contents of edit25 as a double
 
@@ -1087,7 +1201,9 @@ function edit24_Callback(hObject, eventdata, handles)
 % hObject    handle to edit24 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+handles = edit27_Callback(handles.edit27,eventdata,handles);
 
+guidata(hObject,handles)
 % Hints: get(hObject,'String') returns contents of edit24 as text
 %        str2double(get(hObject,'String')) returns contents of edit24 as a double
 
@@ -1223,7 +1339,7 @@ function listbox2_Callback(hObject, eventdata, handles)
 % hObject    handle to listbox2 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+%contents={get(hObject,'Value')}
 % Hints: contents = cellstr(get(hObject,'String')) returns listbox2 contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from listbox2
 
@@ -1275,3 +1391,19 @@ function radiobutton22_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of radiobutton22
+
+
+% --- Executes on button press in pushbutton5.
+function pushbutton5_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton5 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes during object creation, after setting all properties.
+function axes7_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes7 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: place code in OpeningFcn to populate axes7
