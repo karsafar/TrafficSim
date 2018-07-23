@@ -554,12 +554,6 @@ for iIteration = 1:nIterations
     HorizontalArm.move_all_cars(t,dt,iIteration,nIterations)
     VerticalArm.move_all_cars(t,dt,iIteration,nIterations)
     if get(handles.pushbutton3,'userdata') % stop condition
-        set(findall(handles.uipanel10, '-property', 'enable'), 'enable', 'on')
-        set(findall(handles.uipanel14, '-property', 'enable'), 'enable', 'off')
-        set(findall(handles.uipanel15, '-property', 'enable'), 'enable', 'off')
-        handles.HorizontalArm = HorizontalArm;
-        handles.VerticalArm = VerticalArm;
-        handles.iIteration = iIteration;
         break;
     end
     if plotFlag
@@ -568,6 +562,13 @@ for iIteration = 1:nIterations
     end
 
 end
+set(findall(handles.uipanel10, '-property', 'enable'), 'enable', 'on')
+set(findall(handles.uipanel14, '-property', 'enable'), 'enable', 'off')
+set(findall(handles.uipanel15, '-property', 'enable'), 'enable', 'off')
+handles.HorizontalArm = HorizontalArm;
+handles.VerticalArm = VerticalArm;
+handles.iIteration = iIteration;
+
 guidata(hObject,handles);
 
 % sim.horizArm = cast_output(HorizontalArm);
