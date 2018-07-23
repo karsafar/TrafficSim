@@ -22,7 +22,7 @@ function varargout = microSim(varargin)
 
 % Edit the above text to modify the response to help UI
 
-% Last Modified by GUIDE v2.5 22-Jul-2018 16:34:59
+% Last Modified by GUIDE v2.5 23-Jul-2018 02:36:06
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -57,7 +57,7 @@ function UI_OpeningFcn(hObject, eventdata, handles, varargin)
 handles.carTypes = {@IdmCar, @HdmCar, @AggressiveCar, @PassiveCar, @HesitantCar, @ManualCar};
 handles.roadTypes = {@LoopRoad @FiniteRoad};
 
-handles.hPlot7 = plot(handles.axes7, NaN, NaN);
+% handles.hPlot7 = plot(handles.axes7, NaN, NaN)
 
 set(findall(handles.uipanel10, '-property', 'enable'), 'enable', 'off')
 handles = text18_Callback(handles.text18,eventdata,handles);
@@ -556,16 +556,21 @@ for iIteration = 1:nIterations
     % Move all the cars along the road
     HorizontalArm.move_all_cars(t,dt,iIteration,nIterations)
     VerticalArm.move_all_cars(t,dt,iIteration,nIterations)
-    
+    if get(handles.pushbutton3,'userdata') % stop condition
+        set(findall(handles.uipanel10, '-property', 'enable'), 'enable', 'on')
+        handles.HorizontalArm = HorizontalArm;
+        handles.VerticalArm = VerticalArm;
+        handles.iIteration = iIteration;
+        break;
+    end
     if plotFlag
         pause(0.01)
         junc.delete_car_images();
     end
-    if get(handles.pushbutton3,'userdata') % stop condition
-        set(findall(handles.uipanel10, '-property', 'enable'), 'enable', 'on')
-        break;
-    end
+
 end
+guidata(hObject,handles);
+
 % sim.horizArm = cast_output(HorizontalArm);
 % sim.vertArm = cast_output(VerticalArm);
 
@@ -1394,10 +1399,50 @@ function radiobutton22_Callback(hObject, eventdata, handles)
 
 
 % --- Executes on button press in pushbutton5.
-function pushbutton5_Callback(hObject, eventdata, handles)
+function handles = pushbutton5_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton5 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+cars = handles.HorizontalArm.allCars;
+
+title(handles.axes5,'All car displacements along the Arm','FontSize',14)
+xlabel(handles.axes5,'Time, s','FontSize',12)
+ylabel(handles.axes5,'Position, m','FontSize',12)
+hold(handles.axes5,'on');
+grid(handles.axes5,'on');
+for i = 1:numel(cars)
+    plot(handles.axes5,cars(i).timeHistory,cars(i).locationHistory,'b-','LineWidth',1)
+end
+
+
+title(handles.axes2,'Velocity profile','FontSize',14)
+xlabel(handles.axes2,'Time, s','FontSize',12)
+ylabel(handles.axes2,' Velocity V, m/s','FontSize',12)
+hold(handles.axes2,'on');
+grid(handles.axes2,'on');
+% axis(handles.axes2,[min(times) max(times) 0 10])
+plot(handles.axes2,cars(1).timeHistory,cars(1).velocityHistory,'b-','LineWidth',1)
+
+
+title(handles.axes6,'Velocity Average at every time step','FontSize',14)
+xlabel(handles.axes6,'Time, s','FontSize',12)
+ylabel(handles.axes6,' Velocity <V>, m/s','FontSize',12)
+hold(handles.axes6,'on');
+grid(handles.axes6,'on');
+plot(handles.axes6,handles.t_rng(1:handles.iIteration),handles.HorizontalArm.averageVelocityHistory(1:handles.iIteration),'b-')
+% axis(handles.axes2,[0 runTime 0 10])
+
+for i = 1:handles.iIteration
+    cummulativeAverage(i) = nanmean(handles.HorizontalArm.averageVelocityHistory(1:i));
+end
+
+title(handles.axes4,'Velocity Average Over the Simulation','FontSize',14)
+xlabel(handles.axes4,'Time, s','FontSize',12)
+ylabel(handles.axes4,' Velocity <V>, m/s','FontSize',12)
+hold(handles.axes4,'on');
+grid(handles.axes4,'on');
+plot(handles.axes4,handles.t_rng(1:handles.iIteration),cummulativeAverage,'b-')
 
 
 % --- Executes during object creation, after setting all properties.
@@ -1407,3 +1452,46 @@ function axes7_CreateFcn(hObject, eventdata, handles)
 % handles    empty - handles not created until after all CreateFcns called
 
 % Hint: place code in OpeningFcn to populate axes7
+
+
+% --- Executes during object creation, after setting all properties.
+function handles = axes5_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes5 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: place code in OpeningFcn to populate axes5
+
+
+% --- Executes during object creation, after setting all properties.
+function axes2_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: place code in OpeningFcn to populate axes2
+
+
+% --- Executes during object creation, after setting all properties.
+function axes4_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: place code in OpeningFcn to populate axes4
+
+
+% --- Executes during object creation, after setting all properties.
+function axes6_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes6 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: place code in OpeningFcn to populate axes6
+
+
+% --- Executes on button press in pushbutton6.
+function pushbutton6_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton6 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)

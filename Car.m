@@ -24,7 +24,7 @@ classdef Car < dlnode
     properties (Constant)
         maximumVelocity = 13
         dimension = [2.16 4.4 2.75];
-        tol = 1e-3
+        tol = 1e-2
     end
     methods
         

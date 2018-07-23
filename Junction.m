@@ -12,7 +12,8 @@ classdef Junction < handle
         end
         function plot_outline(obj,roadDimensions)
             %figure('units', 'normalized', 'position', [0.4, 0, 0.6, 1]);
-            obj.junctionPlotHandle = axes;
+            allAxesInFigure = findall(0,'type','axes');
+            obj.junctionPlotHandle = allAxesInFigure(1);
             axis(obj.junctionPlotHandle,'equal',[roadDimensions.Start(1) roadDimensions.End(1)...
                                                  roadDimensions.Start(2) roadDimensions.End(2)], 'off')
             hold(obj.junctionPlotHandle,'on')

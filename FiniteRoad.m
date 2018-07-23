@@ -8,7 +8,7 @@ classdef FiniteRoad < Road
         numCarsHistory = []
         carRatios
         spawningInterval
-        tolerance = 100
+        tolerance = 10
         testFlag = 1
         
     end
