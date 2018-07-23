@@ -58,9 +58,12 @@ classdef IdmCar < Car & matlab.mixin.Heterogeneous
                 s_star = obj.minimumGap + max(0,intelligentBreaking);
             end
             
+            if obj.tol > abs(obj.velocity - obj.targetVelocity)
+                obj.idmAcceleration = 0;
+            else
+                obj.idmAcceleration = obj.a*(1 - (obj.velocity/obj.targetVelocity)^obj.delta - (s_star/obj.s)^2);
+            end
             
-            obj.idmAcceleration = obj.a*(1 - (obj.velocity/obj.targetVelocity)^obj.delta - (s_star/obj.s)^2);
-
             if obj.idmAcceleration > obj.maximumAcceleration(1)
                 obj.idmAcceleration = obj.maximumAcceleration(1);
             elseif obj.idmAcceleration < obj.maximumAcceleration(2)
