@@ -11,11 +11,15 @@ classdef Junction < handle
             end
         end
         function plot_outline(obj,roadDimensions)
-            %figure('units', 'normalized', 'position', [0.4, 0, 0.6, 1]);
             allAxesInFigure = findall(0,'type','axes');
-            obj.junctionPlotHandle = allAxesInFigure(1);
+            if ~isempty(allAxesInFigure)
+                obj.junctionPlotHandle = allAxesInFigure(1);
+            else
+                figure('units', 'normalized', 'position', [0.4, 0, 0.6, 1]);
+                obj.junctionPlotHandle = axes;
+            end
             axis(obj.junctionPlotHandle,'equal',[roadDimensions.Start(1) roadDimensions.End(1)...
-                                                 roadDimensions.Start(2) roadDimensions.End(2)], 'off')
+                roadDimensions.Start(2) roadDimensions.End(2)], 'off')
             hold(obj.junctionPlotHandle,'on')
             for i = 1:2
                 if i == 1
@@ -30,39 +34,42 @@ classdef Junction < handle
                 
                 fill(obj.junctionPlotHandle,xBox,yBox,[0.5 0.5 0.5])
             end
-            rad = 30;
-            x1=-rad;
-            x2=rad;
-            y1=-rad;
-            y2=rad;
-            x = [x1, x2, x2, x1, x1];
-            y = [y1, y1, y2, y2, y1];
-            plot(obj.junctionPlotHandle,x, y, 'k--', 'LineWidth', 1);
             
-            iDimension = [2.16 4.4 2.75];
-            carRectangle = [ 0 0; iDimension(2) 0; iDimension(2) iDimension(1); 0 iDimension(1)]-...
-                [(iDimension(2) - iDimension(3))/2*ones(4,1) iDimension(1)/2*ones(4,1) ];
-            
-            x = roadDimensions.End(2)-20;
-            x1 = x-5;
-            y = (roadDimensions.End(2)-5):-5:(roadDimensions.End(2)-30);
-            fill(obj.junctionPlotHandle,x1+[carRectangle(:,1); carRectangle(1,1)],y(1)+[carRectangle(:,2); carRectangle(1,2)],'g');
-            text(obj.junctionPlotHandle,x, y(1)+0.5, '- ManualCar');
-            
-            fill(obj.junctionPlotHandle,x1+[carRectangle(:,1); carRectangle(1,1)],y(2)+[carRectangle(:,2); carRectangle(1,2)],'r');
-            text(obj.junctionPlotHandle,x, y(2)+0.5, '- AggressiveCar');
-            
-            fill(obj.junctionPlotHandle,x1+[carRectangle(:,1); carRectangle(1,1)],y(3)+[carRectangle(:,2); carRectangle(1,2)],'b');
-            text(obj.junctionPlotHandle,x, y(3)+0.5, '- PassiveCar');
-            
-            fill(obj.junctionPlotHandle,x1+[carRectangle(:,1); carRectangle(1,1)],y(4)+[carRectangle(:,2); carRectangle(1,2)],'y');
-            text(obj.junctionPlotHandle,x, y(4)+0.5, '- HesitantCar');
-            
-            fill(obj.junctionPlotHandle,x1+[carRectangle(:,1); carRectangle(1,1)],y(5)+[carRectangle(:,2); carRectangle(1,2)],'m');
-            text(obj.junctionPlotHandle,x, y(5)+0.5, '- HdmCar');
-            
-            fill(obj.junctionPlotHandle,x1+[carRectangle(:,1); carRectangle(1,1)],y(6)+[carRectangle(:,2); carRectangle(1,2)],'k');
-            text(obj.junctionPlotHandle,x, y(6)+0.5, '- IdmCar');
+            if isempty(allAxesInFigure)
+                rad = 30;
+                x1=-rad;
+                x2=rad;
+                y1=-rad;
+                y2=rad;
+                x = [x1, x2, x2, x1, x1];
+                y = [y1, y1, y2, y2, y1];
+                plot(obj.junctionPlotHandle,x, y, 'k--', 'LineWidth', 1);
+                
+                iDimension = [2.16 4.4 2.75];
+                carRectangle = [ 0 0; iDimension(2) 0; iDimension(2) iDimension(1); 0 iDimension(1)]-...
+                    [(iDimension(2) - iDimension(3))/2*ones(4,1) iDimension(1)/2*ones(4,1) ];
+                
+                x = roadDimensions.End(2)-20;
+                x1 = x-5;
+                y = (roadDimensions.End(2)-5):-5:(roadDimensions.End(2)-30);
+                fill(obj.junctionPlotHandle,x1+[carRectangle(:,1); carRectangle(1,1)],y(1)+[carRectangle(:,2); carRectangle(1,2)],'g');
+                text(obj.junctionPlotHandle,x, y(1)+0.5, '- ManualCar');
+                
+                fill(obj.junctionPlotHandle,x1+[carRectangle(:,1); carRectangle(1,1)],y(2)+[carRectangle(:,2); carRectangle(1,2)],'r');
+                text(obj.junctionPlotHandle,x, y(2)+0.5, '- AggressiveCar');
+                
+                fill(obj.junctionPlotHandle,x1+[carRectangle(:,1); carRectangle(1,1)],y(3)+[carRectangle(:,2); carRectangle(1,2)],'b');
+                text(obj.junctionPlotHandle,x, y(3)+0.5, '- PassiveCar');
+                
+                fill(obj.junctionPlotHandle,x1+[carRectangle(:,1); carRectangle(1,1)],y(4)+[carRectangle(:,2); carRectangle(1,2)],'y');
+                text(obj.junctionPlotHandle,x, y(4)+0.5, '- HesitantCar');
+                
+                fill(obj.junctionPlotHandle,x1+[carRectangle(:,1); carRectangle(1,1)],y(5)+[carRectangle(:,2); carRectangle(1,2)],'m');
+                text(obj.junctionPlotHandle,x, y(5)+0.5, '- HdmCar');
+                
+                fill(obj.junctionPlotHandle,x1+[carRectangle(:,1); carRectangle(1,1)],y(6)+[carRectangle(:,2); carRectangle(1,2)],'k');
+                text(obj.junctionPlotHandle,x, y(6)+0.5, '- IdmCar');
+            end
         end
         function draw_all_cars(obj,horizontalArm,vericalArm)
             if horizontalArm.numCars > 0
@@ -98,7 +105,7 @@ classdef Junction < handle
                 disp(msg);
                 if plotFlag
                     junctionAxesHandle = text(obj.junctionPlotHandle,3,-7,msg,'Color','red');
-%                     pause()
+                    %                     pause()
                     delete(junctionAxesHandle);
                     beep;
                 else
@@ -121,7 +128,7 @@ classdef Junction < handle
                 carRectangle = [ 0 0; iDimension(2) 0; iDimension(2) iDimension(1); 0 iDimension(1)]-...
                     [(iDimension(2) - iDimension(3))/2*ones(4,1) iDimension(1)/2*ones(4,1) ];
                 front = [(iDimension(2) + iDimension(3))/2 0];
-
+                
                 % rotation counter-clockwise about the origin
                 if iPosition(2) == 0
                     transformation = real([cosd(iPosition(2)) -sind(iPosition(2)) iPosition(1);...

@@ -5,8 +5,9 @@ clear
 roadTypes = {@LoopRoad @FiniteRoad};
 carTypes = {@IdmCar, @HdmCar, @AggressiveCar, @PassiveCar, @HesitantCar, @ManualCar};
 
-carTypeRatios = [0 0.3 0.1 0 0.4 0.2; 0 0 1 0 0 0];
-% carTypeRatios = [0 0 1 0 0 0;0 0 0.25 0.15 0.15 0.45];
+% carTypeRatios = [0 0.3 0.1 0 0.4 0.2; 0 0 1 0 0 0];
+carTypeRatios = [0 0 1 0 0 0;0 0 0.25 0.15 0.15 0.45];
+% carTypeRatios = [0 0 1 0 0 0;0 0 1 0 0 0];
 assert(sum(carTypeRatios(1,:)) == 1,'Wrong distribution of horizontal arm rations');
 assert(sum(carTypeRatios(2,:)) == 1,'Wrong distribution of vertical arm rations');
 

@@ -71,7 +71,7 @@ classdef Car < dlnode
             
             % unit test the constraints
             assert(obj.velocity >= 0 && obj.velocity <= obj.maximumVelocity,'Velocity is out of limit');
-            assert(obj.tol >=(obj.maximumAcceleration(2) - obj.acceleration) && obj.tol >= (obj.acceleration - 8) ,'Acceleration contraints are violated');            
+            assert(obj.acceleration >=(obj.maximumAcceleration(2) - obj.tol) && obj.acceleration <= (obj.tol + 8) ,'Acceleration contraints are violated');            
         end
     end
 end

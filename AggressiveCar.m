@@ -4,7 +4,7 @@ classdef AggressiveCar < IdmCar
         bb
         it_accel
         it_pose
-        %         it_CarsOpposite
+        it_CarsOpposite
         it_a_stop_idm
         it_dist_gap
         it_front_car_vel
@@ -35,7 +35,7 @@ classdef AggressiveCar < IdmCar
             obj.it_a_max_accel = obj.bb.add_item('Amax',obj.maximumAcceleration(1));
             obj.it_a_max_decel = obj.bb.add_item('Amin',obj.maximumAcceleration(2));
             obj.it_pose = obj.bb.add_item('pose',obj.pose(1));
-            %             obj.it_CarsOpposite = obj.bb.add_item('CarsOpposite',true);
+            obj.it_CarsOpposite = obj.bb.add_item('CarsOpposite',true);
             obj.it_a_stop_idm = obj.bb.add_item('Astop',obj.idmAcceleration);
             obj.it_dist_gap = obj.bb.add_item('distGap',obj.s);
             obj.it_front_car_vel = obj.bb.add_item('frontCarVel',0);
@@ -74,7 +74,8 @@ classdef AggressiveCar < IdmCar
             
             cruise = BtSelector(obj.it_pose < -50,...
                 obj.it_pose > obj.s_out,...
-                obj.it_frontCarPassedJunction==0);%                 obj.it_CarsOpposite == 0, ...
+                obj.it_CarsOpposite == 0, ...
+                obj.it_frontCarPassedJunction==0);%                 
             
             
             doCruiseIdm = BtSequence(cruise,cruise_idm);
@@ -221,7 +222,7 @@ classdef AggressiveCar < IdmCar
                     obj.it_a_max_accel.set_value(obj.maximumAcceleration(1)+0.1);
                     obj.it_a_max_decel.set_value(obj.maximumAcceleration(2)-0.1);
                     obj.it_pose.set_value(obj.pose(1));
-%                     obj.it_CarsOpposite.set_value(~isempty(oppositeCars) && allPassedJunction==0);
+                    obj.it_CarsOpposite.set_value(allPassedJunction==0);
                     obj.it_dist_gap.set_value(obj.s);
                     
                     if isempty(obj.Prev)
