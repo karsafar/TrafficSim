@@ -18,7 +18,6 @@ junc = Junction(roadDims, plotFlag);
 
 % controlled break of the simulation
 % finishup = onCleanup(@() myCleanupFun(HorizontalArm, VerticalArm));
-
 for iIteration = 1:nIterations
     % update time
     t = t_rng(iIteration);
