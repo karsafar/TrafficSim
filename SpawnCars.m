@@ -30,12 +30,13 @@ classdef SpawnCars < handle
         function controlled_spawn(obj,SpawnData,dt)
             %%
             obj.numCars = numel(SpawnData(:,1));
-            carTypes = SpawnData{:,4};
+            carTypes = SpawnData{:,5};
             for iCar = 1:obj.numCars
                 new_car = carTypes{iCar}(obj.roadOrientation, obj.roadStart,obj.roadWidth,dt);
                 new_car.pose(1) = SpawnData{iCar,1};
                 new_car.velocity = SpawnData{iCar,2};
-                new_car.acceleration = SpawnData{iCar,3};
+                new_car.targetVelocity = SpawnData{iCar,3};
+                new_car.acceleration = SpawnData{iCar,4};
                 obj.allCars = [obj.allCars new_car];
                 if iCar  > 1
                     insertAfter(obj.allCars(iCar),obj.allCars(iCar-1));
