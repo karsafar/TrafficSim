@@ -22,7 +22,7 @@ roadDims.Width = [4; 4];
 roadDims.Length = roadDims.End - roadDims.Start;
 selectRoadTypes = [2 2] ;
 
-nIterations = runTime/dt;
+nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;
 t_rng = 0:dt:runTime;
 densityRange = [0.001, 0.03; 0.001, 0.01];
