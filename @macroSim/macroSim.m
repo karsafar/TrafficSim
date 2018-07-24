@@ -199,10 +199,10 @@ function handles = pushbutton1_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 runTime = str2double(get(handles.edit1,'String'));
 dt = str2double(get(handles.edit2,'String'));
-nIterations = runTime/dt;
+nIterations = (runTime/dt)+1;
 set(hObject,'String',nIterations);
 nDigits = numel(num2str(dt))-2;
-handles.t_rng = round(linspace(0,runTime,nIterations),nDigits);
+handles.t_rng = 0:dt:runTime;
 
 guidata(hObject,handles);
 
