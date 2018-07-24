@@ -11,7 +11,7 @@ assert(sum(carTypeRatios(1,:)) == 1,'Wrong distribution of horizontal arm ration
 assert(sum(carTypeRatios(2,:)) == 1,'Wrong distribution of vertical arm rations');
 
 plotFlag = true;
-runTime = 3600; % in seconds
+runTime = 5.1; % in seconds
 dt = 0.1; % in seconds
 priority = true;
 fixedSeed = [false false];
@@ -24,7 +24,7 @@ selectRoadTypes = [2 2] ;
 
 nIterations = runTime/dt;
 nDigits = numel(num2str(dt))-2;
-t_rng = round(linspace(0,runTime,nIterations),nDigits);
+t_rng = 0:dt:runTime;
 densityRange = [0.001, 0.03; 0.001, 0.01];
 distMeanRange = [7, 10; 27, 30];
 numberOfFlowValues = 10;

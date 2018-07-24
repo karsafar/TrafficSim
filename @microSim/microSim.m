@@ -1001,7 +1001,8 @@ dt = str2double(get(handles.edit17,'String'));
 nIterations = runTime/dt;
 set(hObject,'String',nIterations);
 nDigits = numel(num2str(dt))-2;
-handles.t_rng = round(linspace(0,runTime,nIterations),nDigits);
+handles.t_rng = 0:dt:runTime;
+% handles.t_rng = round(linspace(0,runTime,nIterations),nDigits);
 
 guidata(hObject,handles);
 % Hints: get(hObject,'String') returns contents of edit23 as text
