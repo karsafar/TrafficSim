@@ -1356,7 +1356,7 @@ if get(handles.checkbox8, 'Value')
             numList = [1:numel(handles.HorizontalArm.allCars)]';
         end
         set(hObject,'string',{numList});
-    else
+    elseif get(handles.radiobutton22, 'Value')
         if numel(handles.VerticalArm.allCars) == 0
             numList = 0;
         else
