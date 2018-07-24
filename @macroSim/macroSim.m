@@ -22,7 +22,7 @@ function varargout = macroSim(varargin)
 
 % Edit the above text to modify the response to help macroSim
 
-% Last Modified by GUIDE v2.5 21-Jul-2018 19:54:18
+% Last Modified by GUIDE v2.5 24-Jul-2018 00:41:54
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -100,11 +100,11 @@ if densityFlag
         handles.Arm(k).V = SpawnCars([{handles.allCarsNumArray_V(k,:)},fixedSeed,{handles.carTypes}],'vertical',roadStart,roadEnd,roadWidth,dt,nIterations);
     end
 else
-    handles.numberOfSimRuns_V = str2double(get(handles.edit42,'String'));
+    handles.numberOfSimRuns_V = str2double(get(handles.edit46,'String'));
     flowRange = str2num(get(handles.edit43,'String'));
 
     spawnRate = linspace(flowRange(1),flowRange(2),handles.numberOfSimRuns_V);
-    carTypeRatios = str2num(get(handles.edit46,'String'));
+    carTypeRatios = str2num(get(handles.edit45,'String'));
     for k = 1:handles.numberOfSimRuns_V
         handles.Arm(k).V = [{carTypeRatios},spawnRate(k),fixedSeed,dt,nIterations];
     end
@@ -816,7 +816,7 @@ nIterations = str2double(get(handles.pushbutton1,'String'));
 dt = str2double(get(handles.edit2,'String'));
 for k = 1:handles.numberOfSimRuns_H
     for l = 1:handles.numberOfSimRuns_V
-        tic
+%         tic
         sim(k,l) = run_simulation({handles.roadTypes{roadType.H},...
             handles.roadTypes{roadType.V}},...
             handles.carTypes,...
@@ -827,7 +827,7 @@ for k = 1:handles.numberOfSimRuns_H
             roadDims,...
             nIterations,...
             dt);
-        runTime(k,l) = toc;
+%         runTime(k,l) = toc;
     end
 end
 
@@ -838,3 +838,10 @@ function checkbox8_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox8
+
+
+% --- Executes on button press in pushbutton14.
+function pushbutton14_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton14 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)

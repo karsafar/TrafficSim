@@ -65,7 +65,7 @@ sim.horizArm = cast_output(HorizontalArm);
 sim.vertArm = cast_output(VerticalArm);
 end
 
-function myCleanupFun(HorizontalArm, VerticalArm)
+% function myCleanupFun(HorizontalArm, VerticalArm)
 % sim.horizArm = cast_output(HorizontalArm);
 % sim.vertArm = cast_output(VerticalArm);
 % iSim = 1;
@@ -74,7 +74,7 @@ function myCleanupFun(HorizontalArm, VerticalArm)
 % iCar = 1;
 % figure(3);
 % time_velocity_plot(iCar,iSim,sim,Arm)
-end
+% end
 
 function tempArm = cast_output(arm)
 tempArm.nCarHistory = arm.nCarHistory;
