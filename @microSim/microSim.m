@@ -998,7 +998,7 @@ function handles = edit23_Callback(hObject, eventdata, handles)
 
 runTime = str2double(get(handles.edit16,'String'));
 dt = str2double(get(handles.edit17,'String'));
-nIterations = runTime/dt;
+nIterations = (runTime/dt)+1;
 set(hObject,'String',nIterations);
 nDigits = numel(num2str(dt))-2;
 handles.t_rng = 0:dt:runTime;
