@@ -202,7 +202,9 @@ dt = str2double(get(handles.edit2,'String'));
 nIterations = runTime/dt;
 set(hObject,'String',nIterations);
 nDigits = numel(num2str(dt))-2;
-handles.t_rng = round(linspace(0,runTime,nIterations),nDigits);
+handles.t_rng = 0:dt:runTime;
+
+% handles.t_rng = round(linspace(0,runTime,nIterations),nDigits);
 
 guidata(hObject,handles);
 

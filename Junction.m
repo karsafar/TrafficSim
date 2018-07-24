@@ -36,15 +36,15 @@ classdef Junction < handle
             end
             
             if isempty(allAxesInFigure)
-                rad = 30;
-                x1=-rad;
-                x2=rad;
-                y1=-rad;
-                y2=rad;
-                x = [x1, x2, x2, x1, x1];
-                y = [y1, y1, y2, y2, y1];
-                plot(obj.junctionPlotHandle,x, y, 'k--', 'LineWidth', 1);
-                
+%                 rad = 30;
+%                 x1=-rad;
+%                 x2=rad;
+%                 y1=-rad;
+%                 y2=rad;
+%                 x = [x1, x2, x2, x1, x1];
+%                 y = [y1, y1, y2, y2, y1];
+%                 plot(obj.junctionPlotHandle,x, y, 'k--', 'LineWidth', 1);
+%                 
                 iDimension = [2.16 4.4 2.75];
                 carRectangle = [ 0 0; iDimension(2) 0; iDimension(2) iDimension(1); 0 iDimension(1)]-...
                     [(iDimension(2) - iDimension(3))/2*ones(4,1) iDimension(1)/2*ones(4,1) ];

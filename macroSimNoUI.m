@@ -24,7 +24,8 @@ selectRoadTypes = [2 2] ;
 
 nIterations = runTime/dt;
 nDigits = numel(num2str(dt))-2;
-t_rng = round(linspace(0,runTime,nIterations),nDigits);
+t_rng = 0:dt:runTime;
+% t_rng = round(linspace(0,runTime,nIterations),nDigits);
 densityRange = [0.001, 0.03; 0.001, 0.01];
 distMeanRange = [7, 10; 27, 30];
 numberOfFlowValues = 10;
