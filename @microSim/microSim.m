@@ -1445,24 +1445,27 @@ if get(handles.radiobutton21,'Value')
 else
     cars = handles.VerticalArm.allCars;
 end
+
  
 if get(handles.checkbox8,'Value')
     if get(handles.checkbox4,'Value')
         cla(findall(handles.axes5,'type','axes'));
-        title(handles.axes5,'All car displacements along the Arm','FontSize',14)
+        title(handles.axes5,'All car displacements along the Arm','FontSize',12)
         xlabel(handles.axes5,'Time, s','FontSize',12)
         ylabel(handles.axes5,'Position, m','FontSize',12)
         hold(handles.axes5,'on');
         grid(handles.axes5,'on');
-        for i = 1:numel(cars)
-            plot(handles.axes5,cars(i).timeHistory,cars(i).locationHistory,'b-','LineWidth',1)
-        end
-        
+        yyaxis(handles.axes5,'left') 
+        plot(handles.axes5,[handles.HorizontalArm.allCars(1:end).timeHistory],[handles.HorizontalArm.allCars(1:end).locationHistory],'b-','LineWidth',1)
+        yyaxis(handles.axes5,'right')
+        plot(handles.axes5,[handles.VerticalArm.allCars(1:end).timeHistory],[handles.VerticalArm.allCars(1:end).locationHistory],'r-','LineWidth',1);
+        ylabel(handles.axes5,'Position, m','FontSize',12)
+        set(handles.axes5, 'Ydir', 'reverse')
     end
     if get(handles.checkbox5,'Value')
         cla(findall(handles.axes2,'type','axes'));
         idx = get(handles.listbox2,'Value');
-        title(handles.axes2,'Velocity profile','FontSize',14)
+        title(handles.axes2,'Velocity profile','FontSize',12)
         xlabel(handles.axes2,'Time, s','FontSize',12)
         ylabel(handles.axes2,' Velocity V, m/s','FontSize',12)
         hold(handles.axes2,'on');
@@ -1476,7 +1479,7 @@ end
 if get(handles.checkbox9,'Value')
     if get(handles.checkbox6,'Value')
         cla(findall(handles.axes6,'type','axes'));
-        title(handles.axes6,'Velocity Average at every time step','FontSize',14)
+        title(handles.axes6,'Velocity Average at every time step','FontSize',12)
         xlabel(handles.axes6,'Time, s','FontSize',12)
         ylabel(handles.axes6,' Velocity <V>, m/s','FontSize',12)
         hold(handles.axes6,'on');
@@ -1492,7 +1495,7 @@ if get(handles.checkbox9,'Value')
             cummulativeAverage(i) = nanmean(handles.HorizontalArm.averageVelocityHistory(1:i));
         end
         
-        title(handles.axes4,'Velocity Average Over the Simulation','FontSize',14)
+        title(handles.axes4,'Velocity Average Over the Simulation','FontSize',12)
         xlabel(handles.axes4,'Time, s','FontSize',12)
         ylabel(handles.axes4,' Velocity <V>, m/s','FontSize',12)
         hold(handles.axes4,'on');
