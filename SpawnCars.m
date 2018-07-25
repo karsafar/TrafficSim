@@ -29,6 +29,7 @@ classdef SpawnCars < handle
         
         function controlled_spawn(obj,SpawnData,dt)
             %%
+            SpawnData = sortrows(SpawnData,{'position'},{'descend'}); 
             obj.numCars = numel(SpawnData(:,1));
             carTypes = SpawnData{:,5};
             for iCar = 1:obj.numCars
