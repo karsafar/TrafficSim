@@ -95,6 +95,7 @@ classdef AggressiveCar < IdmCar
         %%
         function decide_acceleration(obj,oppositeRoad,t,dt)
             oppositeCars = oppositeRoad.allCars;
+            CrossingBlocked = 0;
             if oppositeRoad.numCars ~= 0
                 crossingBegin = obj.s_in;
                 crossingEnd = obj.s_out;
@@ -159,8 +160,13 @@ classdef AggressiveCar < IdmCar
                         t_out = (-oppositeCars(ind).velocity+sqrt((oppositeCars(ind).velocity)^2+2*oppositeCarAcceleration...
                             *(crossingEnd-oppositeCarPose)))/oppositeCarAcceleration+t+3*T_safe*0;
                     elseif tol > abs(oppositeCarAcceleration) && tol > oppositeCars(ind).velocity || ((oppositeCars(ind).velocity)^2+2*oppositeCarAcceleration*(crossingBegin-oppositeCarPose)) > 0
-                        t_in = 99999;
-                        t_out = 99999;
+                        if oppositeCarPose > crossingBegin && oppositeCarPose < crossingEnd
+                            t_in = -99999;
+                            t_out = 999999;
+                        else
+                            t_in = 99999;
+                            t_out = 99999;
+                        end
                     else
                         t_in = (crossingBegin - oppositeCarPose)/oppositeCars(ind).velocity+t-3*T_safe;
                         t_out = (crossingEnd - oppositeCarPose)/oppositeCars(ind).velocity+t+3*T_safe*0;
