@@ -1457,13 +1457,14 @@ if get(handles.checkbox8,'Value')
         ylabel(handles.axes5,'Position, m','FontSize',12)
         hold(handles.axes5,'on');
         grid(handles.axes5,'on');
+        axis(handles.axes5,[0 handles.t_rng(handles.iIteration) -inf inf] )
+        plot(handles.axes5,handles.t_rng(1:handles.iIteration),zeros(1,handles.iIteration),'-g','LineWidth',1);
         yyaxis(handles.axes5,'left') 
         plot(handles.axes5,[handles.HorizontalArm.allCars(1:end).timeHistory],[handles.HorizontalArm.allCars(1:end).locationHistory],'b-','LineWidth',1)
         yyaxis(handles.axes5,'right')
         plot(handles.axes5,[handles.VerticalArm.allCars(1:end).timeHistory],[handles.VerticalArm.allCars(1:end).locationHistory],'r-','LineWidth',1);
         ylabel(handles.axes5,'Position, m','FontSize',12)
         set(handles.axes5, 'Ydir', 'reverse')
-        plot(handles.axes5,handles.t_rng(1:handles.iIteration),zeros(1,handles.iIteration),'-g','LineWidth',1);
     end
     if get(handles.checkbox5,'Value')
         cla(findall(handles.axes2,'type','axes'));
@@ -1475,7 +1476,6 @@ if get(handles.checkbox8,'Value')
         grid(handles.axes2,'on');
         axis(handles.axes2,[min(cars(idx).timeHistory) max(cars(idx).timeHistory) 0 10])
         plot(handles.axes2,cars(idx).timeHistory,cars(idx).velocityHistory,'b-','LineWidth',1)
-        
     end
 end
 
@@ -1488,7 +1488,7 @@ if get(handles.checkbox9,'Value')
         hold(handles.axes6,'on');
         grid(handles.axes6,'on');
         plot(handles.axes6,handles.t_rng(1:handles.iIteration),road.averageVelocityHistory(1:handles.iIteration),'b-','LineWidth',1)
-        % axis(handles.axes2,[0 runTime 0 10])
+        axis(handles.axes6,[0 handles.t_rng(handles.iIteration) 0 10])
     end
     
     if get(handles.checkbox7,'Value')
@@ -1504,6 +1504,7 @@ if get(handles.checkbox9,'Value')
         hold(handles.axes4,'on');
         grid(handles.axes4,'on');
         plot(handles.axes4,handles.t_rng(1:handles.iIteration),cumulativeAverage,'b-','LineWidth',1)
+        axis(handles.axes4,[0 handles.t_rng(handles.iIteration) 0 10])
     end
 end
 
