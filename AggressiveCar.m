@@ -95,7 +95,6 @@ classdef AggressiveCar < IdmCar
         %%
         function decide_acceleration(obj,oppositeRoad,t,dt)
             oppositeCars = oppositeRoad.allCars;
-            CrossingBlocked = 0;
             if oppositeRoad.numCars ~= 0
                 crossingBegin = obj.s_in;
                 crossingEnd = obj.s_out;
