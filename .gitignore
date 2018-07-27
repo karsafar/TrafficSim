@@ -18,3 +18,5 @@ nCarsVsTime\.fig
 *.asv
 
 figures/
+
+*.mlx
