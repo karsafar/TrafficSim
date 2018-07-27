@@ -11,7 +11,7 @@ assert(sum(carTypeRatios(1,:)) == 1,'Wrong distribution of horizontal arm ration
 assert(sum(carTypeRatios(2,:)) == 1,'Wrong distribution of vertical arm rations');
 
 plotFlag = true;
-runTime = 5.1; % in seconds
+runTime = 3600; % in seconds
 dt = 0.1; % in seconds
 priority = true;
 fixedSeed = [false false];
