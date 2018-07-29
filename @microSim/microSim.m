@@ -22,7 +22,7 @@ function varargout = microSim(varargin)
 
 % Edit the above text to modify the response to help UI
 
-% Last Modified by GUIDE v2.5 23-Jul-2018 21:18:04
+% Last Modified by GUIDE v2.5 29-Jul-2018 00:52:29
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -70,6 +70,8 @@ handles.max_density = 1/6.4;        % number of cars per metre (0.1562)
 handles.allCarsNumArray_H = zeros(1,numel(handles.carTypes));
 handles.allCarsNumArray_V = zeros(1,numel(handles.carTypes));
 handles.t_rng = [];
+
+handles.TempCarHighlight = [];
 % Update handles structure
 handles.output = hObject;
 guidata(hObject, handles);
@@ -321,8 +323,8 @@ if p == 0
 elseif p == 1
     set(findall(handles.uipanel3, '-property', 'enable'), 'enable', 'on')
     set(findall(handles.uipanel4, '-property', 'enable'), 'enable', 'off')
-%     set([ handles.edit4,handles.edit5,handles.edit6,handles.edit7,handles.edit8],'Enable','on')
-%     set([ handles.edit2,handles.edit3,handles.edit28,handles.checkbox2],'Enable','off');
+    %     set([ handles.edit4,handles.edit5,handles.edit6,handles.edit7,handles.edit8],'Enable','on')
+    %     set([ handles.edit2,handles.edit3,handles.edit28,handles.checkbox2],'Enable','off');
 end
 
 % Hint: get(hObject,'Value') returns toggle state of radiobutton14
@@ -344,13 +346,13 @@ p = get(handles.radiobutton11,'Value');
 if p == 0
     set([ handles.edit3,handles.text4],'Enable','on');
     set([ handles.edit2,handles.text3],'Enable','off');
-%     set([ handles.edit2],'Enable','off');
-%     set([ handles.edit3],'Enable','on');
+    %     set([ handles.edit2],'Enable','off');
+    %     set([ handles.edit3],'Enable','on');
 elseif p == 1
     set(findall(handles.uipanel3, '-property', 'enable'), 'enable', 'on')
     set(findall(handles.uipanel4, '-property', 'enable'), 'enable', 'off')
-%     set([ handles.edit4,handles.edit5,handles.edit6,handles.edit7,handles.edit8],'Enable','on')
-%     set([ handles.edit2,handles.edit3,handles.edit28,handles.checkbox2],'Enable','off');
+    %     set([ handles.edit4,handles.edit5,handles.edit6,handles.edit7,handles.edit8],'Enable','on')
+    %     set([ handles.edit2,handles.edit3,handles.edit28,handles.checkbox2],'Enable','off');
 end
 
 % Hint: get(hObject,'Value') returns toggle state of radiobutton15
@@ -365,15 +367,15 @@ p = get(handles.radiobutton14,'Value');
 set(findall(handles.uipanel3, '-property', 'enable'), 'enable', 'off')
 set(findall(handles.uipanel4, '-property', 'enable'), 'enable', 'on')
 if p == 0
-%     set([ handles.edit2],'Enable','off');
-%     set([ handles.edit3],'Enable','on');
+    %     set([ handles.edit2],'Enable','off');
+    %     set([ handles.edit3],'Enable','on');
     set([ handles.edit3,handles.text4],'Enable','on');
     set([ handles.edit2,handles.text3],'Enable','off');
 else
     set([ handles.edit3,handles.text4],'Enable','off');
     set([ handles.edit2,handles.text3],'Enable','on');
-%     set([ handles.edit2],'Enable','on');
-%     set([ handles.edit3],'Enable','off');
+    %     set([ handles.edit2],'Enable','on');
+    %     set([ handles.edit3],'Enable','off');
 end
 % set([ handles.edit4,handles.edit5,handles.edit6,handles.edit7,handles.edit8],'Enable','off')
 
@@ -473,6 +475,7 @@ function handles = pushbutton2_Callback(hObject, eventdata, handles)
 handles = pushbutton1_Callback(handles.pushbutton1, eventdata, handles);
 handles = pushbutton4_Callback(handles.pushbutton4, eventdata, handles);
 handles = edit23_Callback(handles.edit23,eventdata,handles);
+cla(findall(handles.axes5,'type','axes'),'reset');
 
 if get(handles.radiobutton14,'Value') && get(handles.radiobutton15,'Value') == 0
     roadType.H = 1;
@@ -526,7 +529,9 @@ for iIteration = 1:nIterations
     if plotFlag
         junc.draw_all_cars(HorizontalArm,VerticalArm)
     end
-    
+    if get(handles.pushbutton3,'userdata') % stop condition
+        break;
+    end
     % check for collision
     junc.collision_check(...
         HorizontalArm.allCars,...
@@ -554,21 +559,24 @@ for iIteration = 1:nIterations
     % Move all the cars along the road
     HorizontalArm.move_all_cars(t,dt,iIteration,nIterations)
     VerticalArm.move_all_cars(t,dt,iIteration,nIterations)
-    if get(handles.pushbutton3,'userdata') % stop condition
-        break;
-    end
+
     if plotFlag
         pause(0.01)
         junc.delete_car_images();
     end
-
+    
 end
 set(findall(handles.uipanel10, '-property', 'enable'), 'enable', 'on')
-set(findall(handles.uipanel14, '-property', 'enable'), 'enable', 'off')
-set(findall(handles.uipanel15, '-property', 'enable'), 'enable', 'off')
+if get(handles.checkbox8,'Value') == 0
+    set(findall(handles.uipanel14, '-property', 'enable'), 'enable', 'off')
+end
+if get(handles.checkbox9,'Value') == 0
+    set(findall(handles.uipanel15, '-property', 'enable'), 'enable', 'off')
+end
 handles.HorizontalArm = HorizontalArm;
 handles.VerticalArm = VerticalArm;
 handles.iIteration = iIteration;
+handles.junc = junc;
 
 guidata(hObject,handles);
 
@@ -581,7 +589,7 @@ function pushbutton3_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton3 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+set(handles.pushbutton7, 'enable', 'on')
 set(hObject,'userdata',1);
 
 % set(findall(handles.uipanel10, '-property', 'enable'), 'enable', 'on')
@@ -815,13 +823,13 @@ p = get(handles.radiobutton18,'Value');
 if p == 0
     set([ handles.edit10,handles.text11],'Enable','on');
     set([ handles.edit9,handles.text10],'Enable','off');
-%     set([ handles.edit9],'Enable','off');
-%     set([ handles.edit10],'Enable','on');
+    %     set([ handles.edit9],'Enable','off');
+    %     set([ handles.edit10],'Enable','on');
 elseif p == 1
     set(findall(handles.uipanel5, '-property', 'enable'), 'enable', 'on')
     set(findall(handles.uipanel6, '-property', 'enable'), 'enable', 'off')
-%     set([ handles.edit11,handles.edit12,handles.edit13,handles.edit14,handles.edit15],'Enable','on')
-%     set([ handles.edit9,handles.edit10,handles.edit29,handles.checkbox3],'Enable','off');
+    %     set([ handles.edit11,handles.edit12,handles.edit13,handles.edit14,handles.edit15],'Enable','on')
+    %     set([ handles.edit9,handles.edit10,handles.edit29,handles.checkbox3],'Enable','off');
 end
 % Hint: get(hObject,'Value') returns toggle state of radiobutton17
 
@@ -835,13 +843,13 @@ p = get(handles.radiobutton18,'Value');
 if p == 0
     set([ handles.edit10,handles.text11],'Enable','off');
     set([ handles.edit9,handles.text10],'Enable','on');
-%     set([ handles.edit10],'Enable','off');
-%     set([ handles.edit9],'Enable','on');
+    %     set([ handles.edit10],'Enable','off');
+    %     set([ handles.edit9],'Enable','on');
 elseif p == 1
     set(findall(handles.uipanel5, '-property', 'enable'), 'enable', 'on')
     set(findall(handles.uipanel6, '-property', 'enable'), 'enable', 'off')
-%     set([ handles.edit11,handles.edit12,handles.edit13,handles.edit14,handles.edit15],'Enable','on')
-%     set([ handles.edit9,handles.edit10,handles.edit29,handles.checkbox3],'Enable','off');
+    %     set([ handles.edit11,handles.edit12,handles.edit13,handles.edit14,handles.edit15],'Enable','on')
+    %     set([ handles.edit9,handles.edit10,handles.edit29,handles.checkbox3],'Enable','off');
 end
 % Hint: get(hObject,'Value') returns toggle state of radiobutton16
 
@@ -1348,6 +1356,7 @@ function handles = listbox2_Callback(hObject, eventdata, handles)
 % hObject    handle to listbox2 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+delete(handles.TempCarHighlight);
 if get(handles.checkbox8, 'Value')
     if get(handles.radiobutton21, 'Value')
         if numel(handles.HorizontalArm.allCars) == 0
@@ -1356,6 +1365,9 @@ if get(handles.checkbox8, 'Value')
             numList = [1:numel(handles.HorizontalArm.allCars)]';
         end
         set(hObject,'string',{numList});
+        idx = get(hObject,'Value');
+        
+        handles.TempCarHighlight = plotCarEdge(handles.HorizontalArm.allCars(idx),handles.axes7);
     elseif get(handles.radiobutton22, 'Value')
         if numel(handles.VerticalArm.allCars) == 0
             numList = 0;
@@ -1363,9 +1375,37 @@ if get(handles.checkbox8, 'Value')
             numList = [1:numel(handles.VerticalArm.allCars)]';
         end
         set(hObject,'string',{numList});
+        idx = get(hObject,'Value');
+        handles.TempCarHighlight = plotCarEdge(handles.VerticalArm.allCars(idx),handles.axes7);
     end
 end
+
 guidata(hObject, handles);
+
+function CarsImageHandle = plotCarEdge(obj,junctionAxesHandle)
+plotVectorX = NaN(1,5);
+plotVectorY = NaN(1,5);
+iDimension = obj.dimension;
+iPosition = obj.pose;
+
+%the origin is placed on the middle of the rear wheels
+carRectangle = [ 0 0; iDimension(2) 0; iDimension(2) iDimension(1); 0 iDimension(1)]-...
+    [(iDimension(2) - iDimension(3))/2*ones(4,1) iDimension(1)/2*ones(4,1) ];
+front = [(iDimension(2) + iDimension(3))/2 0];
+
+% rotation counter-clockwise about the origin
+if iPosition(2) == 0
+    transformation = real([cosd(iPosition(2)) -sind(iPosition(2)) iPosition(1);...
+        sind(iPosition(2)) cosd(iPosition(2)) 0; 0 0 1]*[carRectangle' front'; ones(1,5)]);
+else
+    transformation = real([cosd(iPosition(2)) -sind(iPosition(2)) 0;...
+        sind(iPosition(2)) cosd(iPosition(2)) iPosition(1); 0 0 1]*[carRectangle' front'; ones(1,5)]);
+end
+
+plotVectorX(:) = [transformation(1,1:end-1) transformation(1,1)];
+plotVectorY(:) = [transformation(2,1:end-1) transformation(2,1)];
+
+CarsImageHandle = plot(junctionAxesHandle,plotVectorX',plotVectorY','w-','LineWidth',2);
 
 % Hints: contents = cellstr(get(hObject,'String')) returns listbox2 contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from listbox2
@@ -1420,7 +1460,7 @@ function radiobutton21_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 if get(handles.checkbox8,'Value')
     handles = listbox2_Callback(handles.listbox2,eventdata,handles);
-end 
+end
 % Hint: get(hObject,'Value') returns toggle state of radiobutton21
 
 
@@ -1431,7 +1471,7 @@ function radiobutton22_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 if get(handles.checkbox8,'Value')
     handles = listbox2_Callback(handles.listbox2,eventdata,handles);
-end 
+end
 % Hint: get(hObject,'Value') returns toggle state of radiobutton22
 
 
@@ -1448,23 +1488,23 @@ else
     road =  handles.VerticalArm;
 end
 
- 
+
 if get(handles.checkbox8,'Value')
     if get(handles.checkbox4,'Value')
-        cla(findall(handles.axes5,'type','axes'),'reset');
+        %         cla(findall(handles.axes5,'type','axes'),'reset');
         title(handles.axes5,'All Displacements','FontSize',12)
         xlabel(handles.axes5,'Time, s','FontSize',12)
         ylabel(handles.axes5,'Position, m','FontSize',12)
         hold(handles.axes5,'on');
         grid(handles.axes5,'on');
         axis(handles.axes5,[0 handles.t_rng(handles.iIteration) -inf inf] )
-        plot(handles.axes5,handles.t_rng(1:handles.iIteration),zeros(1,handles.iIteration),'-g','LineWidth',1);
-        yyaxis(handles.axes5,'left') 
+        yyaxis(handles.axes5,'left')
         plot(handles.axes5,[handles.HorizontalArm.allCars(1:end).timeHistory],[handles.HorizontalArm.allCars(1:end).locationHistory],'b-','LineWidth',1)
         yyaxis(handles.axes5,'right')
         plot(handles.axes5,[handles.VerticalArm.allCars(1:end).timeHistory],[handles.VerticalArm.allCars(1:end).locationHistory],'r-','LineWidth',1);
         ylabel(handles.axes5,'Position, m','FontSize',12)
         set(handles.axes5, 'Ydir', 'reverse')
+        plot(handles.axes5,handles.t_rng(1:handles.iIteration),zeros(1,handles.iIteration),'-g','LineWidth',1);
     end
     if get(handles.checkbox5,'Value')
         cla(findall(handles.axes2,'type','axes'));
@@ -1493,7 +1533,7 @@ if get(handles.checkbox9,'Value')
     
     if get(handles.checkbox7,'Value')
         cla(findall(handles.axes4,'type','axes'));
-
+        
         for i = 1:handles.iIteration
             cumulativeAverage(i) = nanmean(road.averageVelocityHistory(1:i));
         end
@@ -1507,6 +1547,8 @@ if get(handles.checkbox9,'Value')
         axis(handles.axes4,[0 handles.t_rng(handles.iIteration) 0 10])
     end
 end
+
+
 
 % --- Executes during object creation, after setting all properties.
 function axes7_CreateFcn(hObject, eventdata, handles)
@@ -1636,3 +1678,89 @@ function edit31_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in pushbutton7.
+function pushbutton7_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton7 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% construct two arms of the junction objects
+set(findall(handles.uipanel10, '-property', 'enable'), 'enable', 'off')
+
+roadDims.Start = [str2num(get(handles.edit18,'String')); str2num(get(handles.edit24,'String'))];
+roadDims.End = [str2num(get(handles.edit19,'String')); str2num(get(handles.edit25,'String'))];
+roadDims.Width = [str2num(get(handles.edit20,'String')); str2num(get(handles.edit26,'String'))];
+roadDims.Length = roadDims.End - roadDims.Start;
+
+plotFlag = get(handles.checkbox1,'Value');
+nIterations = str2num(get(handles.edit23,'String'));
+dt = str2num(get(handles.edit17,'String'));
+
+HorizontalArm = handles.HorizontalArm;
+VerticalArm = handles.VerticalArm;
+
+% plot the junction
+junc = Junction(roadDims, plotFlag);
+
+% controlled break of the simulation
+% finishup = onCleanup(@() myCleanupFun(HorizontalArm, VerticalArm));
+set(handles.pushbutton3,'userdata',0);
+for iIteration = handles.iIteration:nIterations
+    % update time
+    t = handles.t_rng(iIteration);
+    
+    % draw cars
+    if plotFlag
+        junc.draw_all_cars(HorizontalArm,VerticalArm)
+    end
+    
+    if get(handles.pushbutton3,'userdata') % stop condition
+        break;
+    end
+    % check for collision
+    junc.collision_check(...
+        HorizontalArm.allCars,...
+        VerticalArm.allCars,...
+        HorizontalArm.numCars,...
+        VerticalArm.numCars,...
+        plotFlag);
+    
+    % calculate IDM acceleration
+    for iCar = 1:HorizontalArm.numCars
+        calculate_idm_accel(HorizontalArm.allCars(iCar),roadDims.Length(1));
+    end
+    for jCar = 1:VerticalArm.numCars
+        calculate_idm_accel(VerticalArm.allCars(jCar),roadDims.Length(2));
+    end
+    
+    % Itersection Collision Avoidance (ICA)
+    for iCar = 1:HorizontalArm.numCars
+        HorizontalArm.allCars(iCar).decide_acceleration(VerticalArm,t,dt);
+    end
+    for jCar = 1:VerticalArm.numCars
+        VerticalArm.allCars(jCar).decide_acceleration(HorizontalArm,t,dt);
+    end
+    
+    % Move all the cars along the road
+    HorizontalArm.move_all_cars(t,dt,iIteration,nIterations)
+    VerticalArm.move_all_cars(t,dt,iIteration,nIterations)
+
+    if plotFlag
+        pause(0.01)
+        junc.delete_car_images();
+    end
+    
+end
+set(findall(handles.uipanel10, '-property', 'enable'), 'enable', 'on')
+if get(handles.checkbox8,'Value') == 0
+    set(findall(handles.uipanel14, '-property', 'enable'), 'enable', 'off')
+end
+if get(handles.checkbox9,'Value') == 0
+    set(findall(handles.uipanel15, '-property', 'enable'), 'enable', 'off')
+end
+handles.HorizontalArm = HorizontalArm;
+handles.VerticalArm = VerticalArm;
+handles.iIteration = iIteration;
+handles.junc = junc;
+guidata(hObject,handles);
