@@ -1361,22 +1361,28 @@ if get(handles.checkbox8, 'Value')
     if get(handles.radiobutton21, 'Value')
         if numel(handles.HorizontalArm.allCars) == 0
             numList = 0;
+            set(hObject,'Value',1);
+            set(hObject,'string',{numList});
         else
             numList = [1:numel(handles.HorizontalArm.allCars)]';
+            
+            set(hObject,'string',{numList});
+            idx = get(hObject,'Value');
+            
+            handles.TempCarHighlight = plotCarEdge(handles.HorizontalArm.allCars(idx),handles.axes7);
         end
-        set(hObject,'string',{numList});
-        idx = get(hObject,'Value');
-        
-        handles.TempCarHighlight = plotCarEdge(handles.HorizontalArm.allCars(idx),handles.axes7);
     elseif get(handles.radiobutton22, 'Value')
         if numel(handles.VerticalArm.allCars) == 0
             numList = 0;
+            set(hObject,'Value',1);
+            set(hObject,'string',{numList});
         else
             numList = [1:numel(handles.VerticalArm.allCars)]';
+            
+            set(hObject,'string',{numList});
+            idx = get(hObject,'Value');
+            handles.TempCarHighlight = plotCarEdge(handles.VerticalArm.allCars(idx),handles.axes7);
         end
-        set(hObject,'string',{numList});
-        idx = get(hObject,'Value');
-        handles.TempCarHighlight = plotCarEdge(handles.VerticalArm.allCars(idx),handles.axes7);
     end
 end
 
@@ -1459,6 +1465,7 @@ function radiobutton21_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 if get(handles.checkbox8,'Value')
+%     set(handles.listbox2,'Value',0);
     handles = listbox2_Callback(handles.listbox2,eventdata,handles);
 end
 % Hint: get(hObject,'Value') returns toggle state of radiobutton21
@@ -1470,6 +1477,7 @@ function radiobutton22_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 if get(handles.checkbox8,'Value')
+%     set(handles.listbox2,'Value',1);
     handles = listbox2_Callback(handles.listbox2,eventdata,handles);
 end
 % Hint: get(hObject,'Value') returns toggle state of radiobutton22
