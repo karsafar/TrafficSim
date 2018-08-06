@@ -70,7 +70,7 @@ handles.max_density = 1/6.4;        % number of cars per metre (0.1562)
 handles.allCarsNumArray_H = zeros(1,numel(handles.carTypes));
 handles.allCarsNumArray_V = zeros(1,numel(handles.carTypes));
 handles.t_rng = [];
-
+handles.iIteration = 1;
 handles.TempCarHighlight = [];
 % Update handles structure
 handles.output = hObject;
@@ -497,6 +497,7 @@ plotFlag = get(handles.checkbox1,'Value');
 priority = get(handles.edit22,'Value');
 nIterations = str2num(get(handles.edit23,'String'));
 dt = str2num(get(handles.edit17,'String'));
+
 % handles.sim = run_simulation({handles.roadTypes{roadType.H},...
 %     handles.roadTypes{roadType.V}},...
 %     handles.carTypes,...
@@ -507,21 +508,31 @@ dt = str2num(get(handles.edit17,'String'));
 %     roadDims,...
 %     nIterations,...
 %     dt);
-
+   
 set(findall(handles.uipanel10, '-property', 'enable'), 'enable', 'off')
 guidata(hObject,handles);
 
 % construct two arms of the junction objects
-HorizontalArm = handles.roadTypes{roadType.H}([{handles.carTypes},0,roadDims,priority],handles.Arm.H);
-VerticalArm = handles.roadTypes{roadType.V}([{handles.carTypes},90,roadDims,priority],handles.Arm.V);
-
+if get(handles.pushbutton7,'Value') == 0
+    HorizontalArm = handles.roadTypes{roadType.H}([{handles.carTypes},0,roadDims,priority],handles.Arm.H);
+    VerticalArm = handles.roadTypes{roadType.V}([{handles.carTypes},90,roadDims,priority],handles.Arm.V);
+else
+    HorizontalArm = handles.HorizontalArm;
+    VerticalArm = handles.VerticalArm;
+end
 % plot the junction
 junc = Junction(roadDims, plotFlag);
 
+if plotFlag == 0
+    f = waitbar(0,'','Name','Running simulation',...
+        'CreateCancelBtn','setappdata(gcbf,''canceling'',1)');
+    
+    setappdata(f,'canceling',0);
+end
 % controlled break of the simulation
 % finishup = onCleanup(@() myCleanupFun(HorizontalArm, VerticalArm));
 set(handles.pushbutton3,'userdata',0);
-for iIteration = 1:nIterations
+for iIteration = handles.iIteration:nIterations
     % update time
     t = handles.t_rng(iIteration);
     
@@ -563,8 +574,19 @@ for iIteration = 1:nIterations
     if plotFlag
         pause(0.01)
         junc.delete_car_images();
+    elseif mod(iIteration,360) == 0
+        if getappdata(f,'canceling')
+            break
+        end
+        
+        % Update waitbar and message
+        waitbar(iIteration/nIterations,f,sprintf('%d percent progress',round(iIteration*100/nIterations)))
+        
     end
     
+end
+if plotFlag == 0
+    delete(f)
 end
 set(findall(handles.uipanel10, '-property', 'enable'), 'enable', 'on')
 if get(handles.checkbox8,'Value') == 0
@@ -1694,81 +1716,5 @@ function pushbutton7_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % construct two arms of the junction objects
-set(findall(handles.uipanel10, '-property', 'enable'), 'enable', 'off')
-
-roadDims.Start = [str2num(get(handles.edit18,'String')); str2num(get(handles.edit24,'String'))];
-roadDims.End = [str2num(get(handles.edit19,'String')); str2num(get(handles.edit25,'String'))];
-roadDims.Width = [str2num(get(handles.edit20,'String')); str2num(get(handles.edit26,'String'))];
-roadDims.Length = roadDims.End - roadDims.Start;
-
-plotFlag = get(handles.checkbox1,'Value');
-nIterations = str2num(get(handles.edit23,'String'));
-dt = str2num(get(handles.edit17,'String'));
-
-HorizontalArm = handles.HorizontalArm;
-VerticalArm = handles.VerticalArm;
-
-% plot the junction
-junc = Junction(roadDims, plotFlag);
-
-% controlled break of the simulation
-% finishup = onCleanup(@() myCleanupFun(HorizontalArm, VerticalArm));
-set(handles.pushbutton3,'userdata',0);
-for iIteration = handles.iIteration:nIterations
-    % update time
-    t = handles.t_rng(iIteration);
-    
-    % draw cars
-    if plotFlag
-        junc.draw_all_cars(HorizontalArm,VerticalArm)
-    end
-    
-    if get(handles.pushbutton3,'userdata') % stop condition
-        break;
-    end
-    % check for collision
-    junc.collision_check(...
-        HorizontalArm.allCars,...
-        VerticalArm.allCars,...
-        HorizontalArm.numCars,...
-        VerticalArm.numCars,...
-        plotFlag);
-    
-    % calculate IDM acceleration
-    for iCar = 1:HorizontalArm.numCars
-        calculate_idm_accel(HorizontalArm.allCars(iCar),roadDims.Length(1));
-    end
-    for jCar = 1:VerticalArm.numCars
-        calculate_idm_accel(VerticalArm.allCars(jCar),roadDims.Length(2));
-    end
-    
-    % Itersection Collision Avoidance (ICA)
-    for iCar = 1:HorizontalArm.numCars
-        HorizontalArm.allCars(iCar).decide_acceleration(VerticalArm,t,dt);
-    end
-    for jCar = 1:VerticalArm.numCars
-        VerticalArm.allCars(jCar).decide_acceleration(HorizontalArm,t,dt);
-    end
-    
-    % Move all the cars along the road
-    HorizontalArm.move_all_cars(t,dt,iIteration,nIterations)
-    VerticalArm.move_all_cars(t,dt,iIteration,nIterations)
-
-    if plotFlag
-        pause(0.01)
-        junc.delete_car_images();
-    end
-    
-end
-set(findall(handles.uipanel10, '-property', 'enable'), 'enable', 'on')
-if get(handles.checkbox8,'Value') == 0
-    set(findall(handles.uipanel14, '-property', 'enable'), 'enable', 'off')
-end
-if get(handles.checkbox9,'Value') == 0
-    set(findall(handles.uipanel15, '-property', 'enable'), 'enable', 'off')
-end
-handles.HorizontalArm = HorizontalArm;
-handles.VerticalArm = VerticalArm;
-handles.iIteration = iIteration;
-handles.junc = junc;
+handles = pushbutton2_Callback(handles.pushbutton2, eventdata, handles);
 guidata(hObject,handles);
