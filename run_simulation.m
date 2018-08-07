@@ -26,7 +26,7 @@ for iIteration = 1:nIterations
     if plotFlag
         junc.draw_all_cars(HorizontalArm,VerticalArm)
     end
-    
+
     % check for collision
     junc.collision_check(...
         HorizontalArm.allCars,...
