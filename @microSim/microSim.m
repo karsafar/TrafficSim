@@ -22,7 +22,7 @@ function varargout = microSim(varargin)
 
 % Edit the above text to modify the response to help UI
 
-% Last Modified by GUIDE v2.5 07-Aug-2018 04:44:17
+% Last Modified by GUIDE v2.5 07-Aug-2018 21:29:28
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -75,7 +75,6 @@ handles.TempCarHighlight = [];
 % Update handles structure
 handles.output = hObject;
 guidata(hObject, handles);
-% start the timer
 
 
 % UIWAIT makes UI wait for user response (see UIRESUME)
@@ -91,17 +90,6 @@ function varargout = UI_OutputFcn(hObject, eventdata, handles)
 
 % Get default command line output from handles structure
 varargout{1} = handles.output;
-
-
-function timerCallback(hTimer, eventdata, hFigure)
-handles = guidata(hFigure);
-str = handles.myCellData{handles.strIdx};
-set(handles.pushbutton1,'String',str);
-handles.strIdx = handles.strIdx + 1;
-if handles.strIdx > length(handles.myCellData)
-    handles.strIdx = 1;
-end
-guidata(hFigure,handles);
 
 function handles = edit2_Callback(hObject, eventdata, handles)
 % hObject    handle to edit2 (see GCBO)
@@ -426,48 +414,6 @@ function uipanel3_CreateFcn(hObject, eventdata, handles)
 % handles    empty - handles not created until after all CreateFcns called
 
 
-% --- Executes on button press in pushbutton1.
-function handles = pushbutton1_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-% 
-% handles = text18_Callback(handles.text18,eventdata,handles);
-% handles = edit2_Callback(handles.edit2,eventdata,handles);
-% handles = edit23_Callback(handles.edit23,eventdata,handles);
-% 
-% roadStart = str2num(get(handles.edit18,'String'));
-% roadEnd = str2num(get(handles.edit19,'String'));
-% roadWidth = str2num(get(handles.edit20,'String'));
-% dt = str2num(get(handles.edit17,'String'));
-% if get(handles.radiobutton11,'Value')
-%     sz = [str2num(get(handles.edit4,'String')) 5];
-%     varTypes = {'double','double','double','double','function_handle'};
-%     varNames = {'position','velocity','target_velocity','acceleration','carType'};
-%     
-%     T = table('Size',sz,'VariableTypes',varTypes,'VariableNames',varNames);
-%     T.position = [str2num(get(handles.edit5,'String'))'];
-%     T.velocity = [str2num(get(handles.edit6,'String'))'];
-%     T.target_velocity = [str2num(get(handles.edit30,'String'))'];
-%     T.acceleration = [str2num(get(handles.edit7,'String'))'];
-%     T.carType = {handles.carTypes{str2num(get(handles.edit8,'String'))'}}';
-%     
-%     handles.Arm.H = SpawnCars(T,'horizontal',roadStart,roadEnd,roadWidth,dt);
-% else
-%     nIterations = str2double(get(handles.edit23,'String'));
-%     fixedSeed = get(handles.checkbox2,'Value');
-%     if get(handles.radiobutton14,'Value')
-%         handles.Arm.H = SpawnCars([{handles.allCarsNumArray_H},fixedSeed,{handles.carTypes}],'horizontal',roadStart,roadEnd,roadWidth,dt,nIterations);
-%     else
-%         spawnRate = str2double(get(handles.edit3,'String'));
-%         carTypeRatios = str2num(get(handles.edit28,'String'));
-%         dt = str2double(get(handles.edit17,'String'));
-%         handles.Arm.H =  [{carTypeRatios},spawnRate,fixedSeed,dt,nIterations];
-%     end
-% end
-% 
-% 
-% guidata(hObject,handles)
 
 % --- Executes on button press in pushbutton2.
 function handles = pushbutton2_Callback(hObject, eventdata, handles)
@@ -475,9 +421,7 @@ function handles = pushbutton2_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% handles = pushbutton1_Callback(handles.pushbutton1, eventdata, handles);
 handles = uibuttongroup2_ButtonDownFcn(handles.uibuttongroup2, eventdata, handles);
-% handles = pushbutton4_Callback(handles.pushbutton4, eventdata, handles);
 handles = uibuttongroup6_ButtonDownFcn(handles.uibuttongroup6, eventdata, handles);
 handles = edit23_Callback(handles.edit23,eventdata,handles);
 
@@ -537,6 +481,7 @@ end
 % controlled break of the simulation
 % finishup = onCleanup(@() myCleanupFun(HorizontalArm, VerticalArm));
 set(handles.pushbutton3,'userdata',0);
+
 for iIteration = handles.iIteration:nIterations
     % update time
     t = handles.t_rng(iIteration);
@@ -581,14 +526,12 @@ for iIteration = handles.iIteration:nIterations
         junc.delete_car_images();
     elseif mod(iIteration,360) == 0
         if getappdata(f,'canceling')
-            break
+            set(handles.pushbutton3,'userdata',1);
+            set(handles.pushbutton7, 'enable', 'on')
         end
-        
         % Update waitbar and message
         waitbar(iIteration/nIterations,f,sprintf('%d percent progress',round(iIteration*100/nIterations)))
-        
     end
-    
 end
 if plotFlag == 0
     f = findall(0,'type','figure','tag','TMWWaitbar');
@@ -883,51 +826,6 @@ elseif p == 1
     %     set([ handles.edit9,handles.edit10,handles.edit29,handles.checkbox3],'Enable','off');
 end
 % Hint: get(hObject,'Value') returns toggle state of radiobutton16
-
-
-% --- Executes on button press in pushbutton4.
-function handles = pushbutton4_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-% 
-% handles = edit27_Callback(handles.edit27,eventdata,handles);
-% handles = edit10_Callback(handles.edit10,eventdata,handles);
-% handles = edit23_Callback(handles.edit23,eventdata,handles);
-% 
-% roadStart = str2num(get(handles.edit24,'String'));
-% roadEnd = str2num(get(handles.edit25,'String'));
-% roadWidth = str2num(get(handles.edit26,'String'));
-% dt = str2num(get(handles.edit17,'String'));
-% if get(handles.radiobutton18,'Value')
-%     sz = [str2num(get(handles.edit15,'String')) 5];
-%     varTypes = {'double','double','double','double','function_handle'};
-%     varNames = {'position','velocity','target_velocity','acceleration','carType'};
-%     
-%     T = table('Size',sz,'VariableTypes',varTypes,'VariableNames',varNames);
-%     T.position = [str2num(get(handles.edit14,'String'))'];
-%     T.velocity = [str2num(get(handles.edit13,'String'))'];
-%     T.target_velocity = [str2num(get(handles.edit31,'String'))'];
-%     T.acceleration = [str2num(get(handles.edit12,'String'))'];
-%     T.carType = {handles.carTypes{str2num(get(handles.edit11,'String'))'}}';
-%     
-%     handles.Arm.V = SpawnCars(T,'vertical',roadStart,roadEnd,roadWidth,dt);
-% else
-%     nIterations = str2double(get(handles.edit23,'String'));
-%     fixedSeed = get(handles.checkbox3,'Value');
-%     if get(handles.radiobutton17,'Value')
-%         handles.Arm.V = SpawnCars([{handles.allCarsNumArray_V},fixedSeed,{handles.carTypes}],'vertical',roadStart,roadEnd,roadWidth,dt,nIterations);
-%     else
-%         spawnRate = str2double(get(handles.edit9,'String'));
-%         carTypeRatios = str2num(get(handles.edit29,'String'));
-%         dt = str2double(get(handles.edit17,'String'));
-%         handles.Arm.V =  [{carTypeRatios},spawnRate,fixedSeed,dt,nIterations];
-%     end
-% end
-% 
-% 
-% 
-% guidata(hObject,handles)
 
 
 % --- Executes on button press in checkbox1.
@@ -1816,3 +1714,14 @@ end
 
 
 guidata(hObject,handles)
+
+% --- Executes on button press in pushbutton8.
+function pushbutton8_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton8 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+handles = uibuttongroup2_ButtonDownFcn(handles.uibuttongroup2, eventdata, handles);
+handles = uibuttongroup6_ButtonDownFcn(handles.uibuttongroup6, eventdata, handles);
+handles = edit23_Callback(handles.edit23,eventdata,handles);
+set(hObject,'Value',0);
+save('State.mat','handles','-v7.3');
