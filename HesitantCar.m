@@ -54,7 +54,7 @@ classdef HesitantCar < IdmCar
                 A6);
             
             p71 = BtSequence(...
-                obj.it_A_min_ahead<obj.maximumAcceleration(2)-0.1,...
+                obj.it_A_min_ahead<obj.maximumAcceleration(2)-obj.tol,...
                 obj.it_A_max_behind>obj.it_a_max);
             p7 = BtSelector(...
                 p71,...
@@ -211,7 +211,7 @@ classdef HesitantCar < IdmCar
                         obj.it_idmAccel.set_value(obj.idmAcceleration);
                         obj.it_pose.set_value(obj.pose(1));
                         obj.it_vel.set_value(obj.velocity);
-                        obj.it_a_max.set_value(obj.maximumAcceleration(1)+0.1);
+                        obj.it_a_max.set_value(obj.maximumAcceleration(1)+obj.tol);
                         
                         if ~isempty(obj.Prev)
                             if obj.Prev.pose(1) > crossingEnd || obj.Prev.pose(1) < obj.pose(1)
