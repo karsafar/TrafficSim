@@ -524,7 +524,10 @@ for iIteration = handles.iIteration:nIterations
     % Move all the cars along the road
     HorizontalArm.move_all_cars(t,dt,iIteration,nIterations)
     VerticalArm.move_all_cars(t,dt,iIteration,nIterations)
-
+    
+    if get(handles.pushbutton3,'userdata') % stop condition
+        break;
+    end
     if plotFlag
         pause(0.01)
         %if iIteration < nIterations
@@ -537,9 +540,6 @@ for iIteration = handles.iIteration:nIterations
         end
         % Update waitbar and message
         waitbar(iIteration/nIterations,f,sprintf('%d percent progress',round(iIteration*100/nIterations)))
-    end
-    if get(handles.pushbutton3,'userdata') % stop condition
-        break;
     end
 end
 if plotFlag == 0
@@ -1729,8 +1729,6 @@ else
         handles.Arm.V =  [{carTypeRatios},spawnRate,fixedSeed,dt,nIterations];
     end
 end
-
-
 
 guidata(hObject,handles)
 
