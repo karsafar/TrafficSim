@@ -5,7 +5,7 @@ clear
 roadTypes = {@LoopRoad @FiniteRoad};
 carTypes = {@IdmCar, @HdmCar, @AggressiveCar, @PassiveCar, @HesitantCar, @ManualCar};
 
-carTypeRatios = [0 0.3 0.1 0 0.4 0.2; 0 0 1 0 0 0];
+carTypeRatios = [0 0 1 0 0 0; 0 0 0 0 0 1];
 % carTypeRatios = [0 0 1 0 0 0;0 0 0.25 0.15 0.15 0.45];
 assert(sum(carTypeRatios(1,:)) == 1,'Wrong distribution of horizontal arm rations');
 assert(sum(carTypeRatios(2,:)) == 1,'Wrong distribution of vertical arm rations');
@@ -16,7 +16,7 @@ dt = 0.1; % in seconds
 priority = true;
 fixedSeed = [false false];
 % road dimensions
-roadDims.Start = [-150; -150];
+roadDims.Start = [-200; -200];
 roadDims.End = [150; 150];
 roadDims.Width = [4; 4];
 roadDims.Length = roadDims.End - roadDims.Start;
@@ -26,7 +26,7 @@ nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;
 t_rng = 0:dt:runTime;
 densityRange = [0.001, 0.03; 0.001, 0.01];
-distMeanRange = [7, 10; 27, 30];
+distMeanRange = [8, 10; 3, 30];
 numberOfFlowValues = 10;
 
 %% Decide type of road parameters
