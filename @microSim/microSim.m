@@ -22,7 +22,7 @@ function varargout = microSim(varargin)
 
 % Edit the above text to modify the response to help UI
 
-% Last Modified by GUIDE v2.5 07-Aug-2018 21:29:28
+% Last Modified by GUIDE v2.5 11-Aug-2018 18:29:57
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -72,6 +72,12 @@ handles.allCarsNumArray_V = zeros(1,numel(handles.carTypes));
 handles.t_rng = [];
 handles.iIteration = 1;
 handles.TempCarHighlight = [];
+
+% handles.tabgp = uitabgroup(handles.uipanel16);
+% tab2 = uitab(tabgp,'Title','Plot Options');
+
+
+
 % Update handles structure
 handles.output = hObject;
 guidata(hObject, handles);
@@ -457,7 +463,7 @@ dt = str2num(get(handles.edit17,'String'));
 %     nIterations,...
 %     dt);
    
-set(findall(handles.uipanel10, '-property', 'enable'), 'enable', 'off')
+% set(findall(handles.uipanel10, '-property', 'enable'), 'enable', 'off')
 guidata(hObject,handles);
 
 % construct two arms of the junction objects
@@ -481,7 +487,7 @@ end
 % controlled break of the simulation
 % finishup = onCleanup(@() myCleanupFun(HorizontalArm, VerticalArm));
 set(handles.pushbutton3,'userdata',0);
-
+set(findall(handles.uipanel10, '-property', 'enable'), 'enable', 'off')
 for iIteration = handles.iIteration:nIterations
     % update time
     t = handles.t_rng(iIteration);
@@ -490,9 +496,7 @@ for iIteration = handles.iIteration:nIterations
     if plotFlag
         junc.draw_all_cars(HorizontalArm,VerticalArm)
     end
-    if get(handles.pushbutton3,'userdata') % stop condition
-        break;
-    end
+
     % check for collision
     junc.collision_check(...
         HorizontalArm.allCars,...
@@ -523,7 +527,9 @@ for iIteration = handles.iIteration:nIterations
 
     if plotFlag
         pause(0.01)
-        junc.delete_car_images();
+        %if iIteration < nIterations
+            junc.delete_car_images();
+        %end
     elseif mod(iIteration,360) == 0
         if getappdata(f,'canceling')
             set(handles.pushbutton3,'userdata',1);
@@ -531,6 +537,9 @@ for iIteration = handles.iIteration:nIterations
         end
         % Update waitbar and message
         waitbar(iIteration/nIterations,f,sprintf('%d percent progress',round(iIteration*100/nIterations)))
+    end
+    if get(handles.pushbutton3,'userdata') % stop condition
+        break;
     end
 end
 if plotFlag == 0
@@ -548,6 +557,8 @@ handles.HorizontalArm = HorizontalArm;
 handles.VerticalArm = VerticalArm;
 handles.iIteration = iIteration;
 handles.junc = junc;
+
+
 
 guidata(hObject,handles);
 
@@ -1295,9 +1306,12 @@ if get(handles.checkbox8, 'Value')
         else
             numList = [1:numel(handles.HorizontalArm.allCars)]';
             
-            set(hObject,'string',{numList});
             idx = get(hObject,'Value');
-            
+            if numList < idx
+                idx = 1;
+                set(hObject,'Value',idx);
+            end
+            set(hObject,'string',{numList});
             handles.TempCarHighlight = plotCarEdge(handles.HorizontalArm.allCars(idx),handles.axes7);
         end
     elseif get(handles.radiobutton22, 'Value')
@@ -1308,8 +1322,13 @@ if get(handles.checkbox8, 'Value')
         else
             numList = [1:numel(handles.VerticalArm.allCars)]';
             
-            set(hObject,'string',{numList});
             idx = get(hObject,'Value');
+            if numList < idx
+                idx = 1;
+                set(hObject,'Value',idx);
+            end
+            set(hObject,'string',{numList});
+
             handles.TempCarHighlight = plotCarEdge(handles.VerticalArm.allCars(idx),handles.axes7);
         end
     end
@@ -1429,12 +1448,12 @@ end
 if get(handles.checkbox8,'Value')
     if get(handles.checkbox4,'Value')
         cla(findall(handles.axes5,'type','axes'),'reset');
-        title(handles.axes5,'All Displacements','FontSize',12)
+        title(handles.axes5,'Displacements','FontSize',12)
         xlabel(handles.axes5,'Time, s','FontSize',12)
         ylabel(handles.axes5,'Position, m','FontSize',12)
         hold(handles.axes5,'on');
         grid(handles.axes5,'on');
-        axis(handles.axes5,[min([handles.HorizontalArm.allCars(1:end).timeHistory]) handles.t_rng(handles.iIteration) -inf inf] )
+        axis(handles.axes5,[min([handles.HorizontalArm.allCars(1:end).timeHistory]) handles.t_rng(handles.iIteration) road.startPoint road.endPoint] )
         yyaxis(handles.axes5,'left')
         plot(handles.axes5,[handles.HorizontalArm.allCars(1:end).timeHistory],[handles.HorizontalArm.allCars(1:end).locationHistory],'b-','LineWidth',1)
         yyaxis(handles.axes5,'right')
@@ -1725,3 +1744,20 @@ handles = uibuttongroup6_ButtonDownFcn(handles.uibuttongroup6, eventdata, handle
 handles = edit23_Callback(handles.edit23,eventdata,handles);
 set(hObject,'Value',0);
 save('State.mat','handles','-v7.3');
+
+
+% --------------------------------------------------------------------
+function uipanel10_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to uipanel10 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes during object creation, after setting all properties.
+function uipanel10_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to uipanel10 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+% hObject = uitab(handles.tabgp,'Title','Evaluation');
+% 
+% guidata(hObject,handles)

@@ -56,7 +56,7 @@ for iIteration = 1:nIterations
     VerticalArm.move_all_cars(t,dt,iIteration,nIterations)
     
     if plotFlag
-        pause(0.01)
+        pause(0.001)
         junc.delete_car_images();
     end
 end

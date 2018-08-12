@@ -83,7 +83,7 @@ classdef FiniteRoad < Road
             if obj.numCars > 1
                 obj.allCars(1).Next.leaderFlag = true;
             end
-            if t > obj.tolerance && any(~isnan(obj.allCars(1).timeHistory))
+            if t >= obj.tolerance && any(~isnan(obj.allCars(1).timeHistory))
                 obj.collect_car_history(obj.allCars(1));
             end
             obj.allCars(1).removeNode;
@@ -112,7 +112,7 @@ classdef FiniteRoad < Road
             cutNumCars = 0;
             for iCar = 1:obj.numCars
                 
-                if t > obj.tolerance &&  obj.allCars(iCar).pose(1) >= (obj.startPoint+50) && obj.allCars(iCar).pose(1) <= (obj.endPoint-50)
+                if t >= obj.tolerance &&  obj.allCars(iCar).pose(1) >= (obj.startPoint+50) && obj.allCars(iCar).pose(1) <= (obj.endPoint-50)
                     aggregatedVelocities = aggregatedVelocities + obj.allCars(iCar).velocity;
                     cutNumCars = cutNumCars + 1;
                 end
@@ -121,7 +121,7 @@ classdef FiniteRoad < Road
                 obj.allCars(iCar).store_state_data(t)
                 obj.allCars(iCar).move_car(dt)
             end
-            if t > obj.tolerance
+            if t >= obj.tolerance
                 obj.averageVelocityHistory(iIteration) = aggregatedVelocities/cutNumCars;
                 obj.numCarsHistory(iIteration) = cutNumCars;
             end
