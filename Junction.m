@@ -13,6 +13,8 @@ classdef Junction < handle
         function plot_outline(obj,roadDimensions)
             allAxesInFigure = findall(0,'type','axes');
             if ~isempty(allAxesInFigure)
+                plotCars
+                allAxesInFigure = findall(0,'type','axes');
                 obj.junctionPlotHandle = allAxesInFigure(1);
             else
                 figure('units', 'normalized', 'position', [0.4, 0, 0.6, 1]);
