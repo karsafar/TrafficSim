@@ -3,6 +3,7 @@ classdef Car < dlnode
         maximumAcceleration = [3.5 -3.5]
     end
     properties (Access = public)
+        priority = 0
         dt = 0
         pose = NaN(1,2)
         velocity = 0

@@ -22,7 +22,7 @@ function varargout = microSim(varargin)
 
 % Edit the above text to modify the response to help UI
 
-% Last Modified by GUIDE v2.5 11-Aug-2018 18:29:57
+% Last Modified by GUIDE v2.5 13-Aug-2018 16:20:37
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -60,6 +60,7 @@ handles.roadTypes = {@LoopRoad @FiniteRoad};
 % handles.hPlot7 = plot(handles.axes7, NaN, NaN)
 
 set(findall(handles.uipanel10, '-property', 'enable'), 'enable', 'off')
+
 handles = text18_Callback(handles.text18,eventdata,handles);
 handles = edit23_Callback(handles.edit23,eventdata,handles);
 handles = edit27_Callback(handles.edit27,eventdata,handles);
@@ -152,9 +153,6 @@ function edit3_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of edit3 as text
 %        str2double(get(hObject,'String')) returns contents of edit3 as a double
-
-
-
 
 
 % --- Executes during object creation, after setting all properties.
@@ -526,13 +524,19 @@ for iIteration = handles.iIteration:nIterations
     VerticalArm.move_all_cars(t,dt,iIteration,nIterations)
     
     if get(handles.pushbutton3,'userdata') % stop condition
+        for iCar = 1:HorizontalArm.numCars
+            HorizontalArm.collect_car_history(HorizontalArm.allCars(iCar));
+        end
+        for jCar = 1:VerticalArm.numCars
+            VerticalArm.collect_car_history(VerticalArm.allCars(jCar));
+        end
         break;
     end
     if plotFlag
         pause(0.01)
-        %if iIteration < nIterations
+        if iIteration < nIterations
             junc.delete_car_images();
-        %end
+        end
     elseif mod(iIteration,360) == 0
         if getappdata(f,'canceling')
             set(handles.pushbutton3,'userdata',1);
@@ -1453,16 +1457,22 @@ if get(handles.checkbox8,'Value')
         ylabel(handles.axes5,'Position, m','FontSize',12)
         hold(handles.axes5,'on');
         grid(handles.axes5,'on');
-        axis(handles.axes5,[min([handles.HorizontalArm.allCars(1:end).timeHistory]) handles.t_rng(handles.iIteration) road.startPoint road.endPoint] )
+        axis(handles.axes5,[0 handles.t_rng(handles.iIteration) road.startPoint road.endPoint] )
         yyaxis(handles.axes5,'left')
-        plot(handles.axes5,[handles.HorizontalArm.allCars(1:end).timeHistory],[handles.HorizontalArm.allCars(1:end).locationHistory],'b-','LineWidth',1)
+        for iCar = 1:handles.HorizontalArm.nCarHistory
+            plot(handles.axes5,handles.HorizontalArm.carHistory{iCar}(1,1:end),handles.HorizontalArm.carHistory{iCar}(2,1:end),'b-','LineWidth',1)
+        end
+%         plot(handles.axes5,[handles.HorizontalArm.allCars(1:end).timeHistory],[handles.HorizontalArm.allCars(1:end).locationHistory],'b-','LineWidth',1)
         yyaxis(handles.axes5,'right')
-        plot(handles.axes5,[handles.VerticalArm.allCars(1:end).timeHistory],[handles.VerticalArm.allCars(1:end).locationHistory],'r-','LineWidth',1);
+        for jCar = 1:handles.VerticalArm.nCarHistory
+            plot(handles.axes5,handles.VerticalArm.carHistory{jCar}(1,1:end),handles.VerticalArm.carHistory{jCar}(2,1:end),'r-','LineWidth',1)
+        end
+%         plot(handles.axes5,[handles.VerticalArm.allCars(1:end).timeHistory],[handles.VerticalArm.allCars(1:end).locationHistory],'r-','LineWidth',1);
         ylabel(handles.axes5,'Position, m','FontSize',12)
         set(handles.axes5, 'Ydir', 'reverse')
         plot(handles.axes5,handles.t_rng(1:handles.iIteration),zeros(1,handles.iIteration),'-g','LineWidth',1);
     end
-    if get(handles.checkbox5,'Value')
+    if get(handles.checkbox5,'Value') && ~isempty(cars)
         cla(findall(handles.axes2,'type','axes'));
         idx = get(handles.listbox2,'Value');
         title(handles.axes2,'Velocity Profile','FontSize',12)
@@ -1661,9 +1671,9 @@ roadEnd = str2num(get(handles.edit19,'String'));
 roadWidth = str2num(get(handles.edit20,'String'));
 dt = str2num(get(handles.edit17,'String'));
 if get(handles.radiobutton11,'Value')
-    sz = [str2num(get(handles.edit4,'String')) 5];
-    varTypes = {'double','double','double','double','function_handle'};
-    varNames = {'position','velocity','target_velocity','acceleration','carType'};
+    sz = [str2num(get(handles.edit4,'String')) 6];
+    varTypes = {'double','double','double','double','function_handle','double'};
+    varNames = {'position','velocity','target_velocity','acceleration','carType','priority'};
     
     T = table('Size',sz,'VariableTypes',varTypes,'VariableNames',varNames);
     T.position = [str2num(get(handles.edit5,'String'))'];
@@ -1671,6 +1681,7 @@ if get(handles.radiobutton11,'Value')
     T.target_velocity = [str2num(get(handles.edit30,'String'))'];
     T.acceleration = [str2num(get(handles.edit7,'String'))'];
     T.carType = {handles.carTypes{str2num(get(handles.edit8,'String'))'}}';
+    T.priority = [str2num(get(handles.edit32,'String'))'];
     
     handles.Arm.H = SpawnCars(T,'horizontal',roadStart,roadEnd,roadWidth,dt);
 else
@@ -1705,9 +1716,9 @@ roadEnd = str2num(get(handles.edit25,'String'));
 roadWidth = str2num(get(handles.edit26,'String'));
 dt = str2num(get(handles.edit17,'String'));
 if get(handles.radiobutton18,'Value')
-    sz = [str2num(get(handles.edit15,'String')) 5];
-    varTypes = {'double','double','double','double','function_handle'};
-    varNames = {'position','velocity','target_velocity','acceleration','carType'};
+    sz = [str2num(get(handles.edit15,'String')) 6];
+    varTypes = {'double','double','double','double','function_handle','double'};
+    varNames = {'position','velocity','target_velocity','acceleration','carType','priority'};
     
     T = table('Size',sz,'VariableTypes',varTypes,'VariableNames',varNames);
     T.position = [str2num(get(handles.edit14,'String'))'];
@@ -1715,7 +1726,8 @@ if get(handles.radiobutton18,'Value')
     T.target_velocity = [str2num(get(handles.edit31,'String'))'];
     T.acceleration = [str2num(get(handles.edit12,'String'))'];
     T.carType = {handles.carTypes{str2num(get(handles.edit11,'String'))'}}';
-    
+    T.priority = [str2num(get(handles.edit33,'String'))'];
+
     handles.Arm.V = SpawnCars(T,'vertical',roadStart,roadEnd,roadWidth,dt);
 else
     nIterations = str2double(get(handles.edit23,'String'));
@@ -1759,3 +1771,49 @@ function uipanel10_CreateFcn(hObject, eventdata, handles)
 % hObject = uitab(handles.tabgp,'Title','Evaluation');
 % 
 % guidata(hObject,handles)
+
+
+
+function edit32_Callback(hObject, eventdata, handles)
+% hObject    handle to edit32 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit32 as text
+%        str2double(get(hObject,'String')) returns contents of edit32 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit32_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit32 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit33_Callback(hObject, eventdata, handles)
+% hObject    handle to edit33 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit33 as text
+%        str2double(get(hObject,'String')) returns contents of edit33 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit33_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit33 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

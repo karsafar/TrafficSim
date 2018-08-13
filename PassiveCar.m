@@ -22,7 +22,8 @@ classdef PassiveCar < IdmCar
                 dt = varargin{4};
             end
             obj = obj@IdmCar(orientation, startPoint, Width,dt);
-            
+            obj.priority = 0;
+
             %-----------------Initialize Blackboard------------------
             obj.bb = BtBlackboard;
             obj.it_accel = obj.bb.add_item('A',obj.acceleration);
