@@ -38,6 +38,7 @@ classdef SpawnCars < handle
                 new_car.velocity = SpawnData{iCar,2};
                 new_car.targetVelocity = SpawnData{iCar,3};
                 new_car.acceleration = SpawnData{iCar,4};
+                new_car.priority = SpawnData{iCar,6};
                 obj.allCars = [obj.allCars new_car];
                 if iCar  > 1
                     insertAfter(obj.allCars(iCar),obj.allCars(iCar-1));
