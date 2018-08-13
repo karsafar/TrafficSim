@@ -22,7 +22,7 @@ function varargout = microSim(varargin)
 
 % Edit the above text to modify the response to help UI
 
-% Last Modified by GUIDE v2.5 13-Aug-2018 16:20:37
+% Last Modified by GUIDE v2.5 13-Aug-2018 23:27:11
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -1671,9 +1671,9 @@ roadEnd = str2num(get(handles.edit19,'String'));
 roadWidth = str2num(get(handles.edit20,'String'));
 dt = str2num(get(handles.edit17,'String'));
 if get(handles.radiobutton11,'Value')
-    sz = [str2num(get(handles.edit4,'String')) 6];
-    varTypes = {'double','double','double','double','function_handle','double'};
-    varNames = {'position','velocity','target_velocity','acceleration','carType','priority'};
+    sz = [str2num(get(handles.edit4,'String')) 7];
+    varTypes = {'double','double','double','double','function_handle','double','double'};
+    varNames = {'position','velocity','target_velocity','acceleration','carType','priority','max_vel'};
     
     T = table('Size',sz,'VariableTypes',varTypes,'VariableNames',varNames);
     T.position = [str2num(get(handles.edit5,'String'))'];
@@ -1682,6 +1682,7 @@ if get(handles.radiobutton11,'Value')
     T.acceleration = [str2num(get(handles.edit7,'String'))'];
     T.carType = {handles.carTypes{str2num(get(handles.edit8,'String'))'}}';
     T.priority = [str2num(get(handles.edit32,'String'))'];
+    T.max_vel = [str2num(get(handles.edit34,'String'))'];
     
     handles.Arm.H = SpawnCars(T,'horizontal',roadStart,roadEnd,roadWidth,dt);
 else
@@ -1716,9 +1717,9 @@ roadEnd = str2num(get(handles.edit25,'String'));
 roadWidth = str2num(get(handles.edit26,'String'));
 dt = str2num(get(handles.edit17,'String'));
 if get(handles.radiobutton18,'Value')
-    sz = [str2num(get(handles.edit15,'String')) 6];
-    varTypes = {'double','double','double','double','function_handle','double'};
-    varNames = {'position','velocity','target_velocity','acceleration','carType','priority'};
+    sz = [str2num(get(handles.edit15,'String')) 7];
+    varTypes = {'double','double','double','double','function_handle','double','double'};
+    varNames = {'position','velocity','target_velocity','acceleration','carType','priority','max_vel'};
     
     T = table('Size',sz,'VariableTypes',varTypes,'VariableNames',varNames);
     T.position = [str2num(get(handles.edit14,'String'))'];
@@ -1727,7 +1728,8 @@ if get(handles.radiobutton18,'Value')
     T.acceleration = [str2num(get(handles.edit12,'String'))'];
     T.carType = {handles.carTypes{str2num(get(handles.edit11,'String'))'}}';
     T.priority = [str2num(get(handles.edit33,'String'))'];
-
+    T.max_vel = [str2num(get(handles.edit35,'String'))'];
+    
     handles.Arm.V = SpawnCars(T,'vertical',roadStart,roadEnd,roadWidth,dt);
 else
     nIterations = str2double(get(handles.edit23,'String'));
@@ -1809,6 +1811,52 @@ function edit33_Callback(hObject, eventdata, handles)
 % --- Executes during object creation, after setting all properties.
 function edit33_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to edit33 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit34_Callback(hObject, eventdata, handles)
+% hObject    handle to edit34 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit34 as text
+%        str2double(get(hObject,'String')) returns contents of edit34 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit34_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit34 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit35_Callback(hObject, eventdata, handles)
+% hObject    handle to edit35 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit35 as text
+%        str2double(get(hObject,'String')) returns contents of edit35 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit35_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit35 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
