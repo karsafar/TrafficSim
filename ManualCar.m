@@ -21,7 +21,8 @@ classdef ManualCar < HdmCar
                 dt = varargin{4};
             end
             obj = obj@HdmCar(orientation, startPoint, Width,dt);
-            
+            obj.priority = 1;
+
             %-----------------Initialize Blackboard------------------
             obj.bb = BtBlackboard;
             obj.it_accel = obj.bb.add_item('A',obj.acceleration);

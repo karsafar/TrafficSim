@@ -22,7 +22,7 @@ function varargout = microSim(varargin)
 
 % Edit the above text to modify the response to help UI
 
-% Last Modified by GUIDE v2.5 11-Aug-2018 18:29:57
+% Last Modified by GUIDE v2.5 13-Aug-2018 02:58:43
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -60,6 +60,7 @@ handles.roadTypes = {@LoopRoad @FiniteRoad};
 % handles.hPlot7 = plot(handles.axes7, NaN, NaN)
 
 set(findall(handles.uipanel10, '-property', 'enable'), 'enable', 'off')
+
 handles = text18_Callback(handles.text18,eventdata,handles);
 handles = edit23_Callback(handles.edit23,eventdata,handles);
 handles = edit27_Callback(handles.edit27,eventdata,handles);
@@ -526,13 +527,19 @@ for iIteration = handles.iIteration:nIterations
     VerticalArm.move_all_cars(t,dt,iIteration,nIterations)
     
     if get(handles.pushbutton3,'userdata') % stop condition
+        for iCar = 1:HorizontalArm.numCars
+            HorizontalArm.collect_car_history(HorizontalArm.allCars(iCar));
+        end
+        for jCar = 1:VerticalArm.numCars
+            VerticalArm.collect_car_history(VerticalArm.allCars(jCar));
+        end
         break;
     end
     if plotFlag
         pause(0.01)
-        %if iIteration < nIterations
+        if iIteration < nIterations
             junc.delete_car_images();
-        %end
+        end
     elseif mod(iIteration,360) == 0
         if getappdata(f,'canceling')
             set(handles.pushbutton3,'userdata',1);
@@ -1453,16 +1460,22 @@ if get(handles.checkbox8,'Value')
         ylabel(handles.axes5,'Position, m','FontSize',12)
         hold(handles.axes5,'on');
         grid(handles.axes5,'on');
-        axis(handles.axes5,[min([handles.HorizontalArm.allCars(1:end).timeHistory]) handles.t_rng(handles.iIteration) road.startPoint road.endPoint] )
+        axis(handles.axes5,[0 handles.t_rng(handles.iIteration) road.startPoint road.endPoint] )
         yyaxis(handles.axes5,'left')
-        plot(handles.axes5,[handles.HorizontalArm.allCars(1:end).timeHistory],[handles.HorizontalArm.allCars(1:end).locationHistory],'b-','LineWidth',1)
+        for iCar = 1:handles.HorizontalArm.nCarHistory
+            plot(handles.axes5,handles.HorizontalArm.carHistory{iCar}(1,1:end),handles.HorizontalArm.carHistory{iCar}(2,1:end),'b-','LineWidth',1)
+        end
+%         plot(handles.axes5,[handles.HorizontalArm.allCars(1:end).timeHistory],[handles.HorizontalArm.allCars(1:end).locationHistory],'b-','LineWidth',1)
         yyaxis(handles.axes5,'right')
-        plot(handles.axes5,[handles.VerticalArm.allCars(1:end).timeHistory],[handles.VerticalArm.allCars(1:end).locationHistory],'r-','LineWidth',1);
+        for jCar = 1:handles.VerticalArm.nCarHistory
+            plot(handles.axes5,handles.VerticalArm.carHistory{jCar}(1,1:end),handles.VerticalArm.carHistory{jCar}(2,1:end),'r-','LineWidth',1)
+        end
+%         plot(handles.axes5,[handles.VerticalArm.allCars(1:end).timeHistory],[handles.VerticalArm.allCars(1:end).locationHistory],'r-','LineWidth',1);
         ylabel(handles.axes5,'Position, m','FontSize',12)
         set(handles.axes5, 'Ydir', 'reverse')
         plot(handles.axes5,handles.t_rng(1:handles.iIteration),zeros(1,handles.iIteration),'-g','LineWidth',1);
     end
-    if get(handles.checkbox5,'Value')
+    if get(handles.checkbox5,'Value') && ~isempty(cars)
         cla(findall(handles.axes2,'type','axes'));
         idx = get(handles.listbox2,'Value');
         title(handles.axes2,'Velocity Profile','FontSize',12)
