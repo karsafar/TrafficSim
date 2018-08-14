@@ -1462,15 +1462,14 @@ if get(handles.checkbox8,'Value')
         for iCar = 1:handles.HorizontalArm.nCarHistory
             plot(handles.axes5,handles.HorizontalArm.carHistory{iCar}(1,1:end),handles.HorizontalArm.carHistory{iCar}(2,1:end),'b-','LineWidth',1)
         end
-%         plot(handles.axes5,[handles.HorizontalArm.allCars(1:end).timeHistory],[handles.HorizontalArm.allCars(1:end).locationHistory],'b-','LineWidth',1)
         yyaxis(handles.axes5,'right')
         for jCar = 1:handles.VerticalArm.nCarHistory
             plot(handles.axes5,handles.VerticalArm.carHistory{jCar}(1,1:end),handles.VerticalArm.carHistory{jCar}(2,1:end),'r-','LineWidth',1)
         end
-%         plot(handles.axes5,[handles.VerticalArm.allCars(1:end).timeHistory],[handles.VerticalArm.allCars(1:end).locationHistory],'r-','LineWidth',1);
         ylabel(handles.axes5,'Position, m','FontSize',12)
         set(handles.axes5, 'Ydir', 'reverse')
         plot(handles.axes5,handles.t_rng(1:handles.iIteration),zeros(1,handles.iIteration),'-g','LineWidth',1);
+        axis(handles.axes5,[0 handles.t_rng(handles.iIteration) road.startPoint road.endPoint] )
     end
     if get(handles.checkbox5,'Value') && ~isempty(cars)
         cla(findall(handles.axes2,'type','axes'));
