@@ -1316,7 +1316,8 @@ if get(handles.checkbox8, 'Value')
                 set(hObject,'Value',idx);
             end
             set(hObject,'string',{numList});
-            handles.TempCarHighlight = plotCarEdge(handles.HorizontalArm.allCars(idx),handles.axes7);
+            allAxesInFigure = findall(0,'type','axes');
+            handles.TempCarHighlight = plotCarEdge(handles.HorizontalArm.allCars(idx),allAxesInFigure(1));
         end
     elseif get(handles.radiobutton22, 'Value')
         if numel(handles.VerticalArm.allCars) == 0
@@ -1332,8 +1333,8 @@ if get(handles.checkbox8, 'Value')
                 set(hObject,'Value',idx);
             end
             set(hObject,'string',{numList});
-
-            handles.TempCarHighlight = plotCarEdge(handles.VerticalArm.allCars(idx),handles.axes7);
+            allAxesInFigure = findall(0,'type','axes');
+            handles.TempCarHighlight = plotCarEdge(handles.VerticalArm.allCars(idx),allAxesInFigure(1));
         end
     end
 end
@@ -1344,7 +1345,7 @@ function CarsImageHandle = plotCarEdge(obj,junctionAxesHandle)
 plotVectorX = NaN(1,5);
 plotVectorY = NaN(1,5);
 iDimension = obj.dimension;
-iPosition = obj.pose;
+iPosition = [obj.locationHistory(obj.historyIndex-1), obj.pose(2)];
 
 %the origin is placed on the middle of the rear wheels
 carRectangle = [ 0 0; iDimension(2) 0; iDimension(2) iDimension(1); 0 iDimension(1)]-...
@@ -1454,7 +1455,7 @@ if get(handles.checkbox8,'Value')
         cla(findall(handles.axes5,'type','axes'),'reset');
         title(handles.axes5,'Displacements','FontSize',12)
         xlabel(handles.axes5,'Time, s','FontSize',12)
-        ylabel(handles.axes5,'Position, m','FontSize',12)
+        ylabel(handles.axes5,'Horizontal Position, m','FontSize',12)
         hold(handles.axes5,'on');
         grid(handles.axes5,'on');
         axis(handles.axes5,[0 handles.t_rng(handles.iIteration) road.startPoint road.endPoint] )
@@ -1466,7 +1467,7 @@ if get(handles.checkbox8,'Value')
         for jCar = 1:handles.VerticalArm.nCarHistory
             plot(handles.axes5,handles.VerticalArm.carHistory{jCar}(1,1:end),handles.VerticalArm.carHistory{jCar}(2,1:end),'r-','LineWidth',1)
         end
-        ylabel(handles.axes5,'Position, m','FontSize',12)
+        ylabel(handles.axes5,'Vertical Position, m','FontSize',12)
         set(handles.axes5, 'Ydir', 'reverse')
         plot(handles.axes5,handles.t_rng(1:handles.iIteration),zeros(1,handles.iIteration),'-g','LineWidth',1);
         axis(handles.axes5,[0 handles.t_rng(handles.iIteration) road.startPoint road.endPoint] )
