@@ -22,7 +22,7 @@ function varargout = microSim(varargin)
 
 % Edit the above text to modify the response to help UI
 
-% Last Modified by GUIDE v2.5 13-Aug-2018 23:27:11
+% Last Modified by GUIDE v2.5 14-Aug-2018 00:43:41
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -1751,11 +1751,61 @@ function pushbutton8_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton8 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-handles = uibuttongroup2_ButtonDownFcn(handles.uibuttongroup2, eventdata, handles);
-handles = uibuttongroup6_ButtonDownFcn(handles.uibuttongroup6, eventdata, handles);
-handles = edit23_Callback(handles.edit23,eventdata,handles);
-set(hObject,'Value',0);
-save('State.mat','handles','-v7.3');
+sim.runTime = get(handles.edit16,'String');
+sim.timeStepSize = get(handles.edit17,'String');
+sim.rightCarPriority = get(handles.edit22,'Value');
+sim.animate = get(handles.checkbox1,'Value');
+
+%% horizontal arm
+sim.H.start = get(handles.edit18,'String');
+sim.H.end = get(handles.edit19,'String');
+sim.H.width = get(handles.edit20,'String');
+sim.H.prescribeDensityFlow = get(handles.radiobutton10,'Value');
+sim.H.manuallyInputCars = get(handles.radiobutton11,'Value');
+sim.H.loopRoad = get(handles.radiobutton14,'Value');
+sim.H.finiteRoad = get(handles.radiobutton15,'Value');
+
+% manual Traffic assignment
+sim.H.nCars = get(handles.edit4,'String');
+sim.H.position = get(handles.edit5,'String');
+sim.H.velocity = get(handles.edit6,'String');
+sim.H.target_velocity = get(handles.edit30,'String');
+sim.H.acceleration = get(handles.edit7,'String');
+sim.H.carType = get(handles.edit8,'String');
+sim.H.priority = get(handles.edit32,'String');
+sim.H.max_vel = get(handles.edit34,'String');
+
+% random traffic assignment
+sim.H.density = get(handles.edit2,'String');
+sim.H.flowrate = get(handles.edit3,'String');
+sim.H.carTypeRatio = get(handles.edit28,'String');
+sim.H.fixedSeed = get(handles.checkbox2,'Value');
+%% vertical arm
+sim.V.start = get(handles.edit24,'String');
+sim.V.end = get(handles.edit25,'String');
+sim.V.width = get(handles.edit26,'String');
+sim.V.prescribeDensityFlow = get(handles.radiobutton19,'Value');
+sim.V.manuallyInputCars = get(handles.radiobutton18,'Value');
+sim.V.loopRoad = get(handles.radiobutton17,'Value');
+sim.V.finiteRoad = get(handles.radiobutton16,'Value');
+
+% manual Traffic assignment
+sim.V.nCars = get(handles.edit15,'String');
+sim.V.position = get(handles.edit14,'String');
+sim.V.velocity = get(handles.edit13,'String');
+sim.V.target_velocity = get(handles.edit31,'String');
+sim.V.acceleration = get(handles.edit12,'String');
+sim.V.carType = get(handles.edit11,'String');
+sim.V.priority = get(handles.edit33,'String');
+sim.V.max_vel = get(handles.edit35,'String');
+
+% random traffic assignment
+sim.V.density = get(handles.edit10,'String');
+sim.V.flowrate = get(handles.edit9,'String');
+sim.V.carTypeRatio = get(handles.edit29,'String');
+sim.V.fixedSeed = get(handles.checkbox3,'Value');
+
+uisave('sim')
 
 
 % --------------------------------------------------------------------
@@ -1865,3 +1915,66 @@ function edit35_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in pushbutton9.
+function pushbutton9_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton9 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+uiopen
+
+set(handles.edit16,'String',sim.runTime);
+set(handles.edit17,'String',sim.timeStepSize);
+set(handles.edit22,'Value',sim.rightCarPriority);
+set(handles.checkbox1,'Value',sim.animate);
+
+%% horizontal arm
+set(handles.edit18,'String', sim.H.start);
+set(handles.edit19,'String',sim.H.end);
+set(handles.edit20,'String',sim.H.width);
+set(handles.radiobutton10,'Value',sim.H.prescribeDensityFlow);
+set(handles.radiobutton11,'Value',sim.H.manuallyInputCars);
+set(handles.radiobutton14,'Value',sim.H.loopRoad);
+set(handles.radiobutton15,'Value',sim.H.finiteRoad);
+
+% manual Traffic assignment
+set(handles.edit4,'String',sim.H.nCars);
+set(handles.edit5,'String',sim.H.position);
+set(handles.edit6,'String',sim.H.velocity);
+set(handles.edit30,'String',sim.H.target_velocity);
+set(handles.edit7,'String',sim.H.acceleration);
+set(handles.edit8,'String',sim.H.carType);
+set(handles.edit32,'String',sim.H.priority);
+set(handles.edit34,'String',sim.H.max_vel);
+
+% random traffic assignment
+set(handles.edit2,'String',sim.H.density);
+set(handles.edit3,'String',sim.H.flowrate);
+set(handles.edit28,'String',sim.H.carTypeRatio);
+set(handles.checkbox2,'Value',sim.H.fixedSeed);
+%% vertical arm
+set(handles.edit24,'String',sim.V.start);
+set(handles.edit25,'String',sim.V.end);
+set(handles.edit26,'String',sim.V.width);
+set(handles.radiobutton19,'Value',sim.V.prescribeDensityFlow);
+set(handles.radiobutton18,'Value',sim.V.manuallyInputCars);
+set(handles.radiobutton17,'Value',sim.V.loopRoad);
+set(handles.radiobutton16,'Value',sim.V.finiteRoad);
+
+% manual Traffic assignment
+set(handles.edit15,'String',sim.V.nCars);
+set(handles.edit14,'String',sim.V.position);
+set(handles.edit13,'String',sim.V.velocity);
+set(handles.edit31,'String',sim.V.target_velocity);
+set(handles.edit12,'String',sim.V.acceleration);
+set(handles.edit11,'String',sim.V.carType);
+set(handles.edit33,'String',sim.V.priority);
+set(handles.edit35,'String',sim.V.max_vel);
+
+% random traffic assignment
+set(handles.edit10,'String',sim.V.density);
+set(handles.edit9,'String',sim.V.flowrate);
+set(handles.edit29,'String',sim.V.carTypeRatio);
+set(handles.checkbox3,'Value',sim.V.fixedSeed);
