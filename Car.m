@@ -25,7 +25,7 @@ classdef Car < dlnode
     end
     properties (Constant)
         dimension = [2.16 4.4 2.75];
-        tol = 1e-1
+        tol = 5e-1
     end
     methods
         
