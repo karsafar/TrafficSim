@@ -22,7 +22,7 @@ function varargout = microSim(varargin)
 
 % Edit the above text to modify the response to help UI
 
-% Last Modified by GUIDE v2.5 15-Aug-2018 01:27:53
+% Last Modified by GUIDE v2.5 15-Aug-2018 17:56:01
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -2015,3 +2015,15 @@ function pushbutton10_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 close(microSim);
 run('microSim');   
+
+
+% --- Executes on button press in pushbutton11.
+function pushbutton11_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton11 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+cla(findall(handles.axes2,'type','axes'),'reset');
+cla(findall(handles.axes4,'type','axes'),'reset');
+cla(findall(handles.axes5,'type','axes'),'reset');
+cla(findall(handles.axes6,'type','axes'),'reset');
+guidata(hObject,handles);
