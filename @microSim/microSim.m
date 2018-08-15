@@ -22,7 +22,7 @@ function varargout = microSim(varargin)
 
 % Edit the above text to modify the response to help UI
 
-% Last Modified by GUIDE v2.5 15-Aug-2018 17:56:01
+% Last Modified by GUIDE v2.5 15-Aug-2018 19:58:28
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -2005,6 +2005,7 @@ if sim.ResumeFlag
     handles.HorizontalArm = sim.HorizontalArm;
     handles.VerticalArm = sim.VerticalArm;
 end
+set(handles.checkbox11, 'enable', 'on')
 guidata(hObject,handles);
 
 
@@ -2027,3 +2028,17 @@ cla(findall(handles.axes4,'type','axes'),'reset');
 cla(findall(handles.axes5,'type','axes'),'reset');
 cla(findall(handles.axes6,'type','axes'),'reset');
 guidata(hObject,handles);
+
+
+% --- Executes on button press in checkbox11.
+function checkbox11_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox11 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+enableFlag = get(hObject,'Value');
+if enableFlag
+    handles.loadFlag = 0;
+end
+guidata(hObject,handles);
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox11
