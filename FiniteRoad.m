@@ -112,7 +112,7 @@ classdef FiniteRoad < Road
             cutNumCars = 0;
             for iCar = 1:obj.numCars
                 
-                if t >= obj.tolerance &&  obj.allCars(iCar).pose(1) >= (obj.startPoint+50) && obj.allCars(iCar).pose(1) <= (obj.endPoint-50)
+                if t >= obj.tolerance %&& obj.allCars(iCar).pose(1) >= (obj.startPoint+50) && obj.allCars(iCar).pose(1) <= (obj.endPoint-50)
                     aggregatedVelocities = aggregatedVelocities + obj.allCars(iCar).velocity;
                     cutNumCars = cutNumCars + 1;
                 end
