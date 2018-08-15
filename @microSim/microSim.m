@@ -22,7 +22,7 @@ function varargout = microSim(varargin)
 
 % Edit the above text to modify the response to help UI
 
-% Last Modified by GUIDE v2.5 14-Aug-2018 00:43:41
+% Last Modified by GUIDE v2.5 15-Aug-2018 01:27:53
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -73,7 +73,7 @@ handles.allCarsNumArray_V = zeros(1,numel(handles.carTypes));
 handles.t_rng = [];
 handles.iIteration = 1;
 handles.TempCarHighlight = [];
-
+handles.loadFlag = 0;
 % handles.tabgp = uitabgroup(handles.uipanel16);
 % tab2 = uitab(tabgp,'Title','Plot Options');
 
@@ -424,9 +424,10 @@ function handles = pushbutton2_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton2 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-handles = uibuttongroup2_ButtonDownFcn(handles.uibuttongroup2, eventdata, handles);
-handles = uibuttongroup6_ButtonDownFcn(handles.uibuttongroup6, eventdata, handles);
+if handles.loadFlag == 0
+    handles = uibuttongroup2_ButtonDownFcn(handles.uibuttongroup2, eventdata, handles);
+    handles = uibuttongroup6_ButtonDownFcn(handles.uibuttongroup6, eventdata, handles);
+end
 handles = edit23_Callback(handles.edit23,eventdata,handles);
 
 if get(handles.radiobutton14,'Value') && get(handles.radiobutton15,'Value') == 0
@@ -533,7 +534,7 @@ for iIteration = handles.iIteration:nIterations
         break;
     end
     if plotFlag
-        pause(0.01)
+        pause(0.05)
         if iIteration < nIterations
             junc.delete_car_images();
         end
@@ -952,7 +953,7 @@ runTime = str2double(get(handles.edit16,'String'));
 dt = str2double(get(handles.edit17,'String'));
 nIterations = (runTime/dt)+1;
 set(hObject,'String',nIterations);
-nDigits = numel(num2str(dt))-2;
+% nDigits = numel(num2str(dt))-2;
 handles.t_rng = 0:dt:runTime;
 % handles.t_rng = round(linspace(0,runTime,nIterations),nDigits);
 
@@ -1308,10 +1309,10 @@ if get(handles.checkbox8, 'Value')
             set(hObject,'Value',1);
             set(hObject,'string',{numList});
         else
-            numList = [1:numel(handles.HorizontalArm.allCars)]';
+            numList = (1:numel(handles.HorizontalArm.allCars))';
             
             idx = get(hObject,'Value');
-            if numList < idx
+            if numel(handles.HorizontalArm.allCars) < idx
                 idx = 1;
                 set(hObject,'Value',idx);
             end
@@ -1325,10 +1326,10 @@ if get(handles.checkbox8, 'Value')
             set(hObject,'Value',1);
             set(hObject,'string',{numList});
         else
-            numList = [1:numel(handles.VerticalArm.allCars)]';
+            numList = (1:numel(handles.VerticalArm.allCars))';
             
             idx = get(hObject,'Value');
-            if numList < idx
+            if numel(handles.VerticalArm.allCars) < idx
                 idx = 1;
                 set(hObject,'Value',idx);
             end
@@ -1421,6 +1422,7 @@ if get(handles.checkbox8,'Value')
 %     set(handles.listbox2,'Value',0);
     handles = listbox2_Callback(handles.listbox2,eventdata,handles);
 end
+guidata(hObject, handles);
 % Hint: get(hObject,'Value') returns toggle state of radiobutton21
 
 
@@ -1433,6 +1435,7 @@ if get(handles.checkbox8,'Value')
 %     set(handles.listbox2,'Value',1);
     handles = listbox2_Callback(handles.listbox2,eventdata,handles);
 end
+guidata(hObject, handles);
 % Hint: get(hObject,'Value') returns toggle state of radiobutton22
 
 
@@ -1501,7 +1504,7 @@ if get(handles.checkbox9,'Value')
         cla(findall(handles.axes4,'type','axes'));
         
         for i = 1:handles.iIteration
-            cumulativeAverage(i) = nanmean(road.averageVelocityHistory(1:i));
+            cumulativeAverage(i) = nanmean(road.averageVelocityHistory(1:i)); %#ok<*AGROW>
         end
         
         title(handles.axes4,'Cumulative Velocity Average','FontSize',12)
@@ -1676,13 +1679,13 @@ if get(handles.radiobutton11,'Value')
     varNames = {'position','velocity','target_velocity','acceleration','carType','priority','max_vel'};
     
     T = table('Size',sz,'VariableTypes',varTypes,'VariableNames',varNames);
-    T.position = [str2num(get(handles.edit5,'String'))'];
-    T.velocity = [str2num(get(handles.edit6,'String'))'];
-    T.target_velocity = [str2num(get(handles.edit30,'String'))'];
-    T.acceleration = [str2num(get(handles.edit7,'String'))'];
+    T.position = (str2num(get(handles.edit5,'String'))');
+    T.velocity = (str2num(get(handles.edit6,'String'))');
+    T.target_velocity = (str2num(get(handles.edit30,'String'))'); %#ok<*ST2NM>
+    T.acceleration = (str2num(get(handles.edit7,'String'))');
     T.carType = {handles.carTypes{str2num(get(handles.edit8,'String'))'}}';
-    T.priority = [str2num(get(handles.edit32,'String'))'];
-    T.max_vel = [str2num(get(handles.edit34,'String'))'];
+    T.priority = (str2num(get(handles.edit32,'String'))');
+    T.max_vel = (str2num(get(handles.edit34,'String'))');
     
     handles.Arm.H = SpawnCars(T,'horizontal',roadStart,roadEnd,roadWidth,dt);
 else
@@ -1694,11 +1697,9 @@ else
         spawnRate = str2double(get(handles.edit3,'String'));
         carTypeRatios = str2num(get(handles.edit28,'String'));
         dt = str2double(get(handles.edit17,'String'));
-        handles.Arm.H =  [{carTypeRatios},spawnRate,fixedSeed,dt,nIterations];
+        handles.Arm.H = [{carTypeRatios},spawnRate,fixedSeed,dt,nIterations];
     end
 end
-
-
 guidata(hObject,handles)
 
 
@@ -1722,13 +1723,13 @@ if get(handles.radiobutton18,'Value')
     varNames = {'position','velocity','target_velocity','acceleration','carType','priority','max_vel'};
     
     T = table('Size',sz,'VariableTypes',varTypes,'VariableNames',varNames);
-    T.position = [str2num(get(handles.edit14,'String'))'];
-    T.velocity = [str2num(get(handles.edit13,'String'))'];
-    T.target_velocity = [str2num(get(handles.edit31,'String'))'];
-    T.acceleration = [str2num(get(handles.edit12,'String'))'];
+    T.position = (str2num(get(handles.edit14,'String'))');
+    T.velocity = (str2num(get(handles.edit13,'String'))');
+    T.target_velocity = (str2num(get(handles.edit31,'String'))');
+    T.acceleration = (str2num(get(handles.edit12,'String'))');
     T.carType = {handles.carTypes{str2num(get(handles.edit11,'String'))'}}';
-    T.priority = [str2num(get(handles.edit33,'String'))'];
-    T.max_vel = [str2num(get(handles.edit35,'String'))'];
+    T.priority = (str2num(get(handles.edit33,'String'))');
+    T.max_vel = (str2num(get(handles.edit35,'String'))');
     
     handles.Arm.V = SpawnCars(T,'vertical',roadStart,roadEnd,roadWidth,dt);
 else
@@ -1740,19 +1741,31 @@ else
         spawnRate = str2double(get(handles.edit9,'String'));
         carTypeRatios = str2num(get(handles.edit29,'String'));
         dt = str2double(get(handles.edit17,'String'));
-        handles.Arm.V =  [{carTypeRatios},spawnRate,fixedSeed,dt,nIterations];
+        handles.Arm.V = [{carTypeRatios},spawnRate,fixedSeed,dt,nIterations];
     end
 end
-
 guidata(hObject,handles)
 
 % --- Executes on button press in pushbutton8.
-function pushbutton8_Callback(hObject, eventdata, handles)
+function pushbutton8_Callback(hObject, eventdata, handles) %#ok<*INUSL>
 % hObject    handle to pushbutton8 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+if get(handles.pushbutton3,'userdata')
+    sim.HorizontalArm = handles.HorizontalArm;
+    sim.VerticalArm = handles.VerticalArm;
+    sim.ResumeFlag = 1;
+else
+    handles = uibuttongroup2_ButtonDownFcn(handles.uibuttongroup2, eventdata, handles);
+    handles = uibuttongroup6_ButtonDownFcn(handles.uibuttongroup6, eventdata, handles);
+    handles = edit23_Callback(handles.edit23,eventdata,handles);
+    sim.ResumeFlag = 0;
+end
 sim.runTime = get(handles.edit16,'String');
 sim.timeStepSize = get(handles.edit17,'String');
+sim.t_rng = handles.t_rng;
+sim.Iterations = handles.iIteration;
 sim.rightCarPriority = get(handles.edit22,'Value');
 sim.animate = get(handles.checkbox1,'Value');
 
@@ -1803,9 +1816,11 @@ sim.V.max_vel = get(handles.edit35,'String');
 sim.V.density = get(handles.edit10,'String');
 sim.V.flowrate = get(handles.edit9,'String');
 sim.V.carTypeRatio = get(handles.edit29,'String');
-sim.V.fixedSeed = get(handles.checkbox3,'Value');
+sim.V.fixedSeed = get(handles.checkbox3,'Value');  %#ok<*STRNU>
 
-uisave('sim')
+sim.Arm = handles.Arm;
+
+uisave('sim');
 
 
 % --------------------------------------------------------------------
@@ -1872,7 +1887,7 @@ end
 
 
 
-function edit34_Callback(hObject, eventdata, handles)
+function edit34_Callback(hObject, eventdata, handles) %#ok<*INUSD>
 % hObject    handle to edit34 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -1918,7 +1933,7 @@ end
 
 
 % --- Executes on button press in pushbutton9.
-function pushbutton9_Callback(hObject, eventdata, handles)
+function pushbutton9_Callback(hObject, eventdata, handles) %#ok<*DEFNU>
 % hObject    handle to pushbutton9 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -1927,6 +1942,8 @@ uiopen
 
 set(handles.edit16,'String',sim.runTime);
 set(handles.edit17,'String',sim.timeStepSize);
+handles.iIteration = sim.Iterations;
+handles.t_rng = sim.t_rng;
 set(handles.edit22,'Value',sim.rightCarPriority);
 set(handles.checkbox1,'Value',sim.animate);
 
@@ -1978,3 +1995,23 @@ set(handles.edit10,'String',sim.V.density);
 set(handles.edit9,'String',sim.V.flowrate);
 set(handles.edit29,'String',sim.V.carTypeRatio);
 set(handles.checkbox3,'Value',sim.V.fixedSeed);
+
+handles.Arm = sim.Arm;
+handles.loadFlag = 1;
+
+if sim.ResumeFlag
+    set(handles.pushbutton7, 'enable', 'on')
+    set(findall(handles.uipanel10, '-property', 'enable'), 'enable', 'on')
+    handles.HorizontalArm = sim.HorizontalArm;
+    handles.VerticalArm = sim.VerticalArm;
+end
+guidata(hObject,handles);
+
+
+% --- Executes on button press in pushbutton10.
+function pushbutton10_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton10 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+close(microSim);
+run('microSim');   
