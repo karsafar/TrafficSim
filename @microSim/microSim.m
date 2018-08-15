@@ -22,7 +22,7 @@ function varargout = microSim(varargin)
 
 % Edit the above text to modify the response to help UI
 
-% Last Modified by GUIDE v2.5 15-Aug-2018 19:58:28
+% Last Modified by GUIDE v2.5 15-Aug-2018 21:18:10
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -74,10 +74,7 @@ handles.t_rng = [];
 handles.iIteration = 1;
 handles.TempCarHighlight = [];
 handles.loadFlag = 0;
-% handles.tabgp = uitabgroup(handles.uipanel16);
-% tab2 = uitab(tabgp,'Title','Plot Options');
-
-
+handles.pauseLength = 0.05;
 
 % Update handles structure
 handles.output = hObject;
@@ -534,7 +531,7 @@ for iIteration = handles.iIteration:nIterations
         break;
     end
     if plotFlag
-        pause(0.05)
+        pause(handles.pauseLength)
         if iIteration < nIterations
             junc.delete_car_images();
         end
@@ -851,6 +848,11 @@ function checkbox1_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox1
+if get(hObject,'Value')
+    set(handles.edit36, 'enable', 'on');
+else
+    set(handles.edit36, 'enable', 'off');
+end
 
 
 
@@ -2042,3 +2044,29 @@ end
 guidata(hObject,handles);
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox11
+
+
+
+function handles = edit36_Callback(hObject, eventdata, handles)
+% hObject    handle to edit36 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit36 as text
+%        str2double(get(hObject,'String')) returns contents of edit36 as a double
+handles.pauseLength = str2double(get(hObject,'String'));
+
+guidata(hObject,handles);
+
+
+% --- Executes during object creation, after setting all properties.
+function edit36_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit36 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
