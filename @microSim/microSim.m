@@ -850,8 +850,10 @@ function checkbox1_Callback(hObject, eventdata, handles)
 % Hint: get(hObject,'Value') returns toggle state of checkbox1
 if get(hObject,'Value')
     set(handles.edit36, 'enable', 'on');
+    run('plotCars');
 else
     set(handles.edit36, 'enable', 'off');
+    close(plotCars);
 end
 
 
