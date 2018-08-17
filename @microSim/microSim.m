@@ -22,7 +22,7 @@ function varargout = microSim(varargin)
 
 % Edit the above text to modify the response to help UI
 
-% Last Modified by GUIDE v2.5 15-Aug-2018 21:18:10
+% Last Modified by GUIDE v2.5 17-Aug-2018 03:22:24
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -561,11 +561,15 @@ handles.iIteration = iIteration;
 handles.junc = junc;
 
 
-
 guidata(hObject,handles);
+setappdata(0,'horiz',HorizontalArm);
+setappdata(0,'vert',VerticalArm);
+setappdata(0,'iter',iIteration);
+setappdata(0,'junc',junc);
+setappdata(0,'t_rng',handles.t_rng);
 
-% sim.horizArm = cast_output(HorizontalArm);
-% sim.vertArm = cast_output(VerticalArm);
+run('Results');
+% setappdata(temp,'handles_main',handles);
 
 
 % --- Executes on button press in pushbutton3.
