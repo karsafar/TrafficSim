@@ -59,7 +59,6 @@ handles.roadTypes = {@LoopRoad @FiniteRoad};
 
 % handles.hPlot7 = plot(handles.axes7, NaN, NaN)
 
-set(findall(handles.uipanel10, '-property', 'enable'), 'enable', 'off')
 
 handles = text18_Callback(handles.text18,eventdata,handles);
 handles = edit23_Callback(handles.edit23,eventdata,handles);
@@ -415,7 +414,6 @@ function uipanel3_CreateFcn(hObject, eventdata, handles)
 % handles    empty - handles not created until after all CreateFcns called
 
 
-
 % --- Executes on button press in pushbutton2.
 function handles = pushbutton2_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton2 (see GCBO)
@@ -459,7 +457,6 @@ dt = str2num(get(handles.edit17,'String'));
 %     nIterations,...
 %     dt);
    
-% set(findall(handles.uipanel10, '-property', 'enable'), 'enable', 'off')
 guidata(hObject,handles);
 
 % construct two arms of the junction objects
@@ -483,7 +480,6 @@ end
 % controlled break of the simulation
 % finishup = onCleanup(@() myCleanupFun(HorizontalArm, VerticalArm));
 set(handles.pushbutton3,'userdata',0);
-set(findall(handles.uipanel10, '-property', 'enable'), 'enable', 'off')
 for iIteration = handles.iIteration:nIterations
     % update time
     t = handles.t_rng(iIteration);
@@ -548,13 +544,7 @@ if plotFlag == 0
     f = findall(0,'type','figure','tag','TMWWaitbar');
     delete(f)
 end
-set(findall(handles.uipanel10, '-property', 'enable'), 'enable', 'on')
-if get(handles.checkbox8,'Value') == 0
-    set(findall(handles.uipanel14, '-property', 'enable'), 'enable', 'off')
-end
-if get(handles.checkbox9,'Value') == 0
-    set(findall(handles.uipanel15, '-property', 'enable'), 'enable', 'off')
-end
+
 handles.HorizontalArm = HorizontalArm;
 handles.VerticalArm = VerticalArm;
 handles.iIteration = iIteration;
@@ -579,9 +569,6 @@ function pushbutton3_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 set(handles.pushbutton7, 'enable', 'on')
 set(hObject,'userdata',1);
-
-% set(findall(handles.uipanel10, '-property', 'enable'), 'enable', 'on')
-
 
 
 function edit9_Callback(hObject, eventdata, handles)
@@ -1267,89 +1254,6 @@ function text18_ButtonDownFcn(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-
-% --- Executes on button press in checkbox7.
-function checkbox7_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox7 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox7
-
-
-% --- Executes on button press in checkbox6.
-function checkbox6_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox6 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox6
-
-
-% --- Executes on button press in checkbox4.
-function checkbox4_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox4
-
-
-% --- Executes on button press in checkbox5.
-function checkbox5_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox5 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox5
-
-
-% --- Executes on selection change in listbox2.
-function handles = listbox2_Callback(hObject, eventdata, handles)
-% hObject    handle to listbox2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-delete(handles.TempCarHighlight);
-if get(handles.checkbox8, 'Value')
-    if get(handles.radiobutton21, 'Value')
-        if numel(handles.HorizontalArm.allCars) == 0
-            numList = 0;
-            set(hObject,'Value',1);
-            set(hObject,'string',{numList});
-        else
-            numList = (1:numel(handles.HorizontalArm.allCars))';
-            
-            idx = get(hObject,'Value');
-            if numel(handles.HorizontalArm.allCars) < idx
-                idx = 1;
-                set(hObject,'Value',idx);
-            end
-            set(hObject,'string',{numList});
-            allAxesInFigure = findall(0,'type','axes');
-            handles.TempCarHighlight = plotCarEdge(handles.HorizontalArm.allCars(idx),allAxesInFigure(1));
-        end
-    elseif get(handles.radiobutton22, 'Value')
-        if numel(handles.VerticalArm.allCars) == 0
-            numList = 0;
-            set(hObject,'Value',1);
-            set(hObject,'string',{numList});
-        else
-            numList = (1:numel(handles.VerticalArm.allCars))';
-            
-            idx = get(hObject,'Value');
-            if numel(handles.VerticalArm.allCars) < idx
-                idx = 1;
-                set(hObject,'Value',idx);
-            end
-            set(hObject,'string',{numList});
-            allAxesInFigure = findall(0,'type','axes');
-            handles.TempCarHighlight = plotCarEdge(handles.VerticalArm.allCars(idx),allAxesInFigure(1));
-        end
-    end
-end
-
-guidata(hObject, handles);
-
 function CarsImageHandle = plotCarEdge(obj,junctionAxesHandle)
 plotVectorX = NaN(1,5);
 plotVectorY = NaN(1,5);
@@ -1377,155 +1281,6 @@ CarsImageHandle = plot(junctionAxesHandle,plotVectorX',plotVectorY','w-','LineWi
 
 % Hints: contents = cellstr(get(hObject,'String')) returns listbox2 contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from listbox2
-
-
-% --- Executes during object creation, after setting all properties.
-function listbox2_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to listbox2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: listbox controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in checkbox8.
-function checkbox8_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox8 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-if get(hObject,'Value')
-    set(findall(handles.uipanel14, '-property', 'enable'), 'enable', 'on');
-    handles = listbox2_Callback(handles.listbox2,eventdata,handles);
-elseif get(hObject,'Value') == 0
-    set(findall(handles.uipanel14, '-property', 'enable'), 'enable', 'off');
-end
-guidata(hObject, handles);
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox8
-
-
-% --- Executes on button press in checkbox9.
-function checkbox9_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox9 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-if get(hObject,'Value')
-    set(findall(handles.uipanel15, '-property', 'enable'), 'enable', 'on');
-elseif get(hObject,'Value') == 0
-    set(findall(handles.uipanel15, '-property', 'enable'), 'enable', 'off');
-end
-% Hint: get(hObject,'Value') returns toggle state of checkbox9
-
-
-% --- Executes on button press in radiobutton21.
-function radiobutton21_Callback(hObject, eventdata, handles)
-% hObject    handle to radiobutton21 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-if get(handles.checkbox8,'Value')
-%     set(handles.listbox2,'Value',0);
-    handles = listbox2_Callback(handles.listbox2,eventdata,handles);
-end
-guidata(hObject, handles);
-% Hint: get(hObject,'Value') returns toggle state of radiobutton21
-
-
-% --- Executes on button press in radiobutton22.
-function radiobutton22_Callback(hObject, eventdata, handles)
-% hObject    handle to radiobutton22 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-if get(handles.checkbox8,'Value')
-%     set(handles.listbox2,'Value',1);
-    handles = listbox2_Callback(handles.listbox2,eventdata,handles);
-end
-guidata(hObject, handles);
-% Hint: get(hObject,'Value') returns toggle state of radiobutton22
-
-
-% --- Executes on button press in pushbutton5.
-function handles = pushbutton5_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton5 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-if get(handles.radiobutton21,'Value')
-    cars = handles.HorizontalArm.allCars;
-    road =  handles.HorizontalArm;
-else
-    cars = handles.VerticalArm.allCars;
-    road =  handles.VerticalArm;
-end
-
-
-if get(handles.checkbox8,'Value')
-    if get(handles.checkbox4,'Value')
-        cla(findall(handles.axes5,'type','axes'),'reset');
-        title(handles.axes5,'Displacements','FontSize',12)
-        xlabel(handles.axes5,'Time, s','FontSize',12)
-        ylabel(handles.axes5,'Horizontal Position, m','FontSize',12)
-        hold(handles.axes5,'on');
-        grid(handles.axes5,'on');
-        axis(handles.axes5,[0 handles.t_rng(handles.iIteration) road.startPoint road.endPoint] )
-        yyaxis(handles.axes5,'left')
-        for iCar = 1:handles.HorizontalArm.nCarHistory
-            plot(handles.axes5,handles.HorizontalArm.carHistory{iCar}(1,1:end),handles.HorizontalArm.carHistory{iCar}(2,1:end),'b-','LineWidth',1)
-        end
-        yyaxis(handles.axes5,'right')
-        for jCar = 1:handles.VerticalArm.nCarHistory
-            plot(handles.axes5,handles.VerticalArm.carHistory{jCar}(1,1:end),handles.VerticalArm.carHistory{jCar}(2,1:end),'r-','LineWidth',1)
-        end
-        ylabel(handles.axes5,'Vertical Position, m','FontSize',12)
-        set(handles.axes5, 'Ydir', 'reverse')
-        plot(handles.axes5,handles.t_rng(1:handles.iIteration),zeros(1,handles.iIteration),'-g','LineWidth',1);
-        axis(handles.axes5,[0 handles.t_rng(handles.iIteration) road.startPoint road.endPoint] )
-    end
-    if get(handles.checkbox5,'Value') && ~isempty(cars)
-        cla(findall(handles.axes2,'type','axes'));
-        idx = get(handles.listbox2,'Value');
-        title(handles.axes2,'Velocity Profile','FontSize',12)
-        xlabel(handles.axes2,'Time, s','FontSize',12)
-        ylabel(handles.axes2,' Velocity V, m/s','FontSize',12)
-        hold(handles.axes2,'on');
-        grid(handles.axes2,'on');
-        axis(handles.axes2,[min(cars(idx).timeHistory) max(cars(idx).timeHistory) 0 10])
-        plot(handles.axes2,cars(idx).timeHistory,cars(idx).velocityHistory,'b-','LineWidth',1)
-    end
-end
-
-if get(handles.checkbox9,'Value')
-    if get(handles.checkbox6,'Value')
-        cla(findall(handles.axes6,'type','axes'));
-        title(handles.axes6,'Velocity Average Across All Cars','FontSize',12)
-        xlabel(handles.axes6,'Time, s','FontSize',12)
-        ylabel(handles.axes6,' Velocity <V>, m/s','FontSize',12)
-        hold(handles.axes6,'on');
-        grid(handles.axes6,'on');
-        plot(handles.axes6,handles.t_rng(1:handles.iIteration),road.averageVelocityHistory(1:handles.iIteration),'b-','LineWidth',1)
-        axis(handles.axes6,[0 handles.t_rng(handles.iIteration) 0 10])
-    end
-    
-    if get(handles.checkbox7,'Value')
-        cla(findall(handles.axes4,'type','axes'));
-        
-        for i = 1:handles.iIteration
-            cumulativeAverage(i) = nanmean(road.averageVelocityHistory(1:i)); %#ok<*AGROW>
-        end
-        
-        title(handles.axes4,'Cumulative Velocity Average','FontSize',12)
-        xlabel(handles.axes4,'Time, s','FontSize',12)
-        ylabel(handles.axes4,' Velocity <V>, m/s','FontSize',12)
-        hold(handles.axes4,'on');
-        grid(handles.axes4,'on');
-        plot(handles.axes4,handles.t_rng(1:handles.iIteration),cumulativeAverage,'b-','LineWidth',1)
-        axis(handles.axes4,[0 handles.t_rng(handles.iIteration) 0 10])
-    end
-end
-
-
 
 % --- Executes during object creation, after setting all properties.
 function axes7_CreateFcn(hObject, eventdata, handles)
@@ -1595,22 +1350,6 @@ function radiobutton27_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of radiobutton27
-
-
-% --- Executes during object creation, after setting all properties.
-function radiobutton21_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to radiobutton21 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-
-% --- Executes during object creation, after setting all properties.
-function radiobutton22_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to radiobutton22 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-
 
 function edit30_Callback(hObject, eventdata, handles)
 % hObject    handle to edit30 (see GCBO)
@@ -1831,23 +1570,6 @@ sim.Arm = handles.Arm;
 uisave('sim');
 
 
-% --------------------------------------------------------------------
-function uipanel10_ButtonDownFcn(hObject, eventdata, handles)
-% hObject    handle to uipanel10 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes during object creation, after setting all properties.
-function uipanel10_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to uipanel10 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-% hObject = uitab(handles.tabgp,'Title','Evaluation');
-% 
-% guidata(hObject,handles)
-
-
 
 function edit32_Callback(hObject, eventdata, handles)
 % hObject    handle to edit32 (see GCBO)
@@ -2009,7 +1731,6 @@ handles.loadFlag = 1;
 
 if sim.ResumeFlag
     set(handles.pushbutton7, 'enable', 'on')
-    set(findall(handles.uipanel10, '-property', 'enable'), 'enable', 'on')
     handles.HorizontalArm = sim.HorizontalArm;
     handles.VerticalArm = sim.VerticalArm;
 end
@@ -2024,18 +1745,6 @@ function pushbutton10_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 close(microSim);
 run('microSim');   
-
-
-% --- Executes on button press in pushbutton11.
-function pushbutton11_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton11 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-cla(findall(handles.axes2,'type','axes'),'reset');
-cla(findall(handles.axes4,'type','axes'),'reset');
-cla(findall(handles.axes5,'type','axes'),'reset');
-cla(findall(handles.axes6,'type','axes'),'reset');
-guidata(hObject,handles);
 
 
 % --- Executes on button press in checkbox11.
