@@ -22,7 +22,7 @@ function varargout = microSim(varargin)
 
 % Edit the above text to modify the response to help UI
 
-% Last Modified by GUIDE v2.5 17-Aug-2018 03:22:24
+% Last Modified by GUIDE v2.5 18-Aug-2018 02:49:39
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -441,7 +441,12 @@ roadDims.End = [str2num(get(handles.edit19,'String')); str2num(get(handles.edit2
 roadDims.Width = [str2num(get(handles.edit20,'String')); str2num(get(handles.edit26,'String'))];
 roadDims.Length = roadDims.End - roadDims.Start;
 
-plotFlag = get(handles.checkbox1,'Value');
+if get(handles.checkbox_animate,'Value')
+    set(handles.edit36, 'enable', 'on');
+    run('plotCars');
+end
+
+plotFlag = get(handles.checkbox_animate,'Value');
 priority = get(handles.edit22,'Value');
 nIterations = str2num(get(handles.edit23,'String'));
 dt = str2num(get(handles.edit17,'String'));
@@ -535,6 +540,7 @@ for iIteration = handles.iIteration:nIterations
         if getappdata(f,'canceling')
             set(handles.pushbutton3,'userdata',1);
             set(handles.pushbutton7, 'enable', 'on')
+            set(handles.pushbutton_plot_resutls, 'enable', 'on')
         end
         % Update waitbar and message
         waitbar(iIteration/nIterations,f,sprintf('%d percent progress',round(iIteration*100/nIterations)))
@@ -552,14 +558,13 @@ handles.junc = junc;
 
 
 guidata(hObject,handles);
+
+
 setappdata(0,'horiz',HorizontalArm);
 setappdata(0,'vert',VerticalArm);
 setappdata(0,'iter',iIteration);
 setappdata(0,'junc',junc);
 setappdata(0,'t_rng',handles.t_rng);
-
-run('Results');
-% setappdata(temp,'handles_main',handles);
 
 
 % --- Executes on button press in pushbutton3.
@@ -568,6 +573,7 @@ function pushbutton3_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 set(handles.pushbutton7, 'enable', 'on')
+set(handles.pushbutton_plot_resutls, 'enable', 'on')
 set(hObject,'userdata',1);
 
 
@@ -832,21 +838,25 @@ end
 % Hint: get(hObject,'Value') returns toggle state of radiobutton16
 
 
-% --- Executes on button press in checkbox1.
-function checkbox1_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox1 (see GCBO)
+% --- Executes on button press in checkbox_animate.
+function checkbox_animate_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_animate (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of checkbox1
-if get(hObject,'Value')
-    set(handles.edit36, 'enable', 'on');
-    run('plotCars');
-else
+% Hint: get(hObject,'Value') returns toggle state of checkbox_animate
+% if get(hObject,'Value')
+%     set(handles.edit36, 'enable', 'on');
+%     run('plotCars');
+% else
+%     set(handles.edit36, 'enable', 'off');
+%     close(plotCars);
+% end
+allAxesInFigure = findall(0,'type','axes');
+if ~isempty(allAxesInFigure) && strcmpi(allAxesInFigure.Tag,'axes1') 
     set(handles.edit36, 'enable', 'off');
     close(plotCars);
 end
-
 
 
 function edit16_Callback(hObject, eventdata, handles)
@@ -1514,7 +1524,7 @@ sim.timeStepSize = get(handles.edit17,'String');
 sim.t_rng = handles.t_rng;
 sim.Iterations = handles.iIteration;
 sim.rightCarPriority = get(handles.edit22,'Value');
-sim.animate = get(handles.checkbox1,'Value');
+sim.animate = get(handles.checkbox_animate,'Value');
 
 %% horizontal arm
 sim.H.start = get(handles.edit18,'String');
@@ -1675,7 +1685,7 @@ set(handles.edit17,'String',sim.timeStepSize);
 handles.iIteration = sim.Iterations;
 handles.t_rng = sim.t_rng;
 set(handles.edit22,'Value',sim.rightCarPriority);
-set(handles.checkbox1,'Value',sim.animate);
+set(handles.checkbox_animate,'Value',sim.animate);
 
 %% horizontal arm
 set(handles.edit18,'String', sim.H.start);
@@ -1731,6 +1741,7 @@ handles.loadFlag = 1;
 
 if sim.ResumeFlag
     set(handles.pushbutton7, 'enable', 'on')
+    set(handles.pushbutton_plot_resutls, 'enable', 'on')
     handles.HorizontalArm = sim.HorizontalArm;
     handles.VerticalArm = sim.VerticalArm;
 end
@@ -1785,3 +1796,11 @@ function edit36_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in pushbutton_plot_resutls.
+function pushbutton_plot_resutls_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton_plot_resutls (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+run('Results');
