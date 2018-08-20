@@ -10,7 +10,6 @@ classdef FiniteRoad < Road
         spawningInterval
         tolerance = 0
         testFlag = 1
-        
     end
     
     methods
@@ -125,6 +124,12 @@ classdef FiniteRoad < Road
                 obj.averageVelocityHistory(iIteration) = aggregatedVelocities/cutNumCars;
                 obj.numCarsHistory(iIteration) = cutNumCars;
             end
+            deltaV = 0;
+            
+            for iCar = 1:obj.numCars
+                deltaV = deltaV + (obj.allCars(iCar).velocity - obj.averageVelocityHistory(iIteration))^2;
+            end
+            obj.variance(iIteration) = deltaV/obj.numCars;
             if iIteration == nIterations
                 for iCar = 1:obj.numCars
                     if obj.allCars(iCar).pose(1) >= (obj.startPoint+50) && obj.allCars(iCar).pose(1) <= (obj.endPoint-50)
