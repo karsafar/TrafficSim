@@ -22,7 +22,7 @@ function varargout = Results(varargin)
 
 % Edit the above text to modify the response to help Results
 
-% Last Modified by GUIDE v2.5 17-Aug-2018 03:07:15
+% Last Modified by GUIDE v2.5 20-Aug-2018 03:55:57
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -140,7 +140,7 @@ if get(handles.checkbox_macro,'Value')
         cla(findall(handles.axes_time_av_vel,'type','axes'));
         title(handles.axes_time_av_vel,'Velocity Average Across All Cars','FontSize',12)
         xlabel(handles.axes_time_av_vel,'Time, s','FontSize',12)
-        ylabel(handles.axes_time_av_vel,' Velocity <V>, m/s','FontSize',12)
+        ylabel(handles.axes_time_av_vel,' Velocity \langleV\rangle, m/s','FontSize',12)
         hold(handles.axes_time_av_vel,'on');
         grid(handles.axes_time_av_vel,'on');
         plot(handles.axes_time_av_vel,handles.t_rng(1:handles.iIteration),road.averageVelocityHistory(1:handles.iIteration),'b-','LineWidth',1)
@@ -156,11 +156,21 @@ if get(handles.checkbox_macro,'Value')
         
         title(handles.axes_time_ag_vel,'Cumulative Velocity Average','FontSize',12)
         xlabel(handles.axes_time_ag_vel,'Time, s','FontSize',12)
-        ylabel(handles.axes_time_ag_vel,' Velocity <V>, m/s','FontSize',12)
+        ylabel(handles.axes_time_ag_vel,' Velocity \langleV\rangle, m/s','FontSize',12)
         hold(handles.axes_time_ag_vel,'on');
         grid(handles.axes_time_ag_vel,'on');
         plot(handles.axes_time_ag_vel,handles.t_rng(1:handles.iIteration),cumulativeAverage,'b-','LineWidth',1)
         axis(handles.axes_time_ag_vel,[0 handles.t_rng(handles.iIteration) 0 10])
+    end
+    if get(handles.checkbox_var,'Value')
+        cla(findall(handles.axes_speed_var,'type','axes'));
+        title(handles.axes_speed_var,'Speed Variance','FontSize',12)
+        xlabel(handles.axes_speed_var,'Time, s','FontSize',12)
+        ylabel(handles.axes_speed_var,' \sigma^{2}, m^{2}/s^{2}','FontSize',12)
+        hold(handles.axes_speed_var,'on');
+        grid(handles.axes_speed_var,'on');
+        plot(handles.axes_speed_var,handles.t_rng(1:handles.iIteration),road.variance(1:handles.iIteration),'b-','LineWidth',1)
+        axis(handles.axes_speed_var,[0 handles.t_rng(handles.iIteration) 0 max(road.variance)])
     end
 end
 
@@ -354,3 +364,12 @@ if get(handles.checkbox_micro,'Value')
     handles = listbox_select_car_Callback(handles.listbox_select_car,eventdata,handles);
 end
 guidata(hObject, handles);
+
+
+% --- Executes on button press in checkbox_var.
+function checkbox_var_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_var (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_var
