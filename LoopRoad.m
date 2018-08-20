@@ -1,6 +1,5 @@
 classdef LoopRoad < Road
     properties (SetAccess = protected)
-        variance
 %          initPoseProbDist = []
 %          allCarsNumArray = 0
     end

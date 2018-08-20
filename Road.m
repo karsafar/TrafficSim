@@ -17,6 +17,7 @@ classdef Road < handle
         carHistory = {}
         nCarHistory = 0
         averageVelocityHistory = []
+        variance
         carType = 0
         carTypes = {}
         FixedSeed = false

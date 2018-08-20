@@ -22,7 +22,7 @@ function varargout = Results(varargin)
 
 % Edit the above text to modify the response to help Results
 
-% Last Modified by GUIDE v2.5 20-Aug-2018 03:55:57
+% Last Modified by GUIDE v2.5 20-Aug-2018 18:06:39
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -103,7 +103,7 @@ end
 if get(handles.checkbox_micro,'Value')
     if get(handles.checkbox_time_disp,'Value')
         cla(findall(handles.axes_time_disp,'type','axes'),'reset');
-        title(handles.axes_time_disp,'Displacements','FontSize',12)
+        title(handles.axes_time_disp,'Trajectories','FontSize',12)
         xlabel(handles.axes_time_disp,'Time, s','FontSize',12)
         ylabel(handles.axes_time_disp,'Horizontal Position, m','FontSize',12)
         hold(handles.axes_time_disp,'on');
@@ -132,6 +132,23 @@ if get(handles.checkbox_micro,'Value')
         grid(handles.axes_time_vel,'on');
         axis(handles.axes_time_vel,[min(cars(idx).timeHistory) max(cars(idx).timeHistory) 0 10])
         plot(handles.axes_time_vel,cars(idx).timeHistory,cars(idx).velocityHistory,'b-','LineWidth',1)
+    end
+    if get(handles.checkbox_time_disp,'Value')
+        cla(findall(handles.axes_heatmap,'type','axes'),'reset');
+        title(handles.axes_heatmap,'Spatiotemporal Velocity Profiles','FontSize',12)
+        xlabel(handles.axes_heatmap,'Time, s','FontSize',12)
+        ylabel(handles.axes_heatmap,'Horizontal Position, s','FontSize',12)
+        hold(handles.axes_heatmap,'on');
+        grid(handles.axes_heatmap,'on');
+        axis(handles.axes_heatmap,[0 handles.t_rng(handles.iIteration) road.startPoint road.endPoint] )
+        sz = 5;
+        for iCar = 1:road.nCarHistory
+            scatter(handles.axes_heatmap,road.carHistory{iCar}(1,1:end),road.carHistory{iCar}(2,1:end),sz,road.carHistory{iCar}(3,1:end),'filled');
+        end
+        c = colorbar;
+        c.Label.String = 'Velocity, m/s';
+        c.Label.FontSize = 12;
+        colormap(flipud(jet));
     end
 end
 
@@ -181,9 +198,11 @@ function pushbutton_clear_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 cla(findall(handles.axes_time_disp,'type','axes'),'reset');
+cla(findall(handles.axes_heatmap,'type','axes'),'reset');
 cla(findall(handles.axes_time_vel,'type','axes'),'reset');
 cla(findall(handles.axes_time_av_vel,'type','axes'),'reset');
 cla(findall(handles.axes_time_ag_vel,'type','axes'),'reset');
+cla(findall(handles.axes_speed_var,'type','axes'),'reset');
 guidata(hObject,handles);
 
 % --- Executes on button press in checkbox_time_ag_vel.
@@ -373,3 +392,12 @@ function checkbox_var_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox_var
+
+
+% --- Executes on button press in checkbox_spat.
+function checkbox_spat_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_spat (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_spat
