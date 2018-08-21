@@ -67,6 +67,8 @@ handles.iIteration = getappdata(0,'iter');
 handles.junc = getappdata(0,'junc');
 handles.t_rng = getappdata(0,'t_rng');
 handles.TempCarHighlight = [];
+handles.density.H = getappdata(0,'density_H');
+handles.density.V = getappdata(0,'density_V');
 
 % Update handles structure
 guidata(hObject, handles);
@@ -94,9 +96,11 @@ function pushbutton_plot_Callback(hObject, eventdata, handles)
 if get(handles.radiobutton_horiz,'Value')
     cars = handles.HorizontalArm.allCars;
     road =  handles.HorizontalArm;
+    density = ones(handles.iIteration,1)*handles.density.H;
 else
     cars = handles.VerticalArm.allCars;
-    road =  handles.VerticalArm;
+    road =  handles.VerticalArm;    
+    density = ones(handles.iIteration,1)*handles.density.V;
 end
 
 
@@ -133,7 +137,7 @@ if get(handles.checkbox_micro,'Value')
         axis(handles.axes_time_vel,[min(cars(idx).timeHistory) max(cars(idx).timeHistory) 0 10])
         plot(handles.axes_time_vel,cars(idx).timeHistory,cars(idx).velocityHistory,'b-','LineWidth',1)
     end
-    if get(handles.checkbox_time_disp,'Value')
+    if get(handles.checkbox_spat,'Value')
         cla(findall(handles.axes_heatmap,'type','axes'),'reset');
         title(handles.axes_heatmap,'Spatiotemporal Velocity Profiles','FontSize',12)
         xlabel(handles.axes_heatmap,'Time, s','FontSize',12)
@@ -149,6 +153,7 @@ if get(handles.checkbox_micro,'Value')
         c = colorbar;
         c.Label.String = 'Velocity, m/s';
         c.Label.FontSize = 12;
+        caxis([0 cars(1).maximumVelocity]) 
         colormap(flipud(jet));
     end
 end
@@ -191,6 +196,23 @@ if get(handles.checkbox_macro,'Value')
         axis(handles.axes_speed_var,[0 handles.t_rng(handles.iIteration) 0 max(road.variance)])
     end
     if get(handles.checkbox_flow,'Value')
+        tf = isa(road,'LoopRoad');
+        for i = 1:handles.iIteration
+            cumulativeAverage(i) = nanmean(road.averageVelocityHistory(1:i)); %#ok<*AGROW>
+        end
+        if tf == 0
+            density = road.numCarsHistory/road.Length;
+        end
+        flow = density'.*cumulativeAverage;
+        
+        cla(findall(handles.axes_flow,'type','axes'));
+        title(handles.axes_flow,'Demand','FontSize',12)
+        xlabel(handles.axes_flow,'Time, s','FontSize',12)
+        ylabel(handles.axes_flow,'Flow, veh/s','FontSize',12)
+        hold(handles.axes_flow,'on');
+        grid(handles.axes_flow,'on');
+        plot(handles.axes_flow,handles.t_rng(1:handles.iIteration),flow(1:handles.iIteration),'b-','LineWidth',1)
+        axis(handles.axes_flow,[0 handles.t_rng(handles.iIteration) 0 max(flow)])
     end
     if get(handles.checkbox_occupancy,'Value')
         
@@ -222,6 +244,18 @@ if get(handles.checkbox_macro,'Value')
         axis(handles.axes_occupancy,[0 handles.t_rng(handles.iIteration) 0 max(occupancy)])
     end
     if get(handles.checkbox_density,'Value')
+        tf = isa(road,'LoopRoad');
+        if tf == 0
+            density = road.numCarsHistory/road.Length;
+        end
+        cla(findall(handles.axes_density,'type','axes'));
+        title(handles.axes_density,'Density','FontSize',12)
+        xlabel(handles.axes_density,'Time, s','FontSize',12)
+        ylabel(handles.axes_density,'Density, veh/m','FontSize',12)
+        hold(handles.axes_density,'on');
+        grid(handles.axes_density,'on');
+        plot(handles.axes_density,handles.t_rng(1:handles.iIteration),density(1:handles.iIteration),'b-','LineWidth',1)
+        axis(handles.axes_density,[0 handles.t_rng(handles.iIteration) 0 max(density)])
     end
 end
 

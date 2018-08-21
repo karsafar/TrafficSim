@@ -106,7 +106,7 @@ init_density = str2double(get(hObject,'String'));
 
 roadLength = str2double(get(handles.text18,'String'));
 
-numCars = floor(init_density * roadLength);
+numCars = round(init_density * roadLength);
 numCars_max = round(handles.max_density * (roadLength - handles.noSpawnAreaLength));
 if numCars_max < numCars
     numCars = numCars_max;
@@ -566,7 +566,8 @@ setappdata(0,'vert',VerticalArm);
 setappdata(0,'iter',iIteration);
 setappdata(0,'junc',junc);
 setappdata(0,'t_rng',handles.t_rng);
-
+setappdata(0,'density_H',str2double(get(handles.edit2,'String')));
+setappdata(0,'density_V',str2double(get(handles.edit10,'String')));
 
 % --- Executes on button press in pushbutton3.
 function pushbutton3_Callback(hObject, eventdata, handles)
@@ -612,7 +613,7 @@ init_density = str2double(get(hObject,'String'));
 
 roadLength = str2double(get(handles.edit27,'String'));
 
-numCars = floor(init_density * roadLength);
+numCars = round(init_density * roadLength);
 numCars_max = round(handles.max_density * (roadLength - handles.noSpawnAreaLength));
 if numCars_max < numCars
     numCars = numCars_max;
