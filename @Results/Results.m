@@ -108,7 +108,7 @@ if get(handles.checkbox_micro,'Value')
         ylabel(handles.axes_time_disp,'Horizontal Position, m','FontSize',12)
         hold(handles.axes_time_disp,'on');
         grid(handles.axes_time_disp,'on');
-        axis(handles.axes_time_disp,[0 handles.t_rng(handles.iIteration) road.startPoint road.endPoint] )
+        axis(handles.axes_time_disp,[0 handles.t_rng(handles.iIteration) handles.HorizontalArm.startPoint handles.HorizontalArm.endPoint] )
         yyaxis(handles.axes_time_disp,'left')
         for iCar = 1:handles.HorizontalArm.nCarHistory
             plot(handles.axes_time_disp,handles.HorizontalArm.carHistory{iCar}(1,1:end),handles.HorizontalArm.carHistory{iCar}(2,1:end),'b-','LineWidth',1)
@@ -120,7 +120,7 @@ if get(handles.checkbox_micro,'Value')
         ylabel(handles.axes_time_disp,'Vertical Position, m','FontSize',12)
         set(handles.axes_time_disp, 'Ydir', 'reverse')
         plot(handles.axes_time_disp,handles.t_rng(1:handles.iIteration),zeros(1,handles.iIteration),'-g','LineWidth',1);
-        axis(handles.axes_time_disp,[0 handles.t_rng(handles.iIteration) road.startPoint road.endPoint] )
+        axis(handles.axes_time_disp,[0 handles.t_rng(handles.iIteration) handles.VerticalArm.startPoint handles.VerticalArm.endPoint] )
     end
     if get(handles.checkbox_time_vel,'Value') && ~isempty(cars)
         cla(findall(handles.axes_time_vel,'type','axes'));
