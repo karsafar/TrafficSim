@@ -22,7 +22,7 @@ function varargout = Results(varargin)
 
 % Edit the above text to modify the response to help Results
 
-% Last Modified by GUIDE v2.5 20-Aug-2018 18:06:39
+% Last Modified by GUIDE v2.5 21-Aug-2018 03:00:19
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -67,6 +67,8 @@ handles.iIteration = getappdata(0,'iter');
 handles.junc = getappdata(0,'junc');
 handles.t_rng = getappdata(0,'t_rng');
 handles.TempCarHighlight = [];
+handles.density.H = getappdata(0,'density_H');
+handles.density.V = getappdata(0,'density_V');
 
 % Update handles structure
 guidata(hObject, handles);
@@ -94,9 +96,11 @@ function pushbutton_plot_Callback(hObject, eventdata, handles)
 if get(handles.radiobutton_horiz,'Value')
     cars = handles.HorizontalArm.allCars;
     road =  handles.HorizontalArm;
+    density = ones(handles.iIteration,1)*handles.density.H;
 else
     cars = handles.VerticalArm.allCars;
-    road =  handles.VerticalArm;
+    road =  handles.VerticalArm;    
+    density = ones(handles.iIteration,1)*handles.density.V;
 end
 
 
@@ -133,7 +137,7 @@ if get(handles.checkbox_micro,'Value')
         axis(handles.axes_time_vel,[min(cars(idx).timeHistory) max(cars(idx).timeHistory) 0 10])
         plot(handles.axes_time_vel,cars(idx).timeHistory,cars(idx).velocityHistory,'b-','LineWidth',1)
     end
-    if get(handles.checkbox_time_disp,'Value')
+    if get(handles.checkbox_spat,'Value')
         cla(findall(handles.axes_heatmap,'type','axes'),'reset');
         title(handles.axes_heatmap,'Spatiotemporal Velocity Profiles','FontSize',12)
         xlabel(handles.axes_heatmap,'Time, s','FontSize',12)
@@ -145,9 +149,11 @@ if get(handles.checkbox_micro,'Value')
         for iCar = 1:road.nCarHistory
             scatter(handles.axes_heatmap,road.carHistory{iCar}(1,1:end),road.carHistory{iCar}(2,1:end),sz,road.carHistory{iCar}(3,1:end),'filled');
         end
+        axes(handles.axes_heatmap)
         c = colorbar;
         c.Label.String = 'Velocity, m/s';
         c.Label.FontSize = 12;
+        caxis([0 cars(1).maximumVelocity]) 
         colormap(flipud(jet));
     end
 end
@@ -189,6 +195,68 @@ if get(handles.checkbox_macro,'Value')
         plot(handles.axes_speed_var,handles.t_rng(1:handles.iIteration),road.variance(1:handles.iIteration),'b-','LineWidth',1)
         axis(handles.axes_speed_var,[0 handles.t_rng(handles.iIteration) 0 max(road.variance)])
     end
+    if get(handles.checkbox_flow,'Value')
+        tf = isa(road,'LoopRoad');
+        for i = 1:handles.iIteration
+            cumulativeAverage(i) = nanmean(road.averageVelocityHistory(1:i)); %#ok<*AGROW>
+        end
+        if tf == 0
+            density = road.numCarsHistory/road.Length;
+        end
+        flow = density'.*cumulativeAverage;
+        
+        cla(findall(handles.axes_flow,'type','axes'));
+        title(handles.axes_flow,'Demand','FontSize',12)
+        xlabel(handles.axes_flow,'Time, s','FontSize',12)
+        ylabel(handles.axes_flow,'Flow, veh/s','FontSize',12)
+        hold(handles.axes_flow,'on');
+        grid(handles.axes_flow,'on');
+        plot(handles.axes_flow,handles.t_rng(1:handles.iIteration),flow(1:handles.iIteration),'b-','LineWidth',1)
+        axis(handles.axes_flow,[0 handles.t_rng(handles.iIteration) 0 max(flow)])
+    end
+    if get(handles.checkbox_occupancy,'Value')
+        
+        O_in = -10-cars(1).ownDistfromRearToFront;
+        O_out = -10+cars(1).ownDistfromRearToBack;
+        occupancy = zeros(length(handles.t_rng(1:handles.iIteration)),1);
+        for iCar = 1:road.nCarHistory
+            iCar_pos = road.carHistory{iCar}(2,:);
+            iCar_times = road.carHistory{iCar}(1,:);
+            iCar_times = iCar_times(iCar_pos>=O_in & iCar_pos<=O_out);
+            iCar_pos = iCar_pos(iCar_pos>=O_in & iCar_pos<=O_out);
+            [tf,loc]=ismember(iCar_times,handles.t_rng);
+            if ~isempty(iCar_pos)
+                for i = loc(1):loc(end)
+                occupancy(i:end) = occupancy(i)+(handles.t_rng(2)-handles.t_rng(1));
+                end
+            end
+        end
+        for i = 1:length(occupancy)
+            occupancy(i) = (occupancy(i)/handles.t_rng(i))* 100;
+        end
+        cla(findall(handles.axes_occupancy,'type','axes'));
+        title(handles.axes_occupancy,'Occupancy','FontSize',12)
+        xlabel(handles.axes_occupancy,'Time, s','FontSize',12)
+        ylabel(handles.axes_occupancy,' Occupancy, per cent','FontSize',12)
+        hold(handles.axes_occupancy,'on');
+        grid(handles.axes_occupancy,'on');
+        plot(handles.axes_occupancy,handles.t_rng(1:handles.iIteration),occupancy,'b-','LineWidth',1)
+        axis(handles.axes_occupancy,[0 handles.t_rng(handles.iIteration) 0 max(occupancy)])
+    end
+    if get(handles.checkbox_density,'Value')
+        tf = isa(road,'LoopRoad');
+        if tf == 0
+            density = road.numCarsHistory/road.Length;
+        end
+        cla(findall(handles.axes_density,'type','axes'));
+        title(handles.axes_density,'Density','FontSize',12)
+        xlabel(handles.axes_density,'Time, s','FontSize',12)
+        ylabel(handles.axes_density,'Density, veh/m','FontSize',12)
+        hold(handles.axes_density,'on');
+        grid(handles.axes_density,'on');
+        plot(handles.axes_density,handles.t_rng(1:handles.iIteration),density(1:handles.iIteration),'b-','LineWidth',1)
+        axis(handles.axes_density,[0 handles.t_rng(handles.iIteration) 0 max(density)])
+    end
 end
 
 
@@ -203,6 +271,10 @@ cla(findall(handles.axes_time_vel,'type','axes'),'reset');
 cla(findall(handles.axes_time_av_vel,'type','axes'),'reset');
 cla(findall(handles.axes_time_ag_vel,'type','axes'),'reset');
 cla(findall(handles.axes_speed_var,'type','axes'),'reset');
+cla(findall(handles.axes_density,'type','axes'),'reset');
+cla(findall(handles.axes_flow,'type','axes'),'reset');
+cla(findall(handles.axes_occupancy,'type','axes'),'reset');
+
 guidata(hObject,handles);
 
 % --- Executes on button press in checkbox_time_ag_vel.
@@ -401,3 +473,30 @@ function checkbox_spat_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox_spat
+
+
+% --- Executes on button press in checkbox_flow.
+function checkbox_flow_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_flow (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_flow
+
+
+% --- Executes on button press in checkbox_density.
+function checkbox_density_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_density (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_density
+
+
+% --- Executes on button press in checkbox_occupancy.
+function checkbox_occupancy_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_occupancy (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_occupancy

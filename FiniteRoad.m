@@ -61,6 +61,7 @@ classdef FiniteRoad < Road
                 end
                 new_car = obj.add_car(obj.carType,dt);
                 new_car.velocity = 6;
+                new_car.demand_tol = 15;
                 obj.allCars = [obj.allCars new_car];
                 obj.numCars = obj.numCars + 1;
                 
@@ -124,8 +125,8 @@ classdef FiniteRoad < Road
                 obj.averageVelocityHistory(iIteration) = aggregatedVelocities/cutNumCars;
                 obj.numCarsHistory(iIteration) = cutNumCars;
             end
-            deltaV = 0;
             
+            deltaV = 0;
             for iCar = 1:obj.numCars
                 deltaV = deltaV + (obj.allCars(iCar).velocity - obj.averageVelocityHistory(iIteration))^2;
             end

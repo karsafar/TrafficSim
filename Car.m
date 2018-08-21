@@ -15,6 +15,7 @@ classdef Car < dlnode
         timeHistory = NaN(1,100000)
         historyIndex = 1.0
         leaderFlag = true
+        demand_tol = 0
     end
     properties (SetAccess = immutable)
         ownDistfromRearToBack = NaN
