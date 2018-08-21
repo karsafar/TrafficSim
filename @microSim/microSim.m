@@ -550,6 +550,7 @@ if plotFlag == 0
     f = findall(0,'type','figure','tag','TMWWaitbar');
     delete(f)
 end
+set(handles.pushbutton_plot_resutls, 'enable', 'on')
 
 handles.HorizontalArm = HorizontalArm;
 handles.VerticalArm = VerticalArm;
