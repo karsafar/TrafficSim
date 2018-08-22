@@ -1,6 +1,5 @@
 classdef Car < dlnode
     properties (SetAccess = protected)
-        maximumAcceleration = [3.5 -3.5]
     end
     properties (Access = public)
         priority = 0
@@ -9,6 +8,7 @@ classdef Car < dlnode
         velocity = 0
         maximumVelocity = 13
         acceleration = 1.0
+        maximumAcceleration = [3.5 -3.5]
         locationHistory = NaN(1,100000)
         velocityHistory = NaN(1,100000)
         accelerationHistory = NaN(1,100000)
@@ -16,6 +16,7 @@ classdef Car < dlnode
         historyIndex = 1.0
         leaderFlag = true
         demand_tol = 0
+        
     end
     properties (SetAccess = immutable)
         ownDistfromRearToBack = NaN
@@ -72,8 +73,8 @@ classdef Car < dlnode
             obj.historyIndex = i + 1;
             
             % unit test the constraints
-            assert(obj.velocity >= 0 && obj.velocity <= obj.maximumVelocity,'Velocity is out of limit');
-            assert(obj.acceleration >=(obj.maximumAcceleration(2) - obj.tol) && obj.acceleration <= (obj.tol + 8) ,'Acceleration contraints are violated');            
+%             assert(obj.velocity >= 0 && obj.velocity <= obj.maximumVelocity,'Velocity is out of limit');
+%             assert(obj.acceleration >=(obj.maximumAcceleration(2) - obj.tol) && obj.acceleration <= (obj.tol + 8) ,'Acceleration contraints are violated');            
         end
     end
 end

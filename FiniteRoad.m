@@ -133,7 +133,7 @@ classdef FiniteRoad < Road
             obj.variance(iIteration) = deltaV/obj.numCars;
             if iIteration == nIterations
                 for iCar = 1:obj.numCars
-                    if obj.allCars(iCar).pose(1) >= (obj.startPoint+50) && obj.allCars(iCar).pose(1) <= (obj.endPoint-50)
+                    if obj.allCars(iCar).pose(1) >= (obj.startPoint) && obj.allCars(iCar).pose(1) <= (obj.endPoint)
                         obj.collect_car_history(obj.allCars(iCar));
                     end
                 end

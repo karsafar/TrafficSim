@@ -112,31 +112,28 @@ if get(handles.checkbox_micro,'Value')
         ylabel(handles.axes_time_disp,'Horizontal Position, m','FontSize',12)
         hold(handles.axes_time_disp,'on');
         grid(handles.axes_time_disp,'on');
+        x1 = 0;
+        x2 = handles.t_rng(handles.iIteration);
+        y1 = cars(1).s_in;
+        y2 = -cars(1).s_in;
+        x = [x1, x2, x2, x1, x1];
+        y = [y1, y1, y2, y2, y1];
         axis(handles.axes_time_disp,[0 handles.t_rng(handles.iIteration) handles.HorizontalArm.startPoint handles.HorizontalArm.endPoint] )
         yyaxis(handles.axes_time_disp,'left')
+        patch(handles.axes_time_disp,x,y,[0.5 0.5 0.5],'EdgeColor','None');
         for iCar = 1:handles.HorizontalArm.nCarHistory
-            plot(handles.axes_time_disp,handles.HorizontalArm.carHistory{iCar}(1,1:end),handles.HorizontalArm.carHistory{iCar}(2,1:end),'b-','LineWidth',1)
+            plot(handles.axes_time_disp,handles.HorizontalArm.carHistory{iCar}(1,1:end),handles.HorizontalArm.carHistory{iCar}(2,1:end),'b-','LineWidth',1);
         end
         yyaxis(handles.axes_time_disp,'right')
         for jCar = 1:handles.VerticalArm.nCarHistory
-            plot(handles.axes_time_disp,handles.VerticalArm.carHistory{jCar}(1,1:end),handles.VerticalArm.carHistory{jCar}(2,1:end),'r-','LineWidth',1)
+            plot(handles.axes_time_disp,handles.VerticalArm.carHistory{jCar}(1,1:end),handles.VerticalArm.carHistory{jCar}(2,1:end),'r-','LineWidth',1);
         end
         ylabel(handles.axes_time_disp,'Vertical Position, m','FontSize',12)
         set(handles.axes_time_disp, 'Ydir', 'reverse')
-        plot(handles.axes_time_disp,handles.t_rng(1:handles.iIteration),zeros(1,handles.iIteration),'-g','LineWidth',1);
+                
         axis(handles.axes_time_disp,[0 handles.t_rng(handles.iIteration) handles.VerticalArm.startPoint handles.VerticalArm.endPoint] )
     end
-    if get(handles.checkbox_time_vel,'Value') && ~isempty(cars)
-        cla(findall(handles.axes_time_vel,'type','axes'));
-        idx = get(handles.listbox_select_car,'Value');
-        title(handles.axes_time_vel,'Velocity Profile','FontSize',12)
-        xlabel(handles.axes_time_vel,'Time, s','FontSize',12)
-        ylabel(handles.axes_time_vel,' Velocity V, m/s','FontSize',12)
-        hold(handles.axes_time_vel,'on');
-        grid(handles.axes_time_vel,'on');
-        axis(handles.axes_time_vel,[min(cars(idx).timeHistory) max(cars(idx).timeHistory) 0 10])
-        plot(handles.axes_time_vel,cars(idx).timeHistory,cars(idx).velocityHistory,'b-','LineWidth',1)
-    end
+
     if get(handles.checkbox_spat,'Value')
         cla(findall(handles.axes_heatmap,'type','axes'),'reset');
         title(handles.axes_heatmap,'Spatiotemporal Velocity Profiles','FontSize',12)
@@ -360,6 +357,21 @@ if get(handles.checkbox_micro, 'Value')
     end
 end
 
+if get(handles.radiobutton_horiz,'Value')
+    cars = handles.HorizontalArm.allCars;
+else
+    cars = handles.VerticalArm.allCars;
+end
+if get(handles.checkbox_time_vel,'Value') && ~isempty(cars)
+    cla(findall(handles.axes_time_vel,'type','axes'));
+    title(handles.axes_time_vel,'Velocity Profile','FontSize',12)
+    xlabel(handles.axes_time_vel,'Time, s','FontSize',12)
+    ylabel(handles.axes_time_vel,' Velocity V, m/s','FontSize',12)
+    hold(handles.axes_time_vel,'on');
+    grid(handles.axes_time_vel,'on');
+    axis(handles.axes_time_vel,[min(cars(idx).timeHistory) max(cars(idx).timeHistory) 0 cars(1).maximumVelocity])
+    plot(handles.axes_time_vel,cars(idx).timeHistory,cars(idx).velocityHistory,'b-','LineWidth',1)
+end
 guidata(hObject, handles);
 
 function CarsImageHandle = plotCarEdge(obj,junctionAxesHandle)
