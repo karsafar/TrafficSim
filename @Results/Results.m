@@ -64,7 +64,7 @@ end
 handles.HorizontalArm = getappdata(0,'horiz');
 handles.VerticalArm = getappdata(0,'vert');
 handles.iIteration = getappdata(0,'iter');
-handles.junc = getappdata(0,'junc');
+% handles.junc = getappdata(0,'junc');
 handles.t_rng = getappdata(0,'t_rng');
 handles.TempCarHighlight = [];
 handles.density.H = getappdata(0,'density_H');

@@ -22,7 +22,7 @@ function varargout = microSim(varargin)
 
 % Edit the above text to modify the response to help UI
 
-% Last Modified by GUIDE v2.5 18-Aug-2018 02:49:39
+% Last Modified by GUIDE v2.5 03-Sep-2018 23:59:56
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -1506,13 +1506,13 @@ else
 end
 guidata(hObject,handles)
 
-% --- Executes on button press in pushbutton8.
-function pushbutton8_Callback(hObject, eventdata, handles) %#ok<*INUSL>
-% hObject    handle to pushbutton8 (see GCBO)
+% --- Executes on button press in pushbutton_save.
+function pushbutton_save_Callback(hObject, eventdata, handles) %#ok<*INUSL>
+% hObject    handle to pushbutton_save (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-if get(handles.pushbutton3,'userdata')
+nIterations = str2num(get(handles.edit23,'String'));
+if get(handles.pushbutton3,'userdata') || (handles.iIteration == nIterations);
     sim.HorizontalArm = handles.HorizontalArm;
     sim.VerticalArm = handles.VerticalArm;
     sim.ResumeFlag = 1;
@@ -1675,9 +1675,9 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- Executes on button press in pushbutton9.
-function pushbutton9_Callback(hObject, eventdata, handles) %#ok<*DEFNU>
-% hObject    handle to pushbutton9 (see GCBO)
+% --- Executes on button press in pushbutton_load.
+function pushbutton_load_Callback(hObject, eventdata, handles) %#ok<*DEFNU>
+% hObject    handle to pushbutton_load (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
@@ -1751,6 +1751,13 @@ end
 set(handles.checkbox11, 'enable', 'on')
 guidata(hObject,handles);
 
+setappdata(0,'horiz',handles.HorizontalArm);
+setappdata(0,'vert',handles.VerticalArm);
+setappdata(0,'iter',handles.iIteration);
+% setappdata(0,'junc',junc);
+setappdata(0,'t_rng',handles.t_rng);
+setappdata(0,'density_H',str2double(get(handles.edit2,'String')));
+setappdata(0,'density_V',str2double(get(handles.edit10,'String')));
 
 % --- Executes on button press in pushbutton10.
 function pushbutton10_Callback(hObject, eventdata, handles)
