@@ -26,7 +26,7 @@ classdef IdmCar < Car & matlab.mixin.Heterogeneous
             else
                 obj.a = 1;
                 obj.b = 1.5;
-                obj.timeGap  = 1.6;
+                obj.timeGap = 1.6;
             end
         end
         function calculate_idm_accel(obj,varargin)
@@ -44,7 +44,7 @@ classdef IdmCar < Car & matlab.mixin.Heterogeneous
                 obj.s = obj.Prev.pose(1) - obj.pose(1);
                 dV = (obj.velocity - obj.Prev.velocity);
             elseif ~isempty(obj.Prev)
-                obj.s = obj.Prev.pose(1) - obj.pose(1) + roadLength;
+                obj.s = obj.Prev.pose(1) - obj.pose(1) + roadLength+obj.demand_tol;
                 dV = (obj.velocity - obj.Prev.velocity);
             else
                 obj.s = Inf;

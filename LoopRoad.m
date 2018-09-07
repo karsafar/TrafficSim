@@ -12,6 +12,7 @@ classdef LoopRoad < Road
                 obj.numCars = loop_road_args.numCars;
                 obj.allCars = loop_road_args.allCars;
                 obj.averageVelocityHistory = NaN(loop_road_args.nIterations,1);
+                obj.variance = NaN(loop_road_args.nIterations,1);
             else
                 %% I don't need this part
                 obj.allCarsNumArray = loop_road_args{1};
@@ -133,6 +134,11 @@ classdef LoopRoad < Road
             end
             obj.averageVelocityHistory(iIteration) = aggregatedVelocities/obj.numCars;
             
+            deltaV = 0;
+            for iCar = 1:obj.numCars
+                deltaV = deltaV + (obj.allCars(iCar).velocity - obj.averageVelocityHistory(iIteration))^2;
+            end
+            obj.variance(iIteration) = deltaV/obj.numCars;
             if iIteration == nIterations
                 for iCar = 1:obj.numCars
                     obj.collect_car_history(obj.allCars(iCar));

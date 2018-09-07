@@ -20,3 +20,5 @@ nCarsVsTime\.fig
 figures/
 
 *.mlx
+
+SimTests/
