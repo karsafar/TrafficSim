@@ -73,7 +73,7 @@ classdef AggressiveCar < IdmCar
             
             cruise_idm = BtAssign(obj.it_accel,obj.it_a_idm);
             
-            cruise = BtSelector(obj.it_pose < -50,...
+            cruise = BtSelector(obj.it_pose < -15,...
                 obj.it_pose > obj.s_out,...
                 obj.it_CarsOpposite == 0, ...
                 obj.it_frontCarPassedJunction==0);%                 
@@ -81,7 +81,7 @@ classdef AggressiveCar < IdmCar
             
             doCruiseIdm = BtSequence(cruise,cruise_idm);
             
-            enoughAfterJuncSpace = BtSelector(obj.it_front_car_vel > 2, obj.it_dist_gap > 15);
+            enoughAfterJuncSpace = BtSelector(obj.it_front_car_vel > 2, obj.it_dist_gap > 50);
             
             doJunctionAvoid = BtSequence(enoughAfterJuncSpace, Crossing);
             
@@ -90,7 +90,9 @@ classdef AggressiveCar < IdmCar
             EmergencyStop = BtSequence(obj.it_pose < obj.s_in,assignEmergencyStop);
             emergencyStopOrCrossing = BtSelector(doJunctionAvoid,EmergencyStop);
             
-            obj.full_tree = BtSelector(doCruiseIdm, emergencyStopOrCrossing);
+%             obj.full_tree = BtSelector(doCruiseIdm, emergencyStopOrCrossing);
+            obj.full_tree = BtSelector(doCruiseIdm, doJunctionAvoid);
+
             
         end
         %%
@@ -159,10 +161,10 @@ classdef AggressiveCar < IdmCar
                         
                         t_out = (-oppositeCars(ind).velocity+sqrt((oppositeCars(ind).velocity)^2+2*oppositeCarAcceleration...
                             *(crossingEnd-oppositeCarPose)))/oppositeCarAcceleration+t+3*T_safe*0;
-                    elseif tol > abs(oppositeCarAcceleration) && tol > oppositeCars(ind).velocity || ((oppositeCars(ind).velocity)^2+2*oppositeCarAcceleration*(crossingBegin-oppositeCarPose)) > 0
+                    elseif tol > abs(oppositeCarAcceleration) && tol > oppositeCars(ind).velocity || ((oppositeCars(ind).velocity)^2+2*oppositeCarAcceleration*(crossingBegin-oppositeCarPose)) == 0
                         if oppositeCarPose > crossingBegin && oppositeCarPose < crossingEnd
                             t_in = -99999;
-                            t_out = 999999;
+                            t_out = 99999;
                         else
                             t_in = 99999;
                             t_out = 99999;
@@ -176,7 +178,7 @@ classdef AggressiveCar < IdmCar
                         if tol < abs(oppositeNextCarAcceleration)
                             t_in_next = (-oppositeCars(ind).Next.velocity+sqrt((oppositeCars(ind).Next.velocity)^2+2*oppositeNextCarAcceleration...
                                 *(crossingBegin-oppositeCars(ind).Next.pose(1))))/oppositeNextCarAcceleration+t-3*T_safe;
-                        elseif tol > abs(oppositeNextCarAcceleration) && tol > oppositeCars(ind).Next.velocity || ((oppositeCars(ind).Next.velocity)^2+2*oppositeNextCarAcceleration*(crossingBegin-oppositeCars(ind).Next.pose(1))) > 0
+                        elseif tol > abs(oppositeNextCarAcceleration) && tol > oppositeCars(ind).Next.velocity || ((oppositeCars(ind).Next.velocity)^2+2*oppositeNextCarAcceleration*(crossingBegin-oppositeCars(ind).Next.pose(1))) == 0
                             t_in_next = 99999;
                         else
                             t_in_next = (crossingBegin - oppositeCars(ind).Next.pose(1))/oppositeCars(ind).Next.velocity+t+3*T_safe*0;
@@ -253,9 +255,9 @@ classdef AggressiveCar < IdmCar
                     
                     
                     %                             break
-                    %                                                     h5 = figure(5);
-                    %                             set(h5,'units', 'normalized', 'outerposition',[0 0 1 1])
-                    %                                                     plot(obj.full_tree,0);
+%                                                                         h5 = figure(5);
+%                                                 set(h5,'units', 'normalized', 'outerposition',[0 0 1 1])
+%                                                                         plot(obj.full_tree,0);
                     %                             pause()
                     %                             cla(obj.full_tree.ha);
                     %                             delete(obj.full_tree.ha)
