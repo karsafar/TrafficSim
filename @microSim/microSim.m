@@ -25,6 +25,7 @@ function varargout = microSim(varargin)
 % Last Modified by GUIDE v2.5 03-Sep-2018 23:59:56
 
 % Begin initialization code - DO NOT EDIT
+
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
     'gui_Singleton',  gui_Singleton, ...
@@ -532,12 +533,8 @@ for iIteration = handles.iIteration:nIterations
         end
         break;
     end
-    if plotFlag
-        pause(handles.pauseLength)
-        if iIteration < nIterations
-            junc.delete_car_images();
-        end
-    elseif mod(iIteration,360) == 0
+    
+    if mod(iIteration,360) == 0 && plotFlag == 0
         if getappdata(f,'canceling')
             set(handles.pushbutton3,'userdata',1);
             set(handles.pushbutton7, 'enable', 'on')
