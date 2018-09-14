@@ -69,11 +69,11 @@ classdef AggressiveCar < IdmCar
             
             goCar = BtSequence(obj.it_A_min_ahead<0, BtAssign(obj.it_accel,obj.it_a_idm));
             
-            Crossing = BtSelector(aheadCar,stopCar,behindCar,goCar);
+            Crossing = BtSelector(aheadCar,goCar,stopCar,behindCar);
             
             cruise_idm = BtAssign(obj.it_accel,obj.it_a_idm);
             
-            cruise = BtSelector(obj.it_pose < -15,...
+            cruise = BtSelector(obj.it_pose < -30,...
                 obj.it_pose > obj.s_out,...
                 obj.it_CarsOpposite == 0, ...
                 obj.it_frontCarPassedJunction==0);%                 
@@ -81,7 +81,7 @@ classdef AggressiveCar < IdmCar
             
             doCruiseIdm = BtSequence(cruise,cruise_idm);
             
-            enoughAfterJuncSpace = BtSelector(obj.it_front_car_vel > 2, obj.it_dist_gap > 50);
+            enoughAfterJuncSpace = BtSelector(obj.it_front_car_vel > 4, obj.it_dist_gap > 35);
             
             doJunctionAvoid = BtSequence(enoughAfterJuncSpace, Crossing);
             
@@ -90,8 +90,8 @@ classdef AggressiveCar < IdmCar
             EmergencyStop = BtSequence(obj.it_pose < obj.s_in,assignEmergencyStop);
             emergencyStopOrCrossing = BtSelector(doJunctionAvoid,EmergencyStop);
             
-%             obj.full_tree = BtSelector(doCruiseIdm, emergencyStopOrCrossing);
-            obj.full_tree = BtSelector(doCruiseIdm, doJunctionAvoid);
+            obj.full_tree = BtSelector(doCruiseIdm, doJunctionAvoid,EmergencyStop);
+%             obj.full_tree = BtSelector(doCruiseIdm, doJunctionAvoid);
 
             
         end
@@ -105,7 +105,7 @@ classdef AggressiveCar < IdmCar
                 tol = 1e-3;
                 
                 % unpatiance parameter
-                if obj.historyIndex >= 50 && obj.pose(1) <= crossingBegin && tol > abs(obj.velocity) && tol > abs(obj.acceleration) && obj.maximumAcceleration(1) < 8 &&...
+                if obj.historyIndex >= 50 && obj.pose(1) <= crossingBegin && tol > abs(obj.velocity) && tol > abs(obj.acceleration) && obj.maximumAcceleration(1) < 6 &&...
                         (isempty(obj.Prev) || obj.Prev.pose(1) < obj.pose(1) ||  obj.Prev.pose(1)> crossingEnd )
                     obj.maximumAcceleration(1) = obj.maximumAcceleration(1) + 0.05;
                 elseif obj.maximumAcceleration(1) ~= 3.5 && obj.pose(1) > crossingEnd
@@ -161,7 +161,7 @@ classdef AggressiveCar < IdmCar
                         
                         t_out = (-oppositeCars(ind).velocity+sqrt((oppositeCars(ind).velocity)^2+2*oppositeCarAcceleration...
                             *(crossingEnd-oppositeCarPose)))/oppositeCarAcceleration+t+3*T_safe*0;
-                    elseif tol > abs(oppositeCarAcceleration) && tol > oppositeCars(ind).velocity || ((oppositeCars(ind).velocity)^2+2*oppositeCarAcceleration*(crossingBegin-oppositeCarPose)) == 0
+                    elseif tol > abs(oppositeCarAcceleration) && tol > oppositeCars(ind).velocity || ((oppositeCars(ind).velocity)^2+2*oppositeCarAcceleration*(crossingBegin-oppositeCarPose)) > 0
                         if oppositeCarPose > crossingBegin && oppositeCarPose < crossingEnd
                             t_in = -99999;
                             t_out = 99999;
@@ -178,7 +178,7 @@ classdef AggressiveCar < IdmCar
                         if tol < abs(oppositeNextCarAcceleration)
                             t_in_next = (-oppositeCars(ind).Next.velocity+sqrt((oppositeCars(ind).Next.velocity)^2+2*oppositeNextCarAcceleration...
                                 *(crossingBegin-oppositeCars(ind).Next.pose(1))))/oppositeNextCarAcceleration+t-3*T_safe;
-                        elseif tol > abs(oppositeNextCarAcceleration) && tol > oppositeCars(ind).Next.velocity || ((oppositeCars(ind).Next.velocity)^2+2*oppositeNextCarAcceleration*(crossingBegin-oppositeCars(ind).Next.pose(1))) == 0
+                        elseif tol > abs(oppositeNextCarAcceleration) && tol > oppositeCars(ind).Next.velocity || ((oppositeCars(ind).Next.velocity)^2+2*oppositeNextCarAcceleration*(crossingBegin-oppositeCars(ind).Next.pose(1))) > 0
                             t_in_next = 99999;
                         else
                             t_in_next = (crossingBegin - oppositeCars(ind).Next.pose(1))/oppositeCars(ind).Next.velocity+t+3*T_safe*0;
@@ -201,7 +201,6 @@ classdef AggressiveCar < IdmCar
                         A_min_ahead = -9999;
                         A_max_behind = 9999;
                     else
-                        
                         A_max_behind = obj.calc_a_max_behind(...
                             t,...
                             dt,...
@@ -232,7 +231,8 @@ classdef AggressiveCar < IdmCar
                     obj.it_pose.set_value(obj.pose(1));
                     obj.it_CarsOpposite.set_value(allPassedJunction==0);
                     obj.it_dist_gap.set_value(obj.s);
-                    
+%                     obj.it_dist_gap.set_value(obj.s - (obj.minimumGap+obj.velocity*dt+(obj.velocity^2)/(2*obj.b)-(obj.Prev.velocity^2)/(2*obj.Next.b)));
+
                     if isempty(obj.Prev)
                         obj.it_front_car_vel.set_value(obj.targetVelocity);
                     else
@@ -250,18 +250,23 @@ classdef AggressiveCar < IdmCar
                     obj.it_a_stop_idm.set_value(obj.idmAcceleration);
                     obj.modifyIdm(0);
                     
+                    % update BT
                     obj.full_tree.tick;
                     obj.acceleration =  obj.it_accel.get_value;
+
+                    % draw BT
+                    BTplot = 1;
+                    if BTplot
+                        tempGraph = gca;
+                        if isempty(tempGraph.Parent.Number) || tempGraph.Parent.Number ~= 5
+                            figure(5)
+                        else
+                            clf(tempGraph.Parent)
+                        end
+                        plot(obj.full_tree,tempGraph)
+                        obj.bb
+                    end
                     
-                    
-                    %                             break
-%                                                                         h5 = figure(5);
-%                                                 set(h5,'units', 'normalized', 'outerposition',[0 0 1 1])
-%                                                                         plot(obj.full_tree,0);
-                    %                             pause()
-                    %                             cla(obj.full_tree.ha);
-                    %                             delete(obj.full_tree.ha)
-                    %                             close(h5);
                 end
             else
                 obj.acceleration =  obj.idmAcceleration;
@@ -270,6 +275,7 @@ classdef AggressiveCar < IdmCar
     end
     methods (Static)
         function accelerationToPassAhead = calc_a_min_ahead(t,dt,a_max,v,v_max,t_in,s_out,s)
+            
             if (t+dt) <= t_in && s >= s_out-v_max*(t_in-(t+dt))
                 
                 minimumAccelerationToPassAhead = (s_out - 0.5*a_max(1)*(t_in-(t+dt))^2 - v*(t_in-t) - s)/ (dt*(t_in-(t+dt/2)));

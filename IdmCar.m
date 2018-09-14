@@ -20,8 +20,8 @@ classdef IdmCar < Car & matlab.mixin.Heterogeneous
         end
         function obj = modifyIdm(obj,flag)
             if flag
-                obj.a = 2;
-                obj.b = 2;
+                obj.a = 3.5;
+                obj.b = 3.5;
                 obj.timeGap  = 1;
             else
                 obj.a = 1;
