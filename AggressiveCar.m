@@ -69,11 +69,11 @@ classdef AggressiveCar < IdmCar
             
             goCar = BtSequence(obj.it_A_min_ahead<0, BtAssign(obj.it_accel,obj.it_a_idm));
             
-            Crossing = BtSelector(aheadCar,stopCar,behindCar,goCar);
+            Crossing = BtSelector(aheadCar,goCar,stopCar,behindCar);
             
             cruise_idm = BtAssign(obj.it_accel,obj.it_a_idm);
             
-            cruise = BtSelector(obj.it_pose < -15,...
+            cruise = BtSelector(obj.it_pose < -30,...
                 obj.it_pose > obj.s_out,...
                 obj.it_CarsOpposite == 0, ...
                 obj.it_frontCarPassedJunction==0);%                 
@@ -81,7 +81,7 @@ classdef AggressiveCar < IdmCar
             
             doCruiseIdm = BtSequence(cruise,cruise_idm);
             
-            enoughAfterJuncSpace = BtSelector(obj.it_front_car_vel > 3, obj.it_dist_gap > 15);
+            enoughAfterJuncSpace = BtSelector(obj.it_front_car_vel > 4, obj.it_dist_gap > 35);
             
             doJunctionAvoid = BtSequence(enoughAfterJuncSpace, Crossing);
             
@@ -90,7 +90,7 @@ classdef AggressiveCar < IdmCar
             EmergencyStop = BtSequence(obj.it_pose < obj.s_in,assignEmergencyStop);
             emergencyStopOrCrossing = BtSelector(doJunctionAvoid,EmergencyStop);
             
-            obj.full_tree = BtSelector(doCruiseIdm, emergencyStopOrCrossing);
+            obj.full_tree = BtSelector(doCruiseIdm, doJunctionAvoid,EmergencyStop);
 %             obj.full_tree = BtSelector(doCruiseIdm, doJunctionAvoid);
 
             
@@ -105,7 +105,7 @@ classdef AggressiveCar < IdmCar
                 tol = 1e-3;
                 
                 % unpatiance parameter
-                if obj.historyIndex >= 50 && obj.pose(1) <= crossingBegin && tol > abs(obj.velocity) && tol > abs(obj.acceleration) && obj.maximumAcceleration(1) < 8 &&...
+                if obj.historyIndex >= 50 && obj.pose(1) <= crossingBegin && tol > abs(obj.velocity) && tol > abs(obj.acceleration) && obj.maximumAcceleration(1) < 6 &&...
                         (isempty(obj.Prev) || obj.Prev.pose(1) < obj.pose(1) ||  obj.Prev.pose(1)> crossingEnd )
                     obj.maximumAcceleration(1) = obj.maximumAcceleration(1) + 0.05;
                 elseif obj.maximumAcceleration(1) ~= 3.5 && obj.pose(1) > crossingEnd
@@ -250,28 +250,23 @@ classdef AggressiveCar < IdmCar
                     obj.it_a_stop_idm.set_value(obj.idmAcceleration);
                     obj.modifyIdm(0);
                     
-                    
-                    
-                    % draw BT
-                    tempGraph = gca;
-                    if isempty(tempGraph.Parent.Number) || tempGraph.Parent.Number ~= 5
-                        figure(5)
-                    else
-                        clf(tempGraph.Parent)
-                    end
-                    
                     % update BT
                     obj.full_tree.tick;
-                    plot(obj.full_tree,tempGraph)
                     obj.acceleration =  obj.it_accel.get_value;
-                    %                             break
+
+                    % draw BT
+                    BTplot = 1;
+                    if BTplot
+                        tempGraph = gca;
+                        if isempty(tempGraph.Parent.Number) || tempGraph.Parent.Number ~= 5
+                            figure(5)
+                        else
+                            clf(tempGraph.Parent)
+                        end
+                        plot(obj.full_tree,tempGraph)
+                        obj.bb
+                    end
                     
-                    %                             set(h5,'units', 'normalized', 'outerposition',[0 0 1 1])
-                    
-                    %                             pause()
-                    %                             cla(obj.full_tree.ha);
-                    %                             delete(obj.full_tree.ha)
-                    %                             close(h5);
                 end
             else
                 obj.acceleration =  obj.idmAcceleration;

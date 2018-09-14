@@ -1509,7 +1509,7 @@ function pushbutton_save_Callback(hObject, eventdata, handles) %#ok<*INUSL>
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 nIterations = str2num(get(handles.edit23,'String'));
-if get(handles.pushbutton3,'userdata') || (handles.iIteration == nIterations);
+if get(handles.pushbutton3,'userdata') || (handles.iIteration == nIterations)
     sim.HorizontalArm = handles.HorizontalArm;
     sim.VerticalArm = handles.VerticalArm;
     sim.ResumeFlag = 1;
@@ -1748,8 +1748,10 @@ end
 set(handles.checkbox11, 'enable', 'on')
 guidata(hObject,handles);
 
-setappdata(0,'horiz',handles.HorizontalArm);
-setappdata(0,'vert',handles.VerticalArm);
+if sim.ResumeFlag
+    setappdata(0,'horiz',handles.HorizontalArm);
+    setappdata(0,'vert',handles.VerticalArm);
+end
 setappdata(0,'iter',handles.iIteration);
 % setappdata(0,'junc',junc);
 setappdata(0,'t_rng',handles.t_rng);
