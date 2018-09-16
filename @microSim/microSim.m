@@ -496,14 +496,14 @@ for iIteration = handles.iIteration:nIterations
     end
 
     % check for collision
-    if plotFlag == 0
+%     if plotFlag == 0
         junc.collision_check(...
             HorizontalArm.allCars,...
             VerticalArm.allCars,...
             HorizontalArm.numCars,...
             VerticalArm.numCars,...
             plotFlag);
-    end
+%     end
     % calculate IDM acceleration
     for iCar = 1:HorizontalArm.numCars
         calculate_idm_accel(HorizontalArm.allCars(iCar),roadDims.Length(1));
