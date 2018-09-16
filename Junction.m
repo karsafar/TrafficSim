@@ -189,8 +189,8 @@ classdef Junction < handle
                     else
                         set(obj.vertCarsImageHandle(iCar),'XData',plotVectorX','YData',plotVectorY');
                     end
-%                     drawnow limitrate
-                    drawnow
+                    drawnow limitrate
+%                     drawnow
                 end
             end
         end

@@ -8,7 +8,7 @@ classdef Car < dlnode
         velocity = 0
         maximumVelocity = 13
         acceleration = 1.0
-        maximumAcceleration = [3.5 -3.5]
+        maximumAcceleration = [3.5 -9]
         locationHistory = NaN(1,100000)
         velocityHistory = NaN(1,100000)
         accelerationHistory = NaN(1,100000)
@@ -55,13 +55,6 @@ classdef Car < dlnode
         function move_car(obj,dt)
             obj.pose(1) = obj.pose(1) + obj.velocity*dt + 0.5*obj.acceleration*dt^2;
             obj.velocity = obj.velocity + obj.acceleration*dt;
-            if obj.velocity > obj.maximumVelocity
-                obj.velocity = obj.maximumVelocity;
-            elseif obj.velocity < 0 
-                obj.acceleration = -(obj.velocityHistory(obj.historyIndex-1)/dt);
-                obj.accelerationHistory(obj.historyIndex-1) = obj.acceleration;
-                obj.velocity = 0;
-            end
         end
         
         function store_state_data(obj,t)
