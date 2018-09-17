@@ -27,7 +27,7 @@ classdef Car < dlnode
     end
     properties (Constant)
         dimension = [2.16 4.4 2.75];
-        tol = 5e-1
+        tol = 1e-1
     end
     methods
         
@@ -56,8 +56,9 @@ classdef Car < dlnode
             obj.pose(1) = obj.pose(1) + obj.velocity*dt + 0.5*obj.acceleration*dt^2;
             obj.velocity = obj.velocity + obj.acceleration*dt;
         end
-        
+
         function store_state_data(obj,t)
+
             i = obj.historyIndex;
             obj.locationHistory(i) = obj.pose(1);
             obj.velocityHistory(i) = obj.velocity;
@@ -68,6 +69,17 @@ classdef Car < dlnode
             % unit test the constraints
 %             assert(obj.velocity >= 0 && obj.velocity <= obj.maximumVelocity,'Velocity is out of limit');
 %             assert(obj.acceleration >=(obj.maximumAcceleration(2) - obj.tol) && obj.acceleration <= (obj.tol + 8) ,'Acceleration contraints are violated');            
+        end
+        function check_for_negative_velocity(obj,dt)
+            if (obj.velocity + obj.acceleration*dt) < 0
+                if obj.velocity == 0
+                    obj.acceleration = 0;
+                else
+                    obj.acceleration = - obj.velocity/dt;
+                end
+            elseif (obj.velocity + obj.acceleration*dt) > obj.maximumVelocity
+                obj.acceleration = (obj.maximumVelocity - obj.velocity)/dt;
+            end
         end
     end
 end

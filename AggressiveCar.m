@@ -15,6 +15,7 @@ classdef AggressiveCar < IdmCar
         it_a_idm
         it_frontCarPassedJunction
         full_tree
+        BT_plot_flag = 0
     end
     methods
         function obj = AggressiveCar(varargin)
@@ -249,18 +250,17 @@ classdef AggressiveCar < IdmCar
                         obj.it_frontCarPassedJunction.set_value(false);
                     end
                     
-                    obj.modifyIdm(1);
+%                     obj.modifyIdm(1);
                     calculate_idm_accel(obj,oppositeRoad.Length,1)
                     obj.it_a_stop_idm.set_value(obj.idmAcceleration);
-                    obj.modifyIdm(0);
+%                     obj.modifyIdm(0);
                     
                     % update BT
                     obj.full_tree.tick;
                     obj.acceleration =  obj.it_accel.get_value;
                     
                     % draw BT
-                    BTplot = 0;
-                    if BTplot
+                    if obj.BT_plot_flag
                         tempGraph = gca;
                         if isempty(tempGraph.Parent.Number) || tempGraph.Parent.Number ~= 5
                             figure(5)
@@ -276,15 +276,7 @@ classdef AggressiveCar < IdmCar
                 obj.acceleration = obj.idmAcceleration;
             end
             % check for negative velocities
-            if (obj.velocity + obj.acceleration*dt) < 0
-                if obj.velocity == 0
-                    obj.acceleration = 0;
-                else
-                    obj.acceleration = - obj.velocity/dt;
-                end
-            elseif (obj.velocity + obj.acceleration*dt) > obj.maximumVelocity
-                obj.acceleration = (obj.maximumVelocity - obj.velocity)/dt;
-            end
+            check_for_negative_velocity(obj,dt);
         end
     end
     methods (Static)

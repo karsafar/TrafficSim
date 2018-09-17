@@ -62,14 +62,14 @@ classdef ManualCar < HdmCar
                 
                 obj.it_cruise_idm = obj.bb.add_item('Acruise',obj.idmAcceleration);
                 
-                obj.modifyIdm(1);
+%                 obj.modifyIdm(1);
                 calculate_idm_accel(obj,oppositeRoad.Length)
                 obj.it_junc_idm = obj.bb.add_item('AJunc',obj.idmAcceleration);
                 
                 calculate_idm_accel(obj,oppositeRoad.Length,1)
                 obj.it_stop_idm = obj.bb.add_item('Astop',obj.idmAcceleration);
                 
-                obj.modifyIdm(0);
+%                 obj.modifyIdm(0);
                 for jCar = 1:oppositeRoad.numCars
                     oppositeDistToJunc(jCar) = crossingEnd - oppositeCars(jCar).pose(1);
                 end
@@ -149,7 +149,7 @@ classdef ManualCar < HdmCar
                 canPassAheadNext = (t_in_next > t_out_self);
                 obj.it_canPassAheadNext = obj.bb.add_item('canPassAheadNext',canPassAheadNext);
                 
-                if obj.pose(1) > -40 && obj.pose(1) < crossingEnd && (isempty(obj.Prev) || obj.Prev.pose(1) > crossingEnd || obj.Prev.pose(1) < obj.pose(1))
+                if obj.pose(1) > -40 && obj.pose(1) < crossingEnd && (isempty(obj.Prev) || obj.Prev.pose(1) > crossingBegin || obj.Prev.pose(1) < obj.pose(1))
                     obj.it_isJunctionCrossingTime = obj.bb.add_item('isJunctionCrossingTime',true);
                 else
                     obj.it_isJunctionCrossingTime = obj.bb.add_item('isJunctionCrossingTime',false);
@@ -158,16 +158,23 @@ classdef ManualCar < HdmCar
                 obj.full_tree.tick;
                 obj.acceleration =  obj.it_accel.get_value;
                 
-                %             h5 = figure(5);
-                %             plot(obj.full_tree,0);
-                
-                %             %% add this outside BT
-                %             if obj.acceleration < 0 && eps > abs(obj.velocity)
-                %                 obj.acceleration = 0;
-                %             end
+                % draw BT
+                BTplot = 1;
+                if BTplot
+                    tempGraph = gca;
+                    if isempty(tempGraph.Parent.Number) || tempGraph.Parent.Number ~= 5
+                        figure(5)
+                    else
+                        clf(tempGraph.Parent)
+                    end
+                    plot(obj.full_tree,tempGraph)
+                    obj.bb
+                end
             else
                 obj.acceleration = obj.idmAcceleration;
             end
+            % check for negative velocities
+            check_for_negative_velocity(obj,dt);
         end
     end
 end
