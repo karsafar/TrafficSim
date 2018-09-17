@@ -10,6 +10,7 @@ classdef ManualCar < HdmCar
         it_canPassAheadNext
         it_isJunctionCrossingTime
         full_tree
+        BT_plot_flag = 0
     end
     
     methods
@@ -22,7 +23,7 @@ classdef ManualCar < HdmCar
             end
             obj = obj@HdmCar(orientation, startPoint, Width,dt);
             obj.priority = 1;
-
+            
             %-----------------Initialize Blackboard------------------
             obj.bb = BtBlackboard;
             obj.it_accel = obj.bb.add_item('A',obj.acceleration);
@@ -159,8 +160,7 @@ classdef ManualCar < HdmCar
                 obj.acceleration =  obj.it_accel.get_value;
                 
                 % draw BT
-                BTplot = 1;
-                if BTplot
+                if obj.BT_plot_flag
                     tempGraph = gca;
                     if isempty(tempGraph.Parent.Number) || tempGraph.Parent.Number ~= 5
                         figure(5)
