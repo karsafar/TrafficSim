@@ -4,6 +4,8 @@ classdef Junction < handle
         junctionPlotHandle = []
         horizCarsImageHandle = []
         vertCarsImageHandle = []
+        collidingCarsIdx = NaN(1,2)
+        collisionFlag = 0
     end
     
     methods
@@ -86,38 +88,45 @@ classdef Junction < handle
                 obj.draw_car(vericalArm,flag)
             end
         end
-
+        
         function collision_check(obj,allCarsHoriz,allCarsVert,nCars,mCars,plotFlag)
-            bothCarsAtCrossing(1:2)  = false;
-            for iCar = 1:nCars
-                if allCarsHoriz(iCar).pose(1) > allCarsHoriz(iCar).s_in &&...
-                        allCarsHoriz(iCar).pose(1) < allCarsHoriz(iCar).s_out
-                    bothCarsAtCrossing(1) = true;
-                    break;
+                hCar = 0;
+                for iCar = 1:nCars
+                    if allCarsHoriz(iCar).pose(1) > allCarsHoriz(iCar).s_in &&...
+                            allCarsHoriz(iCar).pose(1) < allCarsHoriz(iCar).s_out
+                        hCar = iCar;
+                        break;
+                    end
                 end
-            end
-            for jCar = 1:mCars
-                if allCarsVert(jCar).pose(1) > allCarsVert(jCar).s_in &&...
-                        allCarsVert(jCar).pose(1) < allCarsVert(jCar).s_out
-                    bothCarsAtCrossing(2) = true;
-                    break;
+                for jCar = 1:mCars
+                    vCar = 0;
+                    if allCarsVert(jCar).pose(1) > allCarsVert(jCar).s_in &&...
+                            allCarsVert(jCar).pose(1) < allCarsVert(jCar).s_out
+                        vCar = jCar;
+                        break;
+                    end
                 end
-            end
-            if all(bothCarsAtCrossing)
+                if hCar ==  obj.collidingCarsIdx(1) && vCar ==  obj.collidingCarsIdx(2)
+                    obj.collisionFlag = 0;
+                elseif hCar > 0 && vCar > 0
+                    obj.collidingCarsIdx = [hCar; vCar];
+                    obj.collisionFlag = 1;
+                end
+            if obj.collisionFlag
                 msg = 'Collision occured';
                 disp(msg);
+                
                 if plotFlag
                     junctionAxesHandle = text(obj.junctionPlotHandle,3,-7,msg,'Color','red');
-                    %                     pause()
                     delete(junctionAxesHandle);
-                    beep;
                 else
-                    %pause();
-                    beep;
                 end
+                
+                beep;
+                pause();
             end
         end
-
+        
         function draw_car(obj,Arm,flag)
             plotVectorX = NaN(1,5);
             plotVectorY = NaN(1,5);
@@ -189,8 +198,8 @@ classdef Junction < handle
                     else
                         set(obj.vertCarsImageHandle(iCar),'XData',plotVectorX','YData',plotVectorY');
                     end
-%                     drawnow limitrate
-                    drawnow
+                    drawnow limitrate
+%                                         drawnow
                 end
             end
         end

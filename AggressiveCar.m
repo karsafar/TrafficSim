@@ -15,6 +15,7 @@ classdef AggressiveCar < IdmCar
         it_a_idm
         it_frontCarPassedJunction
         full_tree
+        BT_plot_flag = 0
     end
     methods
         function obj = AggressiveCar(varargin)
@@ -26,7 +27,7 @@ classdef AggressiveCar < IdmCar
             end
             obj = obj@IdmCar(orientation, startPoint, Width,dt);
             obj.priority = 1;
-
+            
             %-----------------Initialize Blackboard------------------
             obj.bb = BtBlackboard;
             obj.it_accel = obj.bb.add_item('A',obj.acceleration);
@@ -76,7 +77,7 @@ classdef AggressiveCar < IdmCar
             cruise = BtSelector(obj.it_pose < -30,...
                 obj.it_pose > obj.s_out,...
                 obj.it_CarsOpposite == 0, ...
-                obj.it_frontCarPassedJunction==0);%                 
+                obj.it_frontCarPassedJunction==0);%
             
             
             doCruiseIdm = BtSequence(cruise,cruise_idm);
@@ -91,8 +92,8 @@ classdef AggressiveCar < IdmCar
             emergencyStopOrCrossing = BtSelector(doJunctionAvoid,EmergencyStop);
             
             obj.full_tree = BtSelector(doCruiseIdm, doJunctionAvoid,EmergencyStop);
-%             obj.full_tree = BtSelector(doCruiseIdm, doJunctionAvoid);
-
+            %             obj.full_tree = BtSelector(doCruiseIdm, doJunctionAvoid);
+            
             
         end
         %%
@@ -152,6 +153,10 @@ classdef AggressiveCar < IdmCar
                     end
                     
                 else
+                    if ~isempty(obj.Prev) && (obj.Prev.pose(1) > obj.s_in) && (obj.Prev.pose(1) < obj.s_out)
+                        calculate_idm_accel(obj,oppositeRoad.Length,1)
+                    end
+                    
                     %% %-----------------Collision Avoidance BT------------------%
                     T_safe = 0.1;
                     tol = 1e-6;
@@ -231,8 +236,8 @@ classdef AggressiveCar < IdmCar
                     obj.it_pose.set_value(obj.pose(1));
                     obj.it_CarsOpposite.set_value(allPassedJunction==0);
                     obj.it_dist_gap.set_value(obj.s);
-%                     obj.it_dist_gap.set_value(obj.s - (obj.minimumGap+obj.velocity*dt+(obj.velocity^2)/(2*obj.b)-(obj.Prev.velocity^2)/(2*obj.Next.b)));
-
+                    %                     obj.it_dist_gap.set_value(obj.s - (obj.minimumGap+obj.velocity*dt+(obj.velocity^2)/(2*obj.b)-(obj.Prev.velocity^2)/(2*obj.Next.b)));
+                    
                     if isempty(obj.Prev)
                         obj.it_front_car_vel.set_value(obj.targetVelocity);
                     else
@@ -245,18 +250,17 @@ classdef AggressiveCar < IdmCar
                         obj.it_frontCarPassedJunction.set_value(false);
                     end
                     
-                    obj.modifyIdm(1);
+%                     obj.modifyIdm(1);
                     calculate_idm_accel(obj,oppositeRoad.Length,1)
                     obj.it_a_stop_idm.set_value(obj.idmAcceleration);
-                    obj.modifyIdm(0);
+%                     obj.modifyIdm(0);
                     
                     % update BT
                     obj.full_tree.tick;
                     obj.acceleration =  obj.it_accel.get_value;
-
+                    
                     % draw BT
-                    BTplot = 1;
-                    if BTplot
+                    if obj.BT_plot_flag
                         tempGraph = gca;
                         if isempty(tempGraph.Parent.Number) || tempGraph.Parent.Number ~= 5
                             figure(5)
@@ -269,8 +273,10 @@ classdef AggressiveCar < IdmCar
                     
                 end
             else
-                obj.acceleration =  obj.idmAcceleration;
+                obj.acceleration = obj.idmAcceleration;
             end
+            % check for negative velocities
+            check_for_negative_velocity(obj,dt);
         end
     end
     methods (Static)
