@@ -29,7 +29,6 @@ classdef AggressiveCar < AutonomousCar
             end
             obj = obj@AutonomousCar(orientation, startPoint, Width,dt);
             obj.priority = 1;
-%             obj.BT_plot_flag = 1;
             %-----------------Initialize Blackboard------------------
             obj.bb = BtBlackboard;
             obj.it_accel = obj.bb.add_item('A',obj.acceleration);
