@@ -493,17 +493,24 @@ for iIteration = handles.iIteration:nIterations
     % draw cars
     if plotFlag
         junc.draw_all_cars(HorizontalArm,VerticalArm)
+        %drawnow limitrate
+        drawnow
     end
-
+    
     % check for collision
-    if plotFlag == 0
-        junc.collision_check(...
-            HorizontalArm.allCars,...
-            VerticalArm.allCars,...
-            HorizontalArm.numCars,...
-            VerticalArm.numCars,...
-            plotFlag);
-    end
+    junc.collision_check(...
+        HorizontalArm.allCars,...
+        VerticalArm.allCars,...
+        HorizontalArm.numCars,...
+        VerticalArm.numCars,...
+        plotFlag);
+
+%     if iIteration == 1300
+%         HorizontalArm.allCars(3).BT_plot_flag = 1;
+%         plotFlag = 1;
+%         junc = Junction(roadDims, plotFlag);
+%     end
+
     % calculate IDM acceleration
     for iCar = 1:HorizontalArm.numCars
         calculate_idm_accel(HorizontalArm.allCars(iCar),roadDims.Length(1));
@@ -534,7 +541,7 @@ for iIteration = handles.iIteration:nIterations
         break;
     end
     
-    if mod(iIteration,360) == 0 && plotFlag == 0
+    if mod(iIteration,36) == 0 && plotFlag == 0
         if getappdata(f,'canceling')
             set(handles.pushbutton3,'userdata',1);
             set(handles.pushbutton7, 'enable', 'on')

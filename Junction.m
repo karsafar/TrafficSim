@@ -106,11 +106,13 @@ classdef Junction < handle
                         break;
                     end
                 end
-                if hCar ==  obj.collidingCarsIdx(1) && vCar ==  obj.collidingCarsIdx(2)
-                    obj.collisionFlag = 0;
-                elseif hCar > 0 && vCar > 0
-                    obj.collidingCarsIdx = [hCar; vCar];
-                    obj.collisionFlag = 1;
+                if nCars > 0 && mCars > 0
+                    if hCar ==  obj.collidingCarsIdx(1) && vCar ==  obj.collidingCarsIdx(2)
+                        obj.collisionFlag = 0;
+                    elseif hCar > 0 && vCar > 0
+                        obj.collidingCarsIdx = [hCar; vCar];
+                        obj.collisionFlag = 1;
+                    end
                 end
             if obj.collisionFlag
                 msg = 'Collision occured';
@@ -122,8 +124,8 @@ classdef Junction < handle
                 else
                 end
                 
-                beep;
-                pause();
+%                 beep;
+%                 pause();
             end
         end
         
@@ -198,8 +200,7 @@ classdef Junction < handle
                     else
                         set(obj.vertCarsImageHandle(iCar),'XData',plotVectorX','YData',plotVectorY');
                     end
-                    drawnow limitrate
-%                                         drawnow
+
                 end
             end
         end

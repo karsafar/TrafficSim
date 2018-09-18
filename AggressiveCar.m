@@ -1,4 +1,4 @@
-classdef AggressiveCar < IdmCar
+classdef AggressiveCar < AutonomousCar
     
     properties (SetAccess = private)
         bb
@@ -15,6 +15,8 @@ classdef AggressiveCar < IdmCar
         it_a_idm
         it_frontCarPassedJunction
         full_tree
+    end
+    properties (SetAccess = public)
         BT_plot_flag = 0
     end
     methods
@@ -25,9 +27,9 @@ classdef AggressiveCar < IdmCar
                 Width = varargin{3};
                 dt = varargin{4};
             end
-            obj = obj@IdmCar(orientation, startPoint, Width,dt);
+            obj = obj@AutonomousCar(orientation, startPoint, Width,dt);
             obj.priority = 1;
-            
+%             obj.BT_plot_flag = 1;
             %-----------------Initialize Blackboard------------------
             obj.bb = BtBlackboard;
             obj.it_accel = obj.bb.add_item('A',obj.acceleration);
@@ -103,7 +105,7 @@ classdef AggressiveCar < IdmCar
                 crossingBegin = obj.s_in;
                 crossingEnd = obj.s_out;
                 oppositeDistToJunc = NaN(oppositeRoad.numCars,1);
-                tol = 1e-3;
+                tol = 1e-2;
                 
                 % unpatiance parameter
                 if obj.historyIndex >= 50 && obj.pose(1) <= crossingBegin && tol > abs(obj.velocity) && tol > abs(obj.acceleration) && obj.maximumAcceleration(1) < 6 &&...
@@ -156,83 +158,24 @@ classdef AggressiveCar < IdmCar
                     if ~isempty(obj.Prev) && (obj.Prev.pose(1) > obj.s_in) && (obj.Prev.pose(1) < obj.s_out)
                         calculate_idm_accel(obj,oppositeRoad.Length,1)
                     end
-                    
-                    %% %-----------------Collision Avoidance BT------------------%
-                    T_safe = 0.1;
-                    tol = 1e-6;
-                    if tol < abs(oppositeCarAcceleration) && ((oppositeCars(ind).velocity)^2+2*oppositeCarAcceleration*(crossingBegin-oppositeCarPose)) > 0
-                        t_in = (-oppositeCars(ind).velocity+sqrt((oppositeCars(ind).velocity)^2+2*oppositeCarAcceleration...
-                            *(crossingBegin-oppositeCarPose)))/oppositeCarAcceleration+t-3*T_safe;
-                        
-                        t_out = (-oppositeCars(ind).velocity+sqrt((oppositeCars(ind).velocity)^2+2*oppositeCarAcceleration...
-                            *(crossingEnd-oppositeCarPose)))/oppositeCarAcceleration+t+3*T_safe*0;
-                    elseif tol > abs(oppositeCarAcceleration) && tol > oppositeCars(ind).velocity || ((oppositeCars(ind).velocity)^2+2*oppositeCarAcceleration*(crossingBegin-oppositeCarPose)) > 0
-                        if oppositeCarPose > crossingBegin && oppositeCarPose < crossingEnd
-                            t_in = -99999;
-                            t_out = 99999;
-                        else
-                            t_in = 99999;
-                            t_out = 99999;
-                        end
+
+                    if ~isempty(oppositeCars(ind).Next)
+                        calc_a_min_ahead(obj,t,dt,oppositeCars(ind).Next);
                     else
-                        t_in = (crossingBegin - oppositeCarPose)/oppositeCars(ind).velocity+t-3*T_safe;
-                        t_out = (crossingEnd - oppositeCarPose)/oppositeCars(ind).velocity+t+3*T_safe*0;
+                        obj.acc_min_ahead = -1e3;
                     end
                     
-                    if ~isempty(oppositeCars(ind).Next) && oppositeCars(ind).Next.pose(1) <= obj.s_in && ((oppositeCars(ind).Next.velocity)^2+2*oppositeNextCarAcceleration*(crossingBegin-oppositeCars(ind).Next.pose(1))) > 0
-                        if tol < abs(oppositeNextCarAcceleration)
-                            t_in_next = (-oppositeCars(ind).Next.velocity+sqrt((oppositeCars(ind).Next.velocity)^2+2*oppositeNextCarAcceleration...
-                                *(crossingBegin-oppositeCars(ind).Next.pose(1))))/oppositeNextCarAcceleration+t-3*T_safe;
-                        elseif tol > abs(oppositeNextCarAcceleration) && tol > oppositeCars(ind).Next.velocity || ((oppositeCars(ind).Next.velocity)^2+2*oppositeNextCarAcceleration*(crossingBegin-oppositeCars(ind).Next.pose(1))) > 0
-                            t_in_next = 99999;
-                        else
-                            t_in_next = (crossingBegin - oppositeCars(ind).Next.pose(1))/oppositeCars(ind).Next.velocity+t+3*T_safe*0;
-                        end
-                        
-                        A_min_ahead_next = obj.calc_a_min_ahead(...
-                            t,...
-                            dt,...
-                            obj.maximumAcceleration,...
-                            obj.velocity,...
-                            obj.maximumVelocity,...
-                            t_in_next,...
-                            crossingEnd,...
-                            obj.pose(1));
-                    else
-                        A_min_ahead_next = -9999;
-                    end
+                    calc_a_max_behind(obj,t,dt,obj.acc_min_ahead,oppositeCars(ind));
                     
-                    if isinf(t_in) || isnan(t_in)
-                        A_min_ahead = -9999;
-                        A_max_behind = 9999;
-                    else
-                        A_max_behind = obj.calc_a_max_behind(...
-                            t,...
-                            dt,...
-                            obj.maximumAcceleration,...
-                            obj.velocity,...
-                            t_out,...
-                            crossingBegin,...
-                            obj.pose(1),...
-                            A_min_ahead_next);
-                        
-                        A_min_ahead = obj.calc_a_min_ahead(...
-                            t,...
-                            dt,...
-                            obj.maximumAcceleration,...
-                            obj.velocity,...
-                            obj.maximumVelocity,...
-                            t_in,...
-                            crossingEnd,...
-                            obj.pose(1));
-                    end
+                    calc_a_min_ahead(obj,t,dt,oppositeCars(ind));
+
                     
                     %-----------------Update the Blackboard------------------%
-                    obj.it_A_min_ahead.set_value(A_min_ahead);
-                    obj.it_A_max_behind.set_value(A_max_behind);
+                    obj.it_A_min_ahead.set_value(obj.acc_min_ahead);
+                    obj.it_A_max_behind.set_value(obj.acc_max_behind);
                     obj.it_a_idm.set_value(obj.idmAcceleration);
-                    obj.it_a_max_accel.set_value(obj.maximumAcceleration(1)+obj.tol);
-                    obj.it_a_max_decel.set_value(obj.maximumAcceleration(2)-obj.tol);
+                    obj.it_a_max_accel.set_value(obj.maximumAcceleration(1)+tol);
+                    obj.it_a_max_decel.set_value(obj.maximumAcceleration(2)-tol);
                     obj.it_pose.set_value(obj.pose(1));
                     obj.it_CarsOpposite.set_value(allPassedJunction==0);
                     obj.it_dist_gap.set_value(obj.s);
@@ -250,10 +193,8 @@ classdef AggressiveCar < IdmCar
                         obj.it_frontCarPassedJunction.set_value(false);
                     end
                     
-%                     obj.modifyIdm(1);
                     calculate_idm_accel(obj,oppositeRoad.Length,1)
                     obj.it_a_stop_idm.set_value(obj.idmAcceleration);
-%                     obj.modifyIdm(0);
                     
                     % update BT
                     obj.full_tree.tick;
@@ -277,51 +218,6 @@ classdef AggressiveCar < IdmCar
             end
             % check for negative velocities
             check_for_negative_velocity(obj,dt);
-        end
-    end
-    methods (Static)
-        function accelerationToPassAhead = calc_a_min_ahead(t,dt,a_max,v,v_max,t_in,s_out,s)
-            
-            if (t+dt) <= t_in && s >= s_out-v_max*(t_in-(t+dt))
-                
-                minimumAccelerationToPassAhead = (s_out - 0.5*a_max(1)*(t_in-(t+dt))^2 - v*(t_in-t) - s)/ (dt*(t_in-(t+dt/2)));
-                junctionExitVelocity  = (v + minimumAccelerationToPassAhead*dt) + a_max(1)*(t_in-(t+dt));
-                
-                minimumAccelerationToReachMaxVel = (-sqrt((v_max-v+0.5*a_max(1)*dt)^2-2*a_max(1)*(s_out-...
-                    v_max*(t_in-(t+dt))-s-v*dt)-v_max^2+2*v*v_max-v^2)+v_max-v+0.5*a_max(1)*dt)/dt;
-                
-                if junctionExitVelocity > v_max || minimumAccelerationToReachMaxVel < minimumAccelerationToPassAhead
-                    accelerationToPassAhead = minimumAccelerationToReachMaxVel;
-                elseif minimumAccelerationToReachMaxVel >= minimumAccelerationToPassAhead
-                    accelerationToPassAhead = minimumAccelerationToPassAhead;
-                else
-                    accelerationToPassAhead = 9999;
-                end
-            else
-                accelerationToPassAhead = 9999;
-            end
-        end
-        function accelerationToPassBehind = calc_a_max_behind(t,dt,a_max,v,t_out,s_in,s,A_min_ahead_next)
-            
-            if  s <= s_in
-                maximumAccelerationToPassBehind = (s_in - 0.5*a_max(2)*(t_out-(t+dt))^2 -...
-                    v*(t_out-t) - s)/ (dt*(t_out-(t+dt/2)));
-                junctionExitVelocity = (v + maximumAccelerationToPassBehind*dt) + a_max(2)*(t_out-(t+dt));
-                
-                maximumAccelerationToStop = ((dt*a_max(2)-2*v) + sqrt(((dt*a_max(2)-2*v)^2 -...
-                    4*(2*a_max(2)*(s_in-s-v*dt)+v^2))))/(2*dt);
-                
-                if junctionExitVelocity < 0 || A_min_ahead_next > -50
-                    accelerationToPassBehind = maximumAccelerationToStop;
-                elseif  junctionExitVelocity > 0 && A_min_ahead_next <= 50
-                    accelerationToPassBehind =  maximumAccelerationToPassBehind;
-                else
-                    accelerationToPassBehind = -9999;
-                end
-                
-            else
-                accelerationToPassBehind = -9999;
-            end
         end
     end
 end
