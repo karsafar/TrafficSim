@@ -22,7 +22,7 @@ function varargout = microSim(varargin)
 
 % Edit the above text to modify the response to help UI
 
-% Last Modified by GUIDE v2.5 18-Sep-2018 21:11:54
+% Last Modified by GUIDE v2.5 18-Sep-2018 22:30:52
 
 % Begin initialization code - DO NOT EDIT
 
@@ -448,7 +448,6 @@ if get(handles.checkbox_animate,'Value')
 end
 
 plotFlag = get(handles.checkbox_animate,'Value');
-priority = get(handles.edit22,'Value');
 nIterations = str2num(get(handles.edit23,'String'));
 dt = str2num(get(handles.edit17,'String'));
 
@@ -468,8 +467,8 @@ guidata(hObject,handles);
 % construct two arms of the junction objects
 if get(handles.pushbutton7,'Value') == 0
     handles.iIteration = 1;
-    HorizontalArm = handles.roadTypes{roadType.H}([{handles.carTypes},0,roadDims,priority],handles.Arm.H);
-    VerticalArm = handles.roadTypes{roadType.V}([{handles.carTypes},90,roadDims,priority],handles.Arm.V);
+    HorizontalArm = handles.roadTypes{roadType.H}([{handles.carTypes},0,roadDims],handles.Arm.H);
+    VerticalArm = handles.roadTypes{roadType.V}([{handles.carTypes},90,roadDims],handles.Arm.V);
 else
     HorizontalArm = handles.HorizontalArm;
     VerticalArm = handles.VerticalArm;
@@ -937,23 +936,6 @@ function edit21_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-
-% --- Executes on button press in edit22.
-function edit22_Callback(hObject, eventdata, handles)
-% hObject    handle to edit22 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of edit22
-
-
-% --- Executes during object creation, after setting all properties.
-function edit22_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit22 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
 
 
 function handles = edit23_Callback(hObject, eventdata, handles)
@@ -1530,7 +1512,6 @@ sim.runTime = get(handles.edit16,'String');
 sim.timeStepSize = get(handles.edit17,'String');
 sim.t_rng = handles.t_rng;
 sim.Iterations = handles.iIteration;
-sim.rightCarPriority = get(handles.edit22,'Value');
 sim.animate = get(handles.checkbox_animate,'Value');
 
 %% horizontal arm
@@ -1691,7 +1672,6 @@ set(handles.edit16,'String',sim.runTime);
 set(handles.edit17,'String',sim.timeStepSize);
 handles.iIteration = sim.Iterations;
 handles.t_rng = sim.t_rng;
-set(handles.edit22,'Value',sim.rightCarPriority);
 set(handles.checkbox_animate,'Value',sim.animate);
 
 %% horizontal arm
