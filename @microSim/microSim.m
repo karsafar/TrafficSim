@@ -22,7 +22,7 @@ function varargout = microSim(varargin)
 
 % Edit the above text to modify the response to help UI
 
-% Last Modified by GUIDE v2.5 03-Sep-2018 23:59:56
+% Last Modified by GUIDE v2.5 18-Sep-2018 21:11:54
 
 % Begin initialization code - DO NOT EDIT
 
@@ -443,7 +443,7 @@ roadDims.Width = [str2num(get(handles.edit20,'String')); str2num(get(handles.edi
 roadDims.Length = roadDims.End - roadDims.Start;
 
 if get(handles.checkbox_animate,'Value')
-    set(handles.edit36, 'enable', 'on');
+    % open and run car plotting figure
     run('plotCars');
 end
 
@@ -493,8 +493,11 @@ for iIteration = handles.iIteration:nIterations
     % draw cars
     if plotFlag
         junc.draw_all_cars(HorizontalArm,VerticalArm)
-        drawnow limitrate
-%         drawnow
+        if get(handles.fastRate,'Value')
+            drawnow limitrate
+        else
+            drawnow
+        end
     end
     
     % check for collision
@@ -851,19 +854,16 @@ function checkbox_animate_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of checkbox_animate
-% if get(hObject,'Value')
-%     set(handles.edit36, 'enable', 'on');
-%     run('plotCars');
-% else
-%     set(handles.edit36, 'enable', 'off');
-%     close(plotCars);
-% end
 allAxesInFigure = findall(0,'type','axes');
 if ~isempty(allAxesInFigure) && strcmpi(allAxesInFigure.Tag,'axes1') 
-    set(handles.edit36, 'enable', 'off');
     close(plotCars);
 end
+
+if get(hObject,'Value')
+     set(findall(handles.updateRateGroup, '-property', 'enable'), 'enable', 'on');
+ else
+     set(findall(handles.updateRateGroup, '-property', 'enable'), 'enable', 'off');
+ end
 
 
 function edit16_Callback(hObject, eventdata, handles)
@@ -1788,35 +1788,35 @@ guidata(hObject,handles);
 % Hint: get(hObject,'Value') returns toggle state of checkbox11
 
 
-
-function handles = edit36_Callback(hObject, eventdata, handles)
-% hObject    handle to edit36 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit36 as text
-%        str2double(get(hObject,'String')) returns contents of edit36 as a double
-handles.pauseLength = str2double(get(hObject,'String'));
-
-guidata(hObject,handles);
-
-
-% --- Executes during object creation, after setting all properties.
-function edit36_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit36 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
 % --- Executes on button press in pushbutton_plot_resutls.
 function pushbutton_plot_resutls_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton_plot_resutls (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 run('Results');
+
+
+% --- Executes on button press in fastRate.
+function fastRate_Callback(hObject, eventdata, handles)
+% hObject    handle to fastRate (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of fastRate
+
+
+% --- Executes on button press in slowRate.
+function slowRate_Callback(hObject, eventdata, handles)
+% hObject    handle to slowRate (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of slowRate
+
+
+% --- Executes during object creation, after setting all properties.
+function updateRateGroup_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to updateRateGroup (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+set(findall(hObject, '-property', 'enable'), 'enable', 'on');
