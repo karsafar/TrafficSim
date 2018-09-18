@@ -88,7 +88,9 @@ classdef FiniteRoad < Road
             end
             obj.allCars(1).removeNode;
             obj.allCars(1) = [];
-%             if numel(obj.allCars) > 1
+            if numel(obj.allCars) == 1
+                obj.allCars(1).removeNode;
+            end
 %                 %obj.allCars(1).targetVelocity = nanmean(obj.averageVelocityHistory);
 %                 obj.allCars(1).Prev = obj.allCars(end);
 %                 obj.allCars(end).Next = obj.allCars(1);
@@ -104,7 +106,7 @@ classdef FiniteRoad < Road
                 obj.spawn_car(t,dt);
             end
             for iCar = 1:obj.numCars
-                if obj.allCars(1).pose(1) >= obj.endPoint
+                if obj.allCars(1).pose(1) > obj.endPoint
                     obj.delete_car(t)
                 end
             end

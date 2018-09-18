@@ -20,9 +20,9 @@ classdef IdmCar < Car & matlab.mixin.Heterogeneous
         end
         function obj = modifyIdm(obj,flag)
             if flag
-                obj.a = 2;
-                obj.b = 2;
-                obj.timeGap  = 1;
+                obj.a = 1;
+                obj.b = 1.5;
+                obj.timeGap  = 1.6;
             else
                 obj.a = 1;
                 obj.b = 1.5;
@@ -37,7 +37,7 @@ classdef IdmCar < Car & matlab.mixin.Heterogeneous
                junc_flag = varargin{2};
             end
 
-            if junc_flag 
+            if junc_flag
                 obj.s = obj.s_in - obj.pose(1);
                 dV = obj.velocity; 
             elseif obj.leaderFlag == 0 
@@ -68,12 +68,12 @@ classdef IdmCar < Car & matlab.mixin.Heterogeneous
                 obj.idmAcceleration = obj.maximumAcceleration(1);
             elseif obj.idmAcceleration < obj.maximumAcceleration(2)
                 obj.idmAcceleration =  obj.maximumAcceleration(2);
-            elseif 0 > obj.velocity + obj.idmAcceleration*0.1
-                obj.idmAcceleration = -obj.velocity/0.1;
             end
         end
         function decide_acceleration(obj,varargin)
             obj.acceleration = obj.idmAcceleration;
+            % check for negative velocities
+            check_for_negative_velocity(obj,varargin{3});
         end
     end
 end

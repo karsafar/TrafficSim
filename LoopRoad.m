@@ -125,7 +125,7 @@ classdef LoopRoad < Road
         function move_all_cars(obj,t,dt,iIteration,nIterations)
             aggregatedVelocities = 0;
             for iCar = 1:obj.numCars
-                if obj.allCars(iCar).pose(1) >= obj.endPoint
+                if obj.allCars(iCar).pose(1) > obj.endPoint
                     obj.respawn_car(obj.allCars(iCar));
                 end
                 obj.allCars(iCar).store_state_data(t)

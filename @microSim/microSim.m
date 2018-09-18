@@ -25,6 +25,7 @@ function varargout = microSim(varargin)
 % Last Modified by GUIDE v2.5 03-Sep-2018 23:59:56
 
 % Begin initialization code - DO NOT EDIT
+
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
     'gui_Singleton',  gui_Singleton, ...
@@ -492,17 +493,24 @@ for iIteration = handles.iIteration:nIterations
     % draw cars
     if plotFlag
         junc.draw_all_cars(HorizontalArm,VerticalArm)
+        drawnow limitrate
+%         drawnow
     end
-
+    
     % check for collision
-    if plotFlag == 0
-        junc.collision_check(...
-            HorizontalArm.allCars,...
-            VerticalArm.allCars,...
-            HorizontalArm.numCars,...
-            VerticalArm.numCars,...
-            plotFlag);
-    end
+    junc.collision_check(...
+        HorizontalArm.allCars,...
+        VerticalArm.allCars,...
+        HorizontalArm.numCars,...
+        VerticalArm.numCars,...
+        plotFlag);
+
+%     if iIteration == 1300
+%         HorizontalArm.allCars(3).BT_plot_flag = 1;
+%         plotFlag = 1;
+%         junc = Junction(roadDims, plotFlag);
+%     end
+
     % calculate IDM acceleration
     for iCar = 1:HorizontalArm.numCars
         calculate_idm_accel(HorizontalArm.allCars(iCar),roadDims.Length(1));
@@ -532,12 +540,8 @@ for iIteration = handles.iIteration:nIterations
         end
         break;
     end
-    if plotFlag
-        pause(handles.pauseLength)
-        if iIteration < nIterations
-            junc.delete_car_images();
-        end
-    elseif mod(iIteration,360) == 0
+    
+    if mod(iIteration,36) == 0 && plotFlag == 0
         if getappdata(f,'canceling')
             set(handles.pushbutton3,'userdata',1);
             set(handles.pushbutton7, 'enable', 'on')
@@ -1512,7 +1516,7 @@ function pushbutton_save_Callback(hObject, eventdata, handles) %#ok<*INUSL>
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 nIterations = str2num(get(handles.edit23,'String'));
-if get(handles.pushbutton3,'userdata') || (handles.iIteration == nIterations);
+if get(handles.pushbutton3,'userdata') || (handles.iIteration == nIterations)
     sim.HorizontalArm = handles.HorizontalArm;
     sim.VerticalArm = handles.VerticalArm;
     sim.ResumeFlag = 1;
@@ -1751,8 +1755,10 @@ end
 set(handles.checkbox11, 'enable', 'on')
 guidata(hObject,handles);
 
-setappdata(0,'horiz',handles.HorizontalArm);
-setappdata(0,'vert',handles.VerticalArm);
+if sim.ResumeFlag
+    setappdata(0,'horiz',handles.HorizontalArm);
+    setappdata(0,'vert',handles.VerticalArm);
+end
 setappdata(0,'iter',handles.iIteration);
 % setappdata(0,'junc',junc);
 setappdata(0,'t_rng',handles.t_rng);
