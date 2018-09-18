@@ -493,8 +493,8 @@ for iIteration = handles.iIteration:nIterations
     % draw cars
     if plotFlag
         junc.draw_all_cars(HorizontalArm,VerticalArm)
-        %drawnow limitrate
-        drawnow
+        drawnow limitrate
+%         drawnow
     end
     
     % check for collision
