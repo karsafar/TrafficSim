@@ -6,8 +6,11 @@ classdef AggressiveCar < AutonomousCar
         it_pose
         it_CarsOpposite
         it_a_stop_idm
-        it_dist_gap
-        it_front_car_vel
+        it_future_emerg_gap
+        it_future_gap
+        it_dist_to_junc
+        it_comf_dist_to_junc
+        it_emerg_dist_to_junc
         it_a_max_accel
         it_a_max_decel
         it_A_min_ahead
@@ -17,7 +20,7 @@ classdef AggressiveCar < AutonomousCar
         full_tree
     end
     properties (SetAccess = public)
-        BT_plot_flag = 0
+        BT_plot_flag = 1
     end
     methods
         function obj = AggressiveCar(varargin)
@@ -40,8 +43,11 @@ classdef AggressiveCar < AutonomousCar
             obj.it_pose = obj.bb.add_item('pose',obj.pose(1));
             obj.it_CarsOpposite = obj.bb.add_item('CarsOpposite',true);
             obj.it_a_stop_idm = obj.bb.add_item('Astop',obj.idmAcceleration);
-            obj.it_dist_gap = obj.bb.add_item('distGap',obj.s);
-            obj.it_front_car_vel = obj.bb.add_item('frontCarVel',0);
+            obj.it_future_emerg_gap = obj.bb.add_item('futureEmergGap',0);
+            obj.it_future_gap = obj.bb.add_item('futureGap',1e9);
+            obj.it_dist_to_junc = obj.bb.add_item('distToJunc',abs(obj.pose(1)+5.575));
+            obj.it_comf_dist_to_junc = obj.bb.add_item('comfDistToJunc',0);
+            obj.it_emerg_dist_to_junc = obj.bb.add_item('emergDistToJunc',0);
             
             if isempty(obj.Prev) || obj.Prev.pose(1) > obj.s_out
                 obj.it_frontCarPassedJunction = obj.bb.add_item('frontCarPassedJunction',true);
@@ -50,52 +56,40 @@ classdef AggressiveCar < AutonomousCar
                 
             end
             
-            %-------------------intersection collision avoidance-------------------
+            % Ahead logic
             assignAhead = BtAssign(obj.it_accel,obj.it_A_min_ahead);
             aheadCar = BtSequence(...
                 obj.it_A_min_ahead>=0,...
-                obj.it_A_min_ahead<=(obj.it_a_max_accel),...
+                obj.it_A_min_ahead<=obj.it_a_max_accel,...
                 assignAhead);
-            assignZero = BtAssign(obj.it_accel,obj.it_A_max_behind);
-            stopCar = BtSequence(...
-                obj.it_A_max_behind>=0,...
-                obj.it_A_max_behind<obj.it_a_idm, assignZero);
-            
+            aheadWithIdm = BtSequence(obj.it_A_min_ahead<0, BtAssign(obj.it_accel,obj.it_a_idm));
+
+            % Behind logic
             assignBehind = BtAssign(obj.it_accel,obj.it_A_max_behind);
+            behindDecel = BtSequence(...
+                obj.it_A_max_behind<=0,...
+                obj.it_A_max_behind>=obj.it_a_max_decel);
+            behindOrIdm = BtSelector(behindDecel,obj.it_A_max_behind>obj.it_a_idm);
+            behindCar = BtSequence(behindOrIdm,assignBehind);
             
-            behindCar = BtSequence(...
-                obj.it_A_max_behind<0,...
-                obj.it_A_min_ahead>=obj.it_a_max_decel,...
-                obj.it_A_max_behind>=obj.it_a_max_decel,...
-                obj.it_A_max_behind<obj.it_a_idm, assignBehind);
-            
-            goCar = BtSequence(obj.it_A_min_ahead<0, BtAssign(obj.it_accel,obj.it_a_idm));
-            
-            Crossing = BtSelector(aheadCar,goCar,stopCar,behindCar);
-            
-            cruise_idm = BtAssign(obj.it_accel,obj.it_a_idm);
-            
-            cruise = BtSelector(obj.it_pose < -30,...
-                obj.it_pose > obj.s_out,...
-                obj.it_CarsOpposite == 0, ...
-                obj.it_frontCarPassedJunction==0);%
-            
-            
-            doCruiseIdm = BtSequence(cruise,cruise_idm);
-            
-            enoughAfterJuncSpace = BtSelector(obj.it_front_car_vel > 4, obj.it_dist_gap > 35);
-            
-            doJunctionAvoid = BtSequence(enoughAfterJuncSpace, Crossing);
-            
-            
+            % Emergency stop before the junction
             assignEmergencyStop = BtAssign(obj.it_accel,obj.it_a_stop_idm);
-            EmergencyStop = BtSequence(obj.it_pose < obj.s_in,assignEmergencyStop);
-            emergencyStopOrCrossing = BtSelector(doJunctionAvoid,EmergencyStop);
+            doEmergencyStop = BtSequence(obj.it_dist_to_junc >= obj.it_emerg_dist_to_junc,assignEmergencyStop);
             
-            obj.full_tree = BtSelector(doCruiseIdm, doJunctionAvoid,EmergencyStop);
-            %             obj.full_tree = BtSelector(doCruiseIdm, doJunctionAvoid);
+            % normal IDM leading car following acceleration
+            assignIdm = BtAssign(obj.it_accel,obj.it_a_idm);
+            IsEmergStopAvailable = BtSequence(obj.it_frontCarPassedJunction==0,...
+                obj.it_dist_to_junc >= obj.it_comf_dist_to_junc);
+            cruise = BtSelector(obj.it_pose > obj.s_out,...
+                obj.it_CarsOpposite == 0, ...
+                IsEmergStopAvailable);
+            doCruiseIdm = BtSequence(cruise,assignIdm);
             
+            % Ahead or Behind logic
+            Crossing = BtSelector(aheadCar,aheadWithIdm,behindCar);
+            doJunctionAvoid = BtSequence(obj.it_future_gap > obj.it_future_emerg_gap, Crossing);
             
+            obj.full_tree = BtSelector(doCruiseIdm, doJunctionAvoid,doEmergencyStop);
         end
         %%
         function decide_acceleration(obj,oppositeRoad,t,dt)
@@ -149,16 +143,27 @@ classdef AggressiveCar < AutonomousCar
                 obj.it_a_idm.set_value(obj.idmAcceleration);
                 obj.it_a_max_accel.set_value(obj.maximumAcceleration(1)+tol);
                 obj.it_a_max_decel.set_value(obj.maximumAcceleration(2)-tol);
+                obj.it_dist_to_junc.set_value(abs(min(0,obj.pose(1)+5.575)));
+                s_comf = calc_safe_gap(obj.a,obj.b,obj.velocity,obj.targetVelocity,obj.timeGap,0.1,obj.delta,obj.maximumAcceleration(2));
+                obj.it_comf_dist_to_junc.set_value(s_comf);
+%                 s_emerg = calc_safe_gap(obj.a,obj.b,obj.velocity,obj.targetVelocity,obj.timeGap,0.1,obj.delta,obj.maximumAcceleration(2));
+                s_emerg = calc_safe_gap(obj.a,obj.b,obj.velocity,obj.targetVelocity,obj.timeGap,0,obj.delta,obj.maximumAcceleration(2),1);
+                obj.it_emerg_dist_to_junc.set_value(s_emerg);
+                
                 obj.it_pose.set_value(obj.pose(1));
                 obj.it_CarsOpposite.set_value(notAllCarsPassedJunction);
-                obj.it_dist_gap.set_value(obj.s);
-                %                     obj.it_dist_gap.set_value(obj.s - (obj.minimumGap+obj.velocity*dt+(obj.velocity^2)/(2*obj.b)-(obj.Prev.velocity^2)/(2*obj.Next.b)));
                 
-                if isempty(obj.Prev)
-                    obj.it_front_car_vel.set_value(obj.targetVelocity);
+                s_outside = calc_safe_gap(obj.a,obj.b,obj.juncExitVelocity,obj.targetVelocity,obj.timeGap,obj.minimumGap,obj.delta,obj.maximumAcceleration(2));
+                obj.it_future_emerg_gap.set_value(s_outside);
+                                
+                if obj.pose(1) < obj.s_out && ~isempty(obj.Prev) && ~isnan(obj.t_in)
+                    s_future = obj.Prev.pose(1) + obj.Prev.velocity*(obj.t_in-(t+dt)) + 0.5*obj.Prev.acceleration*(obj.t_in-(t+dt))^2 - obj.s_out;
+                elseif ~isempty(obj.Prev)
+                    s_future = obj.Prev.pose(1) + obj.Prev.velocity*dt + 0.5*obj.Prev.acceleration*dt^2 - obj.s_out;
                 else
-                    obj.it_front_car_vel.set_value(obj.Prev.velocity);
+                    s_future = 1e9;
                 end
+                obj.it_future_gap.set_value(s_future)
                 
                 if isempty(obj.Prev) || obj.Prev.pose(1) > crossingEnd || obj.Prev.pose(1) < obj.pose(1)
                     obj.it_frontCarPassedJunction.set_value(true);
@@ -183,6 +188,10 @@ classdef AggressiveCar < AutonomousCar
                     end
                     plot(obj.full_tree,tempGraph)
                     obj.bb
+                    obj.juncExitVelocity
+                    s_comf
+                    s_emerg
+                    s_outside
                 end
             end
             % check for negative velocities

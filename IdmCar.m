@@ -19,15 +19,9 @@ classdef IdmCar < Car & matlab.mixin.Heterogeneous
             obj = obj@Car(varargin);
         end
         function obj = modifyIdm(obj,flag)
-            if flag
-                obj.a = 1;
-                obj.b = 1.5;
-                obj.timeGap  = 1.6;
-            else
                 obj.a = 1;
                 obj.b = 1.5;
                 obj.timeGap = 1.6;
-            end
         end
         function calculate_idm_accel(obj,varargin)
             roadLength = varargin{1};
@@ -52,14 +46,14 @@ classdef IdmCar < Car & matlab.mixin.Heterogeneous
             end
 
             intelligentBreaking = obj.velocity*obj.timeGap + (obj.velocity*dV)/(2*sqrt(obj.a*obj.b));
-            if junc_flag
-                s_star = 0.5 + max(0,intelligentBreaking);
+            if junc_flag 
+                s_star = 0.1 + max(0,intelligentBreaking);
             else
                 s_star = obj.minimumGap + max(0,intelligentBreaking);
             end
             
-            if obj.tol > abs(obj.velocity - obj.targetVelocity)
-                obj.idmAcceleration = obj.a*(1 - 1 - (s_star/obj.s)^2);
+            if obj.tol > abs(obj.velocity - obj.targetVelocity) || obj.targetVelocity == 0 %||  ~isempty(obj.Prev) && obj.Prev.velocity == 0
+                obj.idmAcceleration = -obj.a*(s_star/obj.s)^2;
             else
                 obj.idmAcceleration = obj.a*(1 - (obj.velocity/obj.targetVelocity)^obj.delta - (s_star/obj.s)^2);
             end
