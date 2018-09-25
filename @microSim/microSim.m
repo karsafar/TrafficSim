@@ -506,13 +506,7 @@ for iIteration = handles.iIteration:nIterations
         HorizontalArm.numCars,...
         VerticalArm.numCars,...
         plotFlag);
-
-%     if iIteration == 1300
-%         HorizontalArm.allCars(3).BT_plot_flag = 1;
-%         plotFlag = 1;
-%         junc = Junction(roadDims, plotFlag);
-%     end
-
+    
     % calculate IDM acceleration
     for iCar = 1:HorizontalArm.numCars
         calculate_idm_accel(HorizontalArm.allCars(iCar),roadDims.Length(1));
