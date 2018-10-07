@@ -63,7 +63,7 @@ classdef AutonomousCar < IdmCar
             a_max = obj.maximumAcceleration;
             v = obj.velocity;
             s = obj.pose(1);
-            s_in = obj.s_in;
+            s_in = obj.s_in-0.5;
             s_out = obj.s_out;
             T_safe = obj.T_safe; %#ok<*PROPLC>
             tol = obj.tol;

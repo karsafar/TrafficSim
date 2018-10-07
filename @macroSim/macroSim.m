@@ -335,7 +335,7 @@ RealDensityRange = nCarsRange/roadLength;
 
 assert(all(RealDensityRange(end) <= handles.max_density),'wrong max limit of densities. Have to be 0.1562 max');
 assert(all(RealDensityRange(1) >= 0),'wrong min limit of densities. have to be positive');
-string1 = sprintf(' %.3f',RealDensityRange);
+string1 = sprintf(' %.4f',RealDensityRange);
 set(hObject, 'String', string1);
 if numel(nCarsRange) == 1 && nCarsRange == 0
     handles.numberOfSimRuns_H = 1;
@@ -623,7 +623,7 @@ RealDensityRange = nCarsRange/roadLength;
 
 assert(all(RealDensityRange(end) <= handles.max_density),'wrong max limit of densities. Have to be 0.1562 max');
 assert(all(RealDensityRange(1) >= 0),'wrong min limit of densities. have to be positive');
-string1 = sprintf(' %.3f',RealDensityRange);
+string1 = sprintf(' %.4f',RealDensityRange);
 set(hObject, 'String', string1);
 if numel(nCarsRange) == 1 && nCarsRange == 0
     handles.numberOfSimRuns_V = 1;
