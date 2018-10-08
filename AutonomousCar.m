@@ -3,7 +3,7 @@ classdef AutonomousCar < IdmCar
     properties (SetAccess = public)
         acc_min_ahead
         acc_max_behind
-        T_safe = 0.1
+        T_safe = 0.0
         juncExitVelocity = NaN
         t_in = NaN
         t_out = NaN
@@ -39,7 +39,7 @@ classdef AutonomousCar < IdmCar
                 else
                     obj.t_in = (s_in - s_comp)/v_comp+t-T_safe;
                 end
-                if (t+dt) < obj.t_in && s >= s_out-v_max*(obj.t_in-(t))
+                if t < obj.t_in && (s+0.001) >= (s_out-v_max*(obj.t_in-t))
                     
                     aheadWithPositive_A = (s_out - 0.5*a_max(1)*(obj.t_in-(t+dt))^2 - v*(obj.t_in-t) - s)/ (dt*(obj.t_in-(t+dt/2)));
                     juncExitVel  = (v + aheadWithPositive_A*dt) + a_max(1)*(obj.t_in-(t+dt));
@@ -51,25 +51,25 @@ classdef AutonomousCar < IdmCar
                         if aheadWithMaxVel <= a_max(1) && aheadWithMaxVel >= a_max(2)
                             obj.juncExitVelocity = v_max;
                         else
-                            obj.juncExitVelocity = sqrt(v^2+2*obj.acceleration*(s_out-s));
+                            obj.juncExitVelocity = sqrt(v^2+2*obj.maximumAcceleration(1)*(s_out-s));
                         end
                     elseif aheadWithMaxVel >= aheadWithPositive_A
                         obj.acc_min_ahead = aheadWithPositive_A;
                         obj.juncExitVelocity = juncExitVel;
                     else
                         obj.acc_min_ahead = 1e3;
-                        obj.juncExitVelocity = sqrt(v^2+2*obj.acceleration*(s_out-s));
+                        obj.juncExitVelocity = sqrt(v^2+2*obj.maximumAcceleration(1)*(s_out-s));
                     end
                 else
                     obj.acc_min_ahead = 1e3;
-                    obj.juncExitVelocity = sqrt(v^2+2*obj.acceleration*(s_out-s));
+                    obj.juncExitVelocity = sqrt(v^2+2*obj.maximumAcceleration(1)*(s_out-s));
                 end
             elseif tol > v_comp
                 obj.acc_min_ahead = obj.idmAcceleration;
-                obj.juncExitVelocity = sqrt(v^2+2*obj.acceleration*(s_out-s));
+                obj.juncExitVelocity = sqrt(v^2+2*obj.maximumAcceleration(1)*(s_out-s));
             else
                 obj.acc_min_ahead = 1e3;
-                obj.juncExitVelocity = sqrt(v^2+2*obj.acceleration*(s_out-s));
+                obj.juncExitVelocity = sqrt(v^2+2*obj.maximumAcceleration(1)*(s_out-s));
             end
       
         end
@@ -87,9 +87,9 @@ classdef AutonomousCar < IdmCar
             a_comp = competingCar.acceleration;
             if s_comp <= s_out && tol < v_comp
                 if tol < a_comp
-                    obj.t_out = (-v_comp+sqrt((v_comp)^2+2*a_comp*(s_out-s_comp)))/a_comp+t-T_safe;
+                    obj.t_out = (-v_comp+sqrt((v_comp)^2+2*a_comp*(s_out-s_comp)))/a_comp+t+T_safe;
                 else
-                    obj.t_out = (s_out - s_comp)/v_comp+t-T_safe;
+                    obj.t_out = (s_out - s_comp)/v_comp+t+T_safe;
                 end
                 
                 if  s <= s_in

@@ -11,7 +11,7 @@ classdef IdmCar < Car & matlab.mixin.Heterogeneous
         timeGap  = 1.6;
     end
     properties (Access = public)
-        targetVelocity = 6
+        targetVelocity = 13
     end
     
     methods

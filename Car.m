@@ -55,6 +55,9 @@ classdef Car < dlnode
         function move_car(obj,dt)
             obj.pose(1) = obj.pose(1) + obj.velocity*dt + 0.5*obj.acceleration*dt^2;
             obj.velocity = obj.velocity + obj.acceleration*dt;
+            if obj.velocity < obj.tol && obj.velocity > 0
+                obj.velocity = 0;
+            end
         end
 
         function store_state_data(obj,t)
