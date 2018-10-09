@@ -76,13 +76,14 @@ handles.TempCarHighlight = [];
 handles.loadFlag = 0;
 handles.pauseLength = 0.05;
 
+% UIWAIT makes UI wait for user response (see UIRESUME)
+% uiwait(handles.figure1);
+
 % Update handles structure
 handles.output = hObject;
 guidata(hObject, handles);
 
 
-% UIWAIT makes UI wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
 
 
 % --- Outputs from this function are returned to the command line.
@@ -322,13 +323,6 @@ end
 % Hint: get(hObject,'Value') returns toggle state of radiobutton14
 
 
-% --- Executes during object creation, after setting all properties.
-function radiobutton15_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to radiobutton15 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-
 % --- Executes on button press in radiobutton15.
 function radiobutton15_Callback(hObject, eventdata, handles)
 % hObject    handle to radiobutton15 (see GCBO)
@@ -392,13 +386,6 @@ function radiobutton11_Callback(hObject, eventdata, handles)
 set(findall(handles.uipanel3, '-property', 'enable'), 'enable', 'on')
 set(findall(handles.uipanel4, '-property', 'enable'), 'enable', 'off')
 % Hint: get(hObject,'Value') returns toggle state of radiobutton11
-
-
-% --- Executes during object creation, after setting all properties.
-function radiobutton11_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to radiobutton11 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
 
 
 % --- Executes during object creation, after setting all properties.

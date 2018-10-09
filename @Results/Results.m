@@ -157,18 +157,18 @@ end
 
 if get(handles.checkbox_macro,'Value')
     if get(handles.checkbox_time_av_vel,'Value')
-        cla(findall(handles.axes_time_av_vel,'type','axes'));
+       % cla(findall(handles.axes_time_av_vel,'type','axes'));
         title(handles.axes_time_av_vel,'Velocity Average Across All Cars','FontSize',12)
         xlabel(handles.axes_time_av_vel,'Time, s','FontSize',12)
         ylabel(handles.axes_time_av_vel,' Velocity \langleV\rangle, m/s','FontSize',12)
         hold(handles.axes_time_av_vel,'on');
         grid(handles.axes_time_av_vel,'on');
-        plot(handles.axes_time_av_vel,handles.t_rng(1:handles.iIteration),road.averageVelocityHistory(1:handles.iIteration),'b-','LineWidth',1)
-        axis(handles.axes_time_av_vel,[0 handles.t_rng(handles.iIteration) 0 10])
+        plot(handles.axes_time_av_vel,handles.t_rng(1:handles.iIteration),road.averageVelocityHistory(1:handles.iIteration),'LineWidth',1)
+        axis(handles.axes_time_av_vel,[0 handles.t_rng(handles.iIteration) 0 (max(road.averageVelocityHistory(1:handles.iIteration))+2)])
     end
     
     if get(handles.checkbox_time_ag_vel,'Value')
-        cla(findall(handles.axes_time_ag_vel,'type','axes'));
+        %cla(findall(handles.axes_time_ag_vel,'type','axes'));
         
         for i = 1:handles.iIteration
             cumulativeAverage(i) = nanmean(road.averageVelocityHistory(1:i)); %#ok<*AGROW>
@@ -179,17 +179,17 @@ if get(handles.checkbox_macro,'Value')
         ylabel(handles.axes_time_ag_vel,' Velocity \langleV\rangle, m/s','FontSize',12)
         hold(handles.axes_time_ag_vel,'on');
         grid(handles.axes_time_ag_vel,'on');
-        plot(handles.axes_time_ag_vel,handles.t_rng(1:handles.iIteration),cumulativeAverage,'b-','LineWidth',1)
-        axis(handles.axes_time_ag_vel,[0 handles.t_rng(handles.iIteration) 0 10])
+        plot(handles.axes_time_ag_vel,handles.t_rng(1:handles.iIteration),cumulativeAverage,'LineWidth',1)
+        axis(handles.axes_time_ag_vel,[0 handles.t_rng(handles.iIteration) 0 (max(cumulativeAverage)+2)])
     end
     if get(handles.checkbox_var,'Value')
-        cla(findall(handles.axes_speed_var,'type','axes'));
+        %cla(findall(handles.axes_speed_var,'type','axes'));
         title(handles.axes_speed_var,'Speed Variance','FontSize',12)
         xlabel(handles.axes_speed_var,'Time, s','FontSize',12)
         ylabel(handles.axes_speed_var,' \sigma^{2}, m^{2}/s^{2}','FontSize',12)
         hold(handles.axes_speed_var,'on');
         grid(handles.axes_speed_var,'on');
-        plot(handles.axes_speed_var,handles.t_rng(1:handles.iIteration),road.variance(1:handles.iIteration),'b-','LineWidth',1)
+        plot(handles.axes_speed_var,handles.t_rng(1:handles.iIteration),road.variance(1:handles.iIteration),'LineWidth',1)
         axis(handles.axes_speed_var,[0 handles.t_rng(handles.iIteration) 0 max(road.variance)])
     end
     if get(handles.checkbox_flow,'Value')
@@ -202,13 +202,13 @@ if get(handles.checkbox_macro,'Value')
         end
         flow = density'.*cumulativeAverage;
         
-        cla(findall(handles.axes_flow,'type','axes'));
+        %cla(findall(handles.axes_flow,'type','axes'));
         title(handles.axes_flow,'Demand','FontSize',12)
         xlabel(handles.axes_flow,'Time, s','FontSize',12)
         ylabel(handles.axes_flow,'Flow, veh/s','FontSize',12)
         hold(handles.axes_flow,'on');
         grid(handles.axes_flow,'on');
-        plot(handles.axes_flow,handles.t_rng(1:handles.iIteration),flow(1:handles.iIteration),'b-','LineWidth',1)
+        plot(handles.axes_flow,handles.t_rng(1:handles.iIteration),flow(1:handles.iIteration),'LineWidth',1)
         axis(handles.axes_flow,[0 handles.t_rng(handles.iIteration) 0 max(flow)])
     end
     if get(handles.checkbox_occupancy,'Value')
@@ -231,13 +231,13 @@ if get(handles.checkbox_macro,'Value')
         for i = 1:length(occupancy)
             occupancy(i) = (occupancy(i)/handles.t_rng(i))* 100;
         end
-        cla(findall(handles.axes_occupancy,'type','axes'));
+        %cla(findall(handles.axes_occupancy,'type','axes'));
         title(handles.axes_occupancy,'Occupancy','FontSize',12)
         xlabel(handles.axes_occupancy,'Time, s','FontSize',12)
         ylabel(handles.axes_occupancy,' Occupancy, per cent','FontSize',12)
         hold(handles.axes_occupancy,'on');
         grid(handles.axes_occupancy,'on');
-        plot(handles.axes_occupancy,handles.t_rng(1:handles.iIteration),occupancy,'b-','LineWidth',1)
+        plot(handles.axes_occupancy,handles.t_rng(1:handles.iIteration),occupancy,'LineWidth',1)
         axis(handles.axes_occupancy,[0 handles.t_rng(handles.iIteration) 0 max(occupancy)])
     end
     if get(handles.checkbox_density,'Value')
@@ -245,13 +245,13 @@ if get(handles.checkbox_macro,'Value')
         if tf == 0
             density = road.numCarsHistory/road.Length;
         end
-        cla(findall(handles.axes_density,'type','axes'));
+        %cla(findall(handles.axes_density,'type','axes'));
         title(handles.axes_density,'Density','FontSize',12)
         xlabel(handles.axes_density,'Time, s','FontSize',12)
         ylabel(handles.axes_density,'Density, veh/m','FontSize',12)
         hold(handles.axes_density,'on');
         grid(handles.axes_density,'on');
-        plot(handles.axes_density,handles.t_rng(1:handles.iIteration),density(1:handles.iIteration),'b-','LineWidth',1)
+        plot(handles.axes_density,handles.t_rng(1:handles.iIteration),density(1:handles.iIteration),'LineWidth',1)
         axis(handles.axes_density,[0 handles.t_rng(handles.iIteration) 0 max(density)])
     end
 end

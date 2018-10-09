@@ -328,14 +328,14 @@ densityRange = str2num(get(hObject,'String'));
 
 roadLength = str2double(get(handles.pushbutton3,'String'));
 
-initNumCars = round(densityRange(1) * (roadLength - handles.noSpawnAreaLength));
-endNumCars = round(densityRange(2) * (roadLength - handles.noSpawnAreaLength));
+initNumCars = round(densityRange(1) * roadLength);
+endNumCars = round(densityRange(end) * roadLength);
 nCarsRange = initNumCars:1:endNumCars;
 RealDensityRange = nCarsRange/roadLength;
 
 assert(all(RealDensityRange(end) <= handles.max_density),'wrong max limit of densities. Have to be 0.1562 max');
 assert(all(RealDensityRange(1) >= 0),'wrong min limit of densities. have to be positive');
-string1 = sprintf(' %.3f',RealDensityRange);
+string1 = sprintf(' %.4f',RealDensityRange);
 set(hObject, 'String', string1);
 if numel(nCarsRange) == 1 && nCarsRange == 0
     handles.numberOfSimRuns_H = 1;
@@ -616,14 +616,14 @@ densityRange = str2num(get(hObject,'String'));
 
 roadLength = str2double(get(handles.pushbutton3,'String'));
 
-initNumCars = round(densityRange(1) * (roadLength - handles.noSpawnAreaLength));
-endNumCars = round(densityRange(2) * (roadLength - handles.noSpawnAreaLength));
+initNumCars = round(densityRange(1) * roadLength);
+endNumCars = round(densityRange(end) * roadLength);
 nCarsRange = initNumCars:1:endNumCars;
 RealDensityRange = nCarsRange/roadLength;
 
 assert(all(RealDensityRange(end) <= handles.max_density),'wrong max limit of densities. Have to be 0.1562 max');
 assert(all(RealDensityRange(1) >= 0),'wrong min limit of densities. have to be positive');
-string1 = sprintf(' %.3f',RealDensityRange);
+string1 = sprintf(' %.4f',RealDensityRange);
 set(hObject, 'String', string1);
 if numel(nCarsRange) == 1 && nCarsRange == 0
     handles.numberOfSimRuns_V = 1;
@@ -816,13 +816,16 @@ plotFlag = get(handles.checkbox8,'Value');
 priority = get(handles.checkbox1,'Value');
 nIterations = str2double(get(handles.pushbutton1,'String'));
 dt = str2double(get(handles.edit2,'String'));
+
 for k = 1:handles.numberOfSimRuns_H
     for l = 1:handles.numberOfSimRuns_V
 %         tic
-        sim(k,l) = run_simulation({handles.roadTypes{roadType.H},...
+          Arm.H = handles.Arm(k).H;
+          Arm.V = handles.Arm(l).V;
+          sim(k,l) = run_simulation({handles.roadTypes{roadType.H},...
             handles.roadTypes{roadType.V}},...
             handles.carTypes,...
-            handles.Arm(k,l),...
+            Arm,...
             handles.t_rng,...
             plotFlag,...
             priority,...
@@ -832,6 +835,9 @@ for k = 1:handles.numberOfSimRuns_H
 %         runTime(k,l) = toc;
     end
 end
+RunTime = handles.t_rng(end);
+road = roadDims;
+uisave({'dt','RunTime','road','sim'},'var1');
 
 % --- Executes on button press in checkbox8.
 function checkbox8_Callback(hObject, eventdata, handles)
