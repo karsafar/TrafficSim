@@ -62,13 +62,12 @@ classdef AggressiveCar < AutonomousCar
                 obj.it_A_min_ahead>=0,...
                 obj.it_A_min_ahead<=obj.it_a_max_accel,...
                 assignAhead);
-            aheadWithIdm = BtSequence(obj.it_A_min_ahead<0, BtAssign(obj.it_accel,obj.it_a_idm));
+            aheadWithIdm = BtSequence(obj.it_future_gap > obj.it_future_emerg_gap,obj.it_A_min_ahead<0, BtAssign(obj.it_accel,obj.it_a_idm));
 
             % Behind logic
             assignBehind = BtAssign(obj.it_accel,obj.it_A_max_behind);
-%             behindDecel = BtSequence(...
-%                 obj.it_A_max_behind<=0,...
-%                 obj.it_A_max_behind>=obj.it_a_max_decel);
+            behindWithIdm = BtSequence(obj.it_future_gap > obj.it_future_emerg_gap,obj.it_A_max_behind>obj.it_a_idm, BtAssign(obj.it_accel,obj.it_a_idm));
+
             behindOrIdm = BtSelector(obj.it_A_max_behind<=0,obj.it_A_max_behind<=obj.it_a_idm);
             behindCar = BtSequence(obj.it_A_max_behind>=obj.it_a_max_decel,behindOrIdm,assignBehind);
             
@@ -80,14 +79,15 @@ classdef AggressiveCar < AutonomousCar
             assignIdm = BtAssign(obj.it_accel,obj.it_a_idm);
             IsEmergStopAvailable = BtSequence(obj.it_frontCarPassedJunction==0,...
                 obj.it_dist_to_junc >= obj.it_emerg_dist_to_junc);
-            cruise = BtSelector(obj.it_dist_to_junc >obj.it_comf_dist_to_junc ,...
+            
+            cruise = BtSelector(obj.it_dist_to_junc > obj.it_comf_dist_to_junc ,...
                 obj.it_pose > obj.s_out,...
                 obj.it_CarsOpposite == 0, ...
                 IsEmergStopAvailable);
             doCruiseIdm = BtSequence(cruise,assignIdm);
             
             % Ahead or Behind logic
-            Crossing = BtSelector(aheadCar,aheadWithIdm,behindCar);
+            Crossing = BtSelector(aheadWithIdm,aheadCar,behindWithIdm,behindCar);
             doJunctionAvoid = BtSequence(obj.it_future_gap > obj.it_future_emerg_gap, Crossing);
             
             obj.full_tree = BtSelector(doCruiseIdm, doJunctionAvoid,doEmergencyStop);
@@ -121,7 +121,7 @@ classdef AggressiveCar < AutonomousCar
                 
                 % inf - passed junction
                 oppositeDistToJunc(oppositeDistToJunc<0) = inf;
-                [m, ind] = min(oppositeDistToJunc);
+                [~, ind] = min(oppositeDistToJunc);
                 
                 if ~isempty(obj.Prev) && (obj.Prev.pose(1) > obj.s_in) && (obj.Prev.pose(1) < obj.s_out)
                     calculate_idm_accel(obj,oppositeRoad.Length,1)
@@ -148,13 +148,13 @@ classdef AggressiveCar < AutonomousCar
                 comfortableStopGap = calc_safe_gap(obj.a,obj.b,obj.velocity,obj.targetVelocity,obj.timeGap,0.1,obj.delta,-obj.b)+10;
                 obj.it_comf_dist_to_junc.set_value(comfortableStopGap);
                 
-                emergencyStopGap = calc_safe_gap(obj.a,obj.b,obj.velocity,obj.targetVelocity,obj.timeGap,0,obj.delta,obj.maximumAcceleration(2),1) + 2;
+                emergencyStopGap = calc_safe_gap(obj.a,obj.b,obj.velocity,obj.targetVelocity,obj.timeGap,0,obj.delta,obj.maximumAcceleration(2),1);
                 obj.it_emerg_dist_to_junc.set_value(emergencyStopGap);
                 
                 obj.it_pose.set_value(obj.pose(1));
                 obj.it_CarsOpposite.set_value(notAllCarsPassedJunction);
                 
-                futureEmergencyStopGap = calc_safe_gap(obj.a,obj.b,obj.juncExitVelocity,obj.targetVelocity,obj.timeGap,obj.minimumGap,obj.delta,obj.maximumAcceleration(2),1) + 2;
+                futureEmergencyStopGap = calc_safe_gap(obj.a,obj.b,obj.juncExitVelocity,obj.targetVelocity,obj.timeGap,obj.minimumGap,obj.delta,obj.maximumAcceleration(2),1);
                 obj.it_future_emerg_gap.set_value(futureEmergencyStopGap);
                                 
                 if obj.pose(1) < obj.s_out && ~isempty(obj.Prev) && ~isnan(obj.t_in)
@@ -183,6 +183,11 @@ classdef AggressiveCar < AutonomousCar
                 obj.full_tree.tick;
                 obj.acceleration =  obj.it_accel.get_value;
                 
+%                 if obj.pose(1) > -8 && obj.pose(1) < obj.s_in
+%                     obj.BT_plot_flag = 1;
+%                 else
+%                     obj.BT_plot_flag = 0;
+%                 end
                 % draw BT
                 if obj.BT_plot_flag
                     tempGraph = gca;

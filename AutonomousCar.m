@@ -39,7 +39,7 @@ classdef AutonomousCar < IdmCar
                 else
                     obj.t_in = (s_in - s_comp)/v_comp+t-T_safe;
                 end
-                if t < obj.t_in && (s+0.001) >= (s_out-v_max*(obj.t_in-t))
+                if t < (obj.t_in+0.1) && (s+0.01) >= (s_out-v_max*(obj.t_in-t))
                     
                     aheadWithPositive_A = (s_out - 0.5*a_max(1)*(obj.t_in-(t+dt))^2 - v*(obj.t_in-t) - s)/ (dt*(obj.t_in-(t+dt/2)));
                     juncExitVel  = (v + aheadWithPositive_A*dt) + a_max(1)*(obj.t_in-(t+dt));
@@ -78,7 +78,7 @@ classdef AutonomousCar < IdmCar
             a_max = obj.maximumAcceleration;
             v = obj.velocity;
             s = obj.pose(1);
-            s_in = obj.s_in;
+            s_in = obj.s_in-0.2;
             s_out = obj.s_out;
             T_safe = obj.T_safe; %#ok<*PROPLC>
             tol = obj.tol;
@@ -92,7 +92,7 @@ classdef AutonomousCar < IdmCar
                     obj.t_out = (s_out - s_comp)/v_comp+t+T_safe;
                 end
                 
-                if  s <= s_in
+                if  s <= obj.s_in
                     behindWithNegative_A = (s_in - 0.5*a_max(2)*(obj.t_out-(t+dt))^2 -v*(obj.t_out-t) - s)/ (dt*(obj.t_out-(t+dt/2)));
                     junctionExitVelocity = (v + behindWithNegative_A*dt) + a_max(2)*(obj.t_out-(t+dt));
                     
