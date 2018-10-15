@@ -10,9 +10,10 @@ classdef ManualCar < HdmCar
         it_canPassAheadNext
         it_isJunctionCrossingTime
         full_tree
+    end
+    properties (SetAccess = public)
         BT_plot_flag = 0
     end
-    
     methods
         function obj = ManualCar(varargin)
             if nargin == 4

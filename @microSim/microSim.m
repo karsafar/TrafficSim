@@ -369,13 +369,6 @@ end
 % Hint: get(hObject,'Value') returns toggle state of radiobutton10
 
 
-% --- Executes during object creation, after setting all properties.
-function radiobutton10_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to radiobutton10 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-
 % --- Executes on button press in radiobutton11.
 function radiobutton11_Callback(hObject, eventdata, handles)
 % hObject    handle to radiobutton11 (see GCBO)
