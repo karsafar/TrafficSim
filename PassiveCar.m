@@ -44,7 +44,7 @@ classdef PassiveCar < AutonomousCar
             obj.it_CarsOpposite = obj.bb.add_item('CarsOpposite',true);
             obj.it_a_stop_idm = obj.bb.add_item('Astop',obj.idmAcceleration);
             obj.it_future_emerg_gap = obj.bb.add_item('futureEmergGap',0);
-            obj.it_future_gap = obj.bb.add_item('futureGap',1e9);
+            obj.it_future_gap = obj.bb.add_item('futureGap',1e5);
             obj.it_dist_to_junc = obj.bb.add_item('distToJunc',abs(obj.pose(1)-obj.s_in));
             obj.it_comf_dist_to_junc = obj.bb.add_item('comfDistToJunc',0);
             obj.it_emerg_dist_to_junc = obj.bb.add_item('emergDistToJunc',0);
@@ -93,7 +93,7 @@ classdef PassiveCar < AutonomousCar
             obj.full_tree = BtSelector(doCruiseIdm, doJunctionAvoid,doEmergencyStop);
         end
         %%
-        function decide_acceleration(obj,oppositeRoad,t,dt)
+        function decide_acceleration(obj,oppositeRoad,roadLength,t,dt)
             if oppositeRoad.numCars == 0
                 % if no cars on competing arm
                 obj.acceleration = obj.idmAcceleration;
@@ -103,7 +103,7 @@ classdef PassiveCar < AutonomousCar
                 crossingEnd = obj.s_out;
                 tol = 1e-2;
                 
-                % unpatiance parameter
+                % impatience parameter
                 if obj.historyIndex >= 50 && obj.pose(1) <= crossingBegin && tol > abs(obj.velocity) && tol > abs(obj.acceleration) && obj.maximumAcceleration(1) < 7 &&...
                         (isempty(obj.Prev) || obj.Prev.pose(1) < obj.pose(1) ||  obj.Prev.pose(1)> crossingEnd )
                     obj.maximumAcceleration(1) = obj.maximumAcceleration(1) + 0.05;
@@ -124,7 +124,7 @@ classdef PassiveCar < AutonomousCar
                 [~, ind] = min(oppositeDistToJunc);
                 
                 if ~isempty(obj.Prev) && (obj.Prev.pose(1) > obj.s_in) && (obj.Prev.pose(1) < obj.s_out)
-                    calculate_idm_accel(obj,oppositeRoad.Length,1)
+                    calculate_idm_accel(obj,roadLength,1)
                 end
                 
                 if ~isempty(oppositeCars(ind).Next)
@@ -161,12 +161,12 @@ classdef PassiveCar < AutonomousCar
                     if obj.Prev.pose(1) > 0
                         futureGap = obj.Prev.pose(1) + obj.Prev.velocity*(obj.t_in-(t+dt)) + 0.5*obj.Prev.acceleration*(obj.t_in-(t+dt))^2 - obj.s_out;
                     elseif obj.Prev.pose(1) < 0
-                        futureGap = obj.Prev.pose(1) + oppositeRoad.Length + obj.Prev.velocity*(obj.t_in-(t+dt)) + 0.5*obj.Prev.acceleration*(obj.t_in-(t+dt))^2 - obj.s_out;
+                        futureGap = obj.Prev.pose(1) + roadLength + obj.Prev.velocity*(obj.t_in-(t+dt)) + 0.5*obj.Prev.acceleration*(obj.t_in-(t+dt))^2 - obj.s_out;
                     end
                     elseif ~isempty(obj.Prev)
                     futureGap = obj.Prev.pose(1) + obj.Prev.velocity*dt + 0.5*obj.Prev.acceleration*dt^2 - obj.s_out;
                 else
-                    futureGap = 1e9;
+                    futureGap = 1e5;
                 end
                 obj.it_future_gap.set_value(futureGap)
                 
@@ -176,7 +176,7 @@ classdef PassiveCar < AutonomousCar
                     obj.it_frontCarPassedJunction.set_value(false);
                 end
                 
-                calculate_idm_accel(obj,oppositeRoad.Length,1)
+                calculate_idm_accel(obj,roadLength,1)
                 obj.it_a_stop_idm.set_value(obj.idmAcceleration);
                 
                 % update BT

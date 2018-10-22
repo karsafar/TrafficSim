@@ -486,6 +486,9 @@ for iIteration = handles.iIteration:nIterations
         HorizontalArm.numCars,...
         VerticalArm.numCars,...
         plotFlag);
+%     if iIteration == 800
+%         HorizontalArm.allCars(1).BT_plot_flag = 1;
+%     end
     
     % calculate IDM acceleration
     for iCar = 1:HorizontalArm.numCars
@@ -497,10 +500,10 @@ for iIteration = handles.iIteration:nIterations
     
     % Itersection Collision Avoidance (ICA)
     for iCar = 1:HorizontalArm.numCars
-        HorizontalArm.allCars(iCar).decide_acceleration(VerticalArm,t,dt);
+        HorizontalArm.allCars(iCar).decide_acceleration(VerticalArm,roadDims.Length(1),t,dt);
     end
     for jCar = 1:VerticalArm.numCars
-        VerticalArm.allCars(jCar).decide_acceleration(HorizontalArm,t,dt);
+        VerticalArm.allCars(jCar).decide_acceleration(HorizontalArm,roadDims.Length(2),t,dt);
     end
     
     % Move all the cars along the road

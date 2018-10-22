@@ -1,6 +1,6 @@
-classdef HdmCar < IdmCar 
+classdef HdmCar < IdmCar
     properties (Constant)
-        Tr = 0.6    % sec, reation time
+        Tr = 0.6  % sec, reation time
         n_a = 5     % num of anticipated cars
         Vs = 0.1     % percent, variation coefficient of gap estimation
         sigma_r = 0.01 % 1/sec, estimation error for the inverse TTC
@@ -53,8 +53,8 @@ classdef HdmCar < IdmCar
             obj.w_l = obj.k1*obj.w_l  + obj.k2*random(obj.pd_l);
             obj.w_a = obj.k11*obj.w_a + obj.k12*random(obj.pd_a);
             
-%             jj = 1:obj.n_a;
-%             C_idm = (sum(1./(jj.^2)))^-1;
+            %             jj = 1:obj.n_a;
+            %             C_idm = (sum(1./(jj.^2)))^-1;
             a_idm_free  = obj.a*(1 - (obj.velocity/obj.targetVelocity)^obj.delta);
             
             a_int = 0;
@@ -69,11 +69,11 @@ classdef HdmCar < IdmCar
                 currentCarVelJ = obj.velocityHistory(obj.historyIndex-obj.J);
                 currentCarAccelJ = obj.accelerationHistory(obj.historyIndex-obj.J);
             end
-%             C_idm = 1;
+            
             if ~isempty(obj.Prev) && ~junc_flag
                 leaderCar = obj.Prev;
                 nCarLength = 0;
-                while count <= obj.n_a && leaderCar.pose(1) ~= obj.pose(1) && ~junc_flag && ((leaderCar.pose(1) - obj.pose(1)) < 30 || (leaderCar.pose(1) - obj.pose(1) + roadLength) < 30)
+                while count <= obj.n_a && leaderCar.pose(1) ~= obj.pose(1) && ~junc_flag
                     if leaderCar.historyIndex <= obj.J
                         leaderCarPoseJ = leaderCar.pose(1);
                         leaderCarVelJ = leaderCar.velocity;
@@ -102,17 +102,21 @@ classdef HdmCar < IdmCar
                     leaderCar = leaderCar.Prev;
                     count = count + 1;
                     nCarLength = nCarLength + obj.dimension(2);
-                end 
+                end
             end
             C_idm = max(1,(sum(1./((count-1).^2))))^-1;
             
-            if junc_flag
+            
+            if obj.velocity == 0 && obj.targetVelocity == 0
+                obj.idmAcceleration = a_int;
+            elseif junc_flag
                 obj.s = obj.s_in - obj.pose(1);
                 dV = obj.velocity-0.01;
                 intelligentBreaking = obj.velocity*obj.timeGap + (obj.velocity*dV)/(2*sqrt(obj.a*obj.b));
-                s_star = 0.5 + max(0,intelligentBreaking);
+                s_star = 0.3 + max(0,intelligentBreaking);
+                
                 obj.idmAcceleration = obj.a*(1 - (obj.velocity/obj.targetVelocity)^obj.delta - (s_star/obj.s)^2);
-             else
+            else
                 obj.idmAcceleration = a_idm_free + C_idm*a_int + obj.sigma_a*obj.w_a;
             end
             
@@ -120,8 +124,6 @@ classdef HdmCar < IdmCar
                 obj.idmAcceleration = obj.maximumAcceleration(1);
             elseif obj.idmAcceleration < obj.maximumAcceleration(2)
                 obj.idmAcceleration =  obj.maximumAcceleration(2);
-            elseif 0 > obj.velocity + obj.idmAcceleration*0.1
-                obj.idmAcceleration = -obj.velocity/0.1;
             end
         end
     end

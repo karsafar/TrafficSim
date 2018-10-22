@@ -47,10 +47,10 @@ for iIteration = 1:nIterations
     
     % Itersection Collision Avoidance (ICA)
     for iCar = 1:HorizontalArm.numCars
-        HorizontalArm.allCars(iCar).decide_acceleration(VerticalArm,t,dt);
+        HorizontalArm.allCars(iCar).decide_acceleration(VerticalArm,roadDims.Length(1),t,dt);
     end
     for jCar = 1:VerticalArm.numCars
-        VerticalArm.allCars(jCar).decide_acceleration(HorizontalArm,t,dt);
+        VerticalArm.allCars(jCar).decide_acceleration(HorizontalArm,roadDims.Length(2),t,dt);
     end
     
     % Move all the cars along the road
