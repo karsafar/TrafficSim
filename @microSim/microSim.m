@@ -485,10 +485,7 @@ for iIteration = handles.iIteration:nIterations
         VerticalArm.allCars,...
         HorizontalArm.numCars,...
         VerticalArm.numCars,...
-        plotFlag);
-%     if iIteration == 800
-%         HorizontalArm.allCars(1).BT_plot_flag = 1;
-%     end
+        plotFlag,t);
     
     % calculate IDM acceleration
     for iCar = 1:HorizontalArm.numCars

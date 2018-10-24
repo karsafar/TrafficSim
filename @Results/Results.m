@@ -238,7 +238,7 @@ if get(handles.checkbox_macro,'Value')
         hold(handles.axes_occupancy,'on');
         grid(handles.axes_occupancy,'on');
         plot(handles.axes_occupancy,handles.t_rng(1:handles.iIteration),occupancy,'LineWidth',1)
-        axis(handles.axes_occupancy,[0 handles.t_rng(handles.iIteration) 0 max(occupancy)])
+        axis(handles.axes_occupancy,[0 handles.t_rng(handles.iIteration) 0 100])
     end
     if get(handles.checkbox_density,'Value')
         tf = isa(road,'LoopRoad');

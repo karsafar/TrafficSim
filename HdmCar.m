@@ -1,6 +1,6 @@
 classdef HdmCar < IdmCar
     properties (Constant)
-        Tr = 0.6  % sec, reation time
+        Tr = 0.3  % sec, reation time
         n_a = 5     % num of anticipated cars
         Vs = 0.1     % percent, variation coefficient of gap estimation
         sigma_r = 0.01 % 1/sec, estimation error for the inverse TTC

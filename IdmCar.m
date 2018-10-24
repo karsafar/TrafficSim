@@ -67,7 +67,7 @@ classdef IdmCar < Car & matlab.mixin.Heterogeneous
         function decide_acceleration(obj,varargin)
             obj.acceleration = obj.idmAcceleration;
             % check for negative velocities
-            check_for_negative_velocity(obj,varargin{3});
+            check_for_negative_velocity(obj,varargin{4});
         end
     end
 end

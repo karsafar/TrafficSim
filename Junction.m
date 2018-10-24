@@ -89,7 +89,7 @@ classdef Junction < handle
             end
         end
         
-        function collision_check(obj,allCarsHoriz,allCarsVert,nCars,mCars,plotFlag)
+        function collision_check(obj,allCarsHoriz,allCarsVert,nCars,mCars,plotFlag,t)
                 hCar = 0;
                 for iCar = 1:nCars
                     if allCarsHoriz(iCar).pose(1) > allCarsHoriz(iCar).s_in &&...
@@ -115,7 +115,7 @@ classdef Junction < handle
                     end
                 end
             if obj.collisionFlag
-                msg = 'Collision occured';
+                msg = sprintf('Collision occured at time t = %f',t);
                 disp(msg);
                 
                 if plotFlag
