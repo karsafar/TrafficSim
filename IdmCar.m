@@ -52,7 +52,7 @@ classdef IdmCar < Car & matlab.mixin.Heterogeneous
                 s_star = obj.minimumGap + max(0,intelligentBreaking);
             end
             
-            if obj.tol > abs(obj.velocity - obj.targetVelocity) || obj.targetVelocity == 0 %||  ~isempty(obj.Prev) && obj.Prev.velocity == 0
+            if obj.velocity == 0 && obj.targetVelocity == 0
                 obj.idmAcceleration = -obj.a*(s_star/obj.s)^2;
             else
                 obj.idmAcceleration = obj.a*(1 - (obj.velocity/obj.targetVelocity)^obj.delta - (s_star/obj.s)^2);
@@ -67,7 +67,7 @@ classdef IdmCar < Car & matlab.mixin.Heterogeneous
         function decide_acceleration(obj,varargin)
             obj.acceleration = obj.idmAcceleration;
             % check for negative velocities
-            check_for_negative_velocity(obj,varargin{3});
+            check_for_negative_velocity(obj,varargin{4});
         end
     end
 end
