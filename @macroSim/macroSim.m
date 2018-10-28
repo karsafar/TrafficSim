@@ -51,7 +51,7 @@ function macroSim_OpeningFcn(hObject, eventdata, handles, varargin)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to macroSim (see VARARGIN)
-handles.carTypes = {@IdmCar, @HdmCar, @AggressiveCar, @PassiveCar, @HesitantCar, @ManualCar};
+handles.carTypes = {@IdmModel, @HdmModel, @carTypeB, @carTypeC, @HesitantCar, @carTypeA}; 
 handles.roadTypes = {@LoopRoad @FiniteRoad};
 handles.noSpawnAreaLength = 24.4;   % length of no spawn area around the junction + length of a car for safe respawn
 handles.max_density = 1/6.4; % number of cars per metre (0.1562)

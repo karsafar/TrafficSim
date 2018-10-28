@@ -160,15 +160,15 @@ classdef Junction < handle
                         obj.horizCarsImageHandle(1)= [];
                     end
                     if flag == 0 || iCar > numel(obj.horizCarsImageHandle)
-                        if strcmpi(class(Arm.allCars(iCar)),'ManualCar')
+                        if strcmpi(class(Arm.allCars(iCar)),'carTypeA')
                             carColour = 'g';
-                        elseif strcmpi(class(Arm.allCars(iCar)),'AggressiveCar')
+                        elseif strcmpi(class(Arm.allCars(iCar)),'carTypeB')
                             carColour = 'r';
-                        elseif strcmpi(class(Arm.allCars(iCar)),'PassiveCar')
+                        elseif strcmpi(class(Arm.allCars(iCar)),'carTypeC')
                             carColour = 'b';
                         elseif strcmpi(class(Arm.allCars(iCar)),'HesitantCar')
                             carColour = 'y';
-                        elseif strcmpi(class(Arm.allCars(iCar)),'HdmCar')
+                        elseif strcmpi(class(Arm.allCars(iCar)),'HdmModel')
                             carColour = 'm';
                         else
                             carColour = 'k';
@@ -183,15 +183,15 @@ classdef Junction < handle
                         obj.vertCarsImageHandle(1)= [];
                     end
                     if flag == 0 || iCar > numel(obj.vertCarsImageHandle)
-                        if strcmpi(class(Arm.allCars(iCar)),'ManualCar')
+                        if strcmpi(class(Arm.allCars(iCar)),'carTypeA')
                             carColour = 'g';
-                        elseif strcmpi(class(Arm.allCars(iCar)),'AggressiveCar')
+                        elseif strcmpi(class(Arm.allCars(iCar)),'carTypeB')
                             carColour = 'r';
-                        elseif strcmpi(class(Arm.allCars(iCar)),'PassiveCar')
+                        elseif strcmpi(class(Arm.allCars(iCar)),'carTypeC')
                             carColour = 'b';
                         elseif strcmpi(class(Arm.allCars(iCar)),'HesitantCar')
                             carColour = 'y';
-                        elseif strcmpi(class(Arm.allCars(iCar)),'HdmCar')
+                        elseif strcmpi(class(Arm.allCars(iCar)),'HdmModel')
                             carColour = 'm';
                         else
                             carColour = 'k';

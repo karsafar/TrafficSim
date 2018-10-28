@@ -1,4 +1,4 @@
-classdef AutonomousCar < IdmCar
+classdef AutonomousCar < IdmModel
     
     properties (SetAccess = public)
         acc_min_ahead
@@ -17,7 +17,7 @@ classdef AutonomousCar < IdmCar
                 Width = varargin{3};
                 dt = varargin{4};
             end
-            obj = obj@IdmCar(orientation, startPoint, Width,dt);
+            obj = obj@IdmModel(orientation, startPoint, Width,dt);
         end
         function calc_a_min_ahead(obj,t,dt,competingCar)
             %%

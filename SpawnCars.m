@@ -54,7 +54,7 @@ classdef SpawnCars < handle
         end
         function randomSpawn(obj,everyCarNum,carTypes,FixedSeed,dt)
             %%
-            minimumSpacing = IdmCar.minimumGap;
+            minimumSpacing = IdmModel.minimumGap;
             if obj.numCars ~= 0
                 allCarsPoseArray = NaN(obj.numCars,1);
                 for iCar = 1:obj.numCars
