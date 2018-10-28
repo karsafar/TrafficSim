@@ -1,4 +1,4 @@
-classdef AggressiveCar < AutonomousCar
+classdef carTypeB < AutonomousCar
     
     properties (SetAccess = private)
         bb
@@ -23,7 +23,7 @@ classdef AggressiveCar < AutonomousCar
         BT_plot_flag = 0
     end
     methods
-        function obj = AggressiveCar(varargin)
+        function obj = carTypeB(varargin)
             if nargin == 4
                 orientation = varargin{1};
                 startPoint = varargin{2};

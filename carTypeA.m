@@ -1,4 +1,4 @@
-classdef ManualCar < IdmCar
+classdef carTypeA < IdmModel
     properties(SetAccess = private)
         bb
         it_accel
@@ -26,14 +26,14 @@ classdef ManualCar < IdmCar
         BT_plot_flag = 0
     end
     methods
-        function obj = ManualCar(varargin)
+        function obj = carTypeA(varargin)
             if nargin == 4
                 orientation = varargin{1};
                 startPoint = varargin{2};
                 Width = varargin{3};
                 dt = varargin{4};
             end
-            obj = obj@IdmCar(orientation, startPoint, Width,dt);
+            obj = obj@IdmModel(orientation, startPoint, Width,dt);
             obj.priority = 1;
             
             %-----------------Initialize Blackboard------------------
@@ -59,7 +59,7 @@ classdef ManualCar < IdmCar
                 obj.it_frontCarPassedJunction = obj.bb.add_item('frontCarPassedJunction',false);
             end
             
-            assignBehind = BtAssign(obj.it_accel,obj.acceleration);
+            assignBehind = BtAssign(obj.it_accel,obj.it_cruise_idm);
             passBehind = BtSequence(...
                 obj.it_future_gap > obj.it_future_min_stop_gap,...
                 obj.it_canPassBehind == 1,...
@@ -137,15 +137,18 @@ classdef ManualCar < IdmCar
             obj.it_future_min_stop_gap.set_value(futureMinStopGap)
            
             %%
-            [~, t_out_self_ahead] = calculate_t_in_and_out(obj,pass_ahead_accel,obj.velocity,obj.pose(1),t, roadLength);
+            % update t_in_self and t_out_self
+            [obj.t_in_self, obj.t_out_self] = calculate_t_in_and_out(obj,pass_ahead_accel,obj.velocity,obj.pose(1),t,roadLength);
+            
+            %[~, t_out_self_ahead] = calculate_t_in_and_out(obj,pass_ahead_accel,obj.velocity,obj.pose(1),t, roadLength);
             if obj.pose(1) < crossingEnd && ~isempty(obj.Prev) && ~isnan(obj.t_out_self)
                 sPrev = obj.Prev.pose(1);
                 vPrev = obj.Prev.velocity;
                 aPrev = obj.Prev.acceleration;
                 if sPrev > crossingEnd
-                    futureGap = (sPrev + vPrev*(t_out_self_ahead-(t+dt)) + 0.5*aPrev*(t_out_self_ahead-(t+dt))^2) - crossingEnd;
+                    futureGap = (sPrev + vPrev*(obj.t_out_self-(t+dt)) + 0.5*aPrev*(obj.t_out_self-(t+dt))^2) - crossingEnd;
                 elseif sPrev < crossingBegin && sPrev < obj.pose(1)
-                    futureGap = (sPrev + roadLength + vPrev*(t_out_self_ahead-(t+dt)) + 0.5*aPrev*(t_out_self_ahead-(t+dt))^2) - crossingEnd;
+                    futureGap = (sPrev + roadLength + vPrev*(obj.t_out_self-(t+dt)) + 0.5*aPrev*(obj.t_out_self-(t+dt))^2) - crossingEnd;
                 else
                     futureGap = 0;
                 end
@@ -207,7 +210,7 @@ classdef ManualCar < IdmCar
                 if obj.pose(1) > crossingBegin && obj.pose(1) < crossingEnd
                     canPassAhead = 1;
                 else
-                    canPassAhead = (t_in_op > t_out_self_ahead);
+                    canPassAhead = (t_in_op > obj.t_out_self);
                 end
                 obj.it_canPassAhead.set_value(canPassAhead);
                 
@@ -253,9 +256,6 @@ classdef ManualCar < IdmCar
             
             % check for negative velocities
             check_for_negative_velocity(obj,dt);
-            
-            % update t_in_self and t_out_self
-            [obj.t_in_self, obj.t_out_self] = calculate_t_in_and_out(obj,obj.acceleration,obj.velocity,obj.pose(1),t,roadLength);
             
             % reduce speed before the junction
             if abs(obj.pose(1)-crossingBegin) < comfortableStopGap && obj.targetVelocity ~= 6 && obj.pose(1) < crossingEnd && frontCarValue == 0

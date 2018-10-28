@@ -1,4 +1,4 @@
-classdef PassiveCar < AutonomousCar
+classdef carTypeC < AutonomousCar
     
     properties (SetAccess = private)
        bb
@@ -23,7 +23,7 @@ classdef PassiveCar < AutonomousCar
         BT_plot_flag = 0
     end
     methods
-        function obj = PassiveCar(varargin)
+        function obj = carTypeC(varargin)
             if nargin == 4
                 orientation = varargin{1};
                 startPoint = varargin{2};
