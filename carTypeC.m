@@ -1,7 +1,7 @@
 classdef carTypeC < AutonomousCar
     
     properties (SetAccess = private)
-       bb
+        bb
         it_accel
         it_pose
         it_CarsOpposite
