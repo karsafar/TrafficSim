@@ -1,7 +1,7 @@
-classdef PassiveCar < AutonomousCar
+classdef carTypeB < AutonomousCar
     
     properties (SetAccess = private)
-       bb
+        bb
         it_accel
         it_pose
         it_CarsOpposite
@@ -23,7 +23,7 @@ classdef PassiveCar < AutonomousCar
         BT_plot_flag = 0
     end
     methods
-        function obj = PassiveCar(varargin)
+        function obj = carTypeB(varargin)
             if nargin == 4
                 orientation = varargin{1};
                 startPoint = varargin{2};
@@ -65,13 +65,16 @@ classdef PassiveCar < AutonomousCar
                 obj.it_future_gap > obj.it_future_min_stop_gap,...
                 obj.it_A_min_ahead <= 0,...
                 BtAssign(obj.it_accel,obj.it_a_idm));
-
+            
             % Behind logic
             assignBehind = BtAssign(obj.it_accel,obj.it_A_max_behind);
-            behindWithIdm = BtSequence(obj.it_future_gap > obj.it_future_min_stop_gap,obj.it_A_max_behind>obj.it_a_idm, BtAssign(obj.it_accel,obj.it_a_idm));
-
+            behindWithIdm = BtSequence(...
+                obj.it_future_gap > obj.it_future_min_stop_gap,...
+                obj.it_A_max_behind > obj.it_a_idm,...
+                BtAssign(obj.it_accel,obj.it_a_idm));
+            
             behindOrIdm = BtSelector(obj.it_A_max_behind<=0,obj.it_A_max_behind<=obj.it_a_idm);
-            behindCar = BtSequence(obj.it_A_max_behind>=obj.it_a_max_decel,obj.it_A_min_ahead>=obj.it_a_max_decel,behindOrIdm,assignBehind);
+            behindCar = BtSequence(obj.it_A_max_behind>=obj.it_a_max_decel,behindOrIdm,assignBehind);
             
             % Emergency stop before the junction
             assignStop = BtAssign(obj.it_accel, obj.it_a_stop_idm);
@@ -94,7 +97,7 @@ classdef PassiveCar < AutonomousCar
             doCruiseIdm = BtSelector(cruiseOutsideJunction,stopBeforeJunction,doIdm);
                         
             % Ahead or Behind logic
-            Crossing = BtSelector(behindWithIdm,behindCar,aheadWithIdm,aheadCar);
+            Crossing = BtSelector(aheadWithIdm,aheadCar,behindWithIdm,behindCar);
             doJunctionAvoid = BtSequence(obj.it_future_gap > obj.it_future_min_stop_gap, Crossing);
             
             obj.full_tree = BtSelector(doCruiseIdm, doJunctionAvoid,doEmergencyStop);

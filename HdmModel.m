@@ -1,4 +1,4 @@
-classdef HdmCar < IdmCar
+classdef HdmModel < IdmModel
     properties (Constant)
         Tr = 0.3  % sec, reation time
         n_a = 5     % num of anticipated cars
@@ -22,14 +22,14 @@ classdef HdmCar < IdmCar
         J
     end
     methods
-        function obj = HdmCar(varargin)
+        function obj = HdmModel(varargin)
             if nargin == 4
                 orientation = varargin{1};
                 startPoint = varargin{2};
                 Width = varargin{3};
                 dt = varargin{4};
             end
-            obj = obj@IdmCar(orientation, startPoint, Width,dt);
+            obj = obj@IdmModel(orientation, startPoint, Width,dt);
             obj.k1 = exp(-obj.dt/obj.tau_tilda);
             obj.k2 = sqrt((2*obj.dt)/obj.tau_tilda);
             obj.k11 = exp(-obj.dt/obj.tau_tilda_a);

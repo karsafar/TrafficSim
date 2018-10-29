@@ -1,4 +1,4 @@
-classdef HesitantCar < IdmCar
+classdef HesitantCar < IdmModel
     
     properties (SetAccess = private)
         bb
@@ -22,7 +22,7 @@ classdef HesitantCar < IdmCar
                 Width = varargin{3};
                 dt = varargin{4};
             end
-            obj = obj@IdmCar(orientation, startPoint, Width,dt);
+            obj = obj@IdmModel(orientation, startPoint, Width,dt);
             obj.priority = 0;
 
             %-----------------Initialize Blackboard------------------
