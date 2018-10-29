@@ -112,7 +112,7 @@ classdef HdmCar < IdmCar
                 intelligentBreaking = obj.velocity*obj.timeGap + (obj.velocity*dV)/(2*sqrt(obj.a*obj.b));
                 s_star = 0.5 + max(0,intelligentBreaking);
                 obj.idmAcceleration = obj.a*(1 - (obj.velocity/obj.targetVelocity)^obj.delta - (s_star/obj.s)^2);
-            else
+             else
                 obj.idmAcceleration = a_idm_free + C_idm*a_int + obj.sigma_a*obj.w_a;
             end
             

@@ -76,7 +76,7 @@ classdef PassiveCar < AutonomousCar
             
             cruise_idm = BtAssign(obj.it_accel,obj.it_a_idm);
             
-            cruise = BtSelector(obj.it_pose < -30,...
+            cruise = BtSelector(obj.it_pose < -55,...
                 obj.it_pose > obj.s_out,...
                 obj.it_CarsOpposite == 0, ...
                 obj.it_frontCarPassedJunction==0);%
@@ -90,13 +90,12 @@ classdef PassiveCar < AutonomousCar
             
             
             assignEmergencyStop = BtAssign(obj.it_accel,obj.it_a_stop_idm);
-            EmergencyStop = BtSequence(obj.it_pose < obj.s_in,assignEmergencyStop);
+            EmergencyStop = BtSequence(obj.it_pose < -20,assignEmergencyStop);
             emergencyStopOrCrossing = BtSelector(doJunctionAvoid,EmergencyStop);
             
-            obj.full_tree = BtSelector(doCruiseIdm, doJunctionAvoid,EmergencyStop);
-            %             obj.full_tree = BtSelector(doCruiseIdm, doJunctionAvoid);
-            
-            
+            obj.full_tree = BtSelector(doCruiseIdm, doJunctionAvoid,EmergencyStop,BtAssign(obj.it_accel,obj.it_a_idm));
+%                         obj.full_tree = BtSelector(doCruiseIdm, doJunctionAvoid);
+           
         end
         %%
         function decide_acceleration(obj,oppositeRoad,t,dt)
@@ -105,7 +104,7 @@ classdef PassiveCar < AutonomousCar
                 crossingBegin = obj.s_in;
                 crossingEnd = obj.s_out;
                 oppositeDistToJunc = NaN(oppositeRoad.numCars,1);
-                tol = 1e-2;
+                tol = 1e-1;
                 
                 % unpatiance parameter
                 if obj.historyIndex >= 50 && obj.pose(1) <= crossingBegin && tol > abs(obj.velocity) && tol > abs(obj.acceleration) && obj.maximumAcceleration(1) < 6 &&...

@@ -75,7 +75,7 @@ classdef AggressiveCar < AutonomousCar
             
             cruise_idm = BtAssign(obj.it_accel,obj.it_a_idm);
             
-            cruise = BtSelector(obj.it_pose < -30,...
+            cruise = BtSelector(obj.it_pose < -50,...
                 obj.it_pose > obj.s_out,...
                 obj.it_CarsOpposite == 0, ...
                 obj.it_frontCarPassedJunction==0);%
@@ -92,7 +92,7 @@ classdef AggressiveCar < AutonomousCar
             EmergencyStop = BtSequence(obj.it_pose < obj.s_in,assignEmergencyStop);
             emergencyStopOrCrossing = BtSelector(doJunctionAvoid,EmergencyStop);
             
-            obj.full_tree = BtSelector(doCruiseIdm, doJunctionAvoid,EmergencyStop);
+            obj.full_tree = BtSelector(doCruiseIdm, doJunctionAvoid,EmergencyStop,BtAssign(obj.it_accel,obj.it_a_idm));
             %             obj.full_tree = BtSelector(doCruiseIdm, doJunctionAvoid);
             
             

@@ -25,6 +25,8 @@ for iIteration = 1:nIterations
     % draw cars
     if plotFlag
         junc.draw_all_cars(HorizontalArm,VerticalArm)
+        drawnow limitrate
+%         drawnow
     end
 
     % check for collision
@@ -55,10 +57,10 @@ for iIteration = 1:nIterations
     HorizontalArm.move_all_cars(t,dt,iIteration,nIterations)
     VerticalArm.move_all_cars(t,dt,iIteration,nIterations)
     
-    if plotFlag
-        pause(0.001)
-        junc.delete_car_images();
-    end
+%     if plotFlag
+%         pause(0.001)
+%         junc.delete_car_images();
+%     end
 end
 sim.horizArm = cast_output(HorizontalArm);
 sim.vertArm = cast_output(VerticalArm);
@@ -78,7 +80,10 @@ end
 function tempArm = cast_output(arm)
 tempArm.nCarHistory = arm.nCarHistory;
 if strcmpi(class(arm),'FiniteRoad')
+    tempArm.prescription = 1;
     tempArm.numCarsHistory = arm.numCarsHistory(~isnan(arm.numCarsHistory));
+else
+    tempArm.Density = arm.numCars/arm.Length;
 end
 for iCar = 1:tempArm.nCarHistory
     temp1 = arm.carHistory{1,iCar}(1,:);

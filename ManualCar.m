@@ -60,17 +60,24 @@ classdef ManualCar < HdmCar
                 
                 crossingBegin = obj.s_in;
                 crossingEnd = obj.s_out;
+%                 tol = 1e-1;
+                
+%                  % unpatiance parameter
+%                 if obj.historyIndex >= 50 && obj.pose(1) <= crossingBegin && tol > abs(obj.velocity) && tol > abs(obj.acceleration) && obj.maximumAcceleration(1) < 6 &&...
+%                         (isempty(obj.Prev) || obj.Prev.pose(1) < obj.pose(1) ||  obj.Prev.pose(1)> crossingEnd )
+%                     obj.maximumAcceleration(1) = obj.maximumAcceleration(1) + 0.05;
+%                 elseif obj.maximumAcceleration(1) ~= 3.5 && obj.pose(1) > crossingEnd
+%                     obj.maximumAcceleration(1) = 3.5;
+%                 end
                 
                 obj.it_cruise_idm = obj.bb.add_item('Acruise',obj.idmAcceleration);
                 
-%                 obj.modifyIdm(1);
                 calculate_idm_accel(obj,oppositeRoad.Length)
                 obj.it_junc_idm = obj.bb.add_item('AJunc',obj.idmAcceleration);
                 
                 calculate_idm_accel(obj,oppositeRoad.Length,1)
                 obj.it_stop_idm = obj.bb.add_item('Astop',obj.idmAcceleration);
                 
-%                 obj.modifyIdm(0);
                 for jCar = 1:oppositeRoad.numCars
                     oppositeDistToJunc(jCar) = crossingEnd - oppositeCars(jCar).pose(1);
                 end
