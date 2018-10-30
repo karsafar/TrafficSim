@@ -1,6 +1,6 @@
 classdef IdmModel < Car & matlab.mixin.Heterogeneous
     properties (Constant)
-        delta = 2
+        delta = 1
         minimumGap = 6.4
     end
     properties (SetAccess = protected)
@@ -53,10 +53,10 @@ classdef IdmModel < Car & matlab.mixin.Heterogeneous
                 obj.idmAcceleration = obj.a*(1 - (obj.velocity/obj.targetVelocity)^obj.delta - (s_star/obj.s)^2);
             end
             
-            if obj.idmAcceleration > obj.maximumAcceleration(1)
-                obj.idmAcceleration = obj.maximumAcceleration(1);
-            elseif obj.idmAcceleration < obj.maximumAcceleration(2)
-                obj.idmAcceleration =  obj.maximumAcceleration(2);
+            if obj.idmAcceleration > obj.a_max
+                obj.idmAcceleration = obj.a_max;
+            elseif obj.idmAcceleration < obj.a_feas_min
+                obj.idmAcceleration =  obj.a_feas_min;
             end
         end
         function decide_acceleration(obj,varargin)

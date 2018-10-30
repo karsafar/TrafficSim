@@ -120,10 +120,10 @@ classdef HdmModel < IdmModel
                 obj.idmAcceleration = a_idm_free + C_idm*a_int + obj.sigma_a*obj.w_a;
             end
             
-            if obj.idmAcceleration > obj.maximumAcceleration(1)
-                obj.idmAcceleration = obj.maximumAcceleration(1);
-            elseif obj.idmAcceleration < obj.maximumAcceleration(2)
-                obj.idmAcceleration =  obj.maximumAcceleration(2);
+            if obj.idmAcceleration > obj.a_max
+                obj.idmAcceleration = obj.a_max;
+            elseif obj.idmAcceleration < obj.a_feas_min
+                obj.idmAcceleration =  obj.a_feas_min;
             end
         end
     end
