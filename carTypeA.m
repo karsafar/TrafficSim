@@ -22,7 +22,7 @@ classdef carTypeA < IdmModel
         juncExitVelocity = NaN
     end
     properties (SetAccess = public)
-        BT_plot_flag = 1
+        BT_plot_flag = 0
     end
     methods
         function obj = carTypeA(varargin)
@@ -239,6 +239,7 @@ classdef carTypeA < IdmModel
             obj.full_tree.tick;
             obj.acceleration =  obj.it_accel.get_value;
             
+                
 %             if obj.pose(1) > -8 && obj.pose(1) < crossingEnd
 %                 obj.BT_plot_flag = 1;
 %             else

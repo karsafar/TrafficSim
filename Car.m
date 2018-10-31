@@ -19,7 +19,7 @@ classdef Car < dlnode
         historyIndex = 1.0
         leaderFlag = true
         demand_tol = 0
-        
+        stopIndex = 0
     end
     properties (SetAccess = immutable)
         ownDistfromRearToBack = NaN
@@ -74,7 +74,7 @@ classdef Car < dlnode
             
             % unit test the constraints
             tol = 5e-2;
-            assert(obj.velocity >= 0 && obj.velocity <= obj.maximumVelocity,'Velocity is out of limit');
+            assert(obj.velocity >= 0-tol && obj.velocity <= obj.maximumVelocity+tol,'Velocity is out of limit');
             assert(obj.acceleration >=(obj.a_feas_min - tol) && obj.acceleration <= (tol + obj.a_max) ,'Acceleration contraints are violated');            
         end
         function check_for_negative_velocity(obj,dt)
