@@ -7,8 +7,7 @@ classdef Car < dlnode
         pose = NaN(1,2)
         velocity = 0
         maximumVelocity = 13
-        acceleration = 1.0
-%         maximumAcceleration = [3.5 -9]
+        acceleration = 0.0
         a_max = 3.5
         a_min = -3.5
         a_feas_min = -9
@@ -73,9 +72,9 @@ classdef Car < dlnode
             obj.historyIndex = i + 1;
             
             % unit test the constraints
-            tol = 5e-2;
-            assert(obj.velocity >= 0-tol && obj.velocity <= obj.maximumVelocity+tol,'Velocity is out of limit');
-            assert(obj.acceleration >=(obj.a_feas_min - tol) && obj.acceleration <= (tol + obj.a_max) ,'Acceleration contraints are violated');            
+            tolerance = 5e-2;
+            assert(obj.velocity >= 0-tolerance && obj.velocity <= obj.maximumVelocity+tolerance,'Velocity is out of limit');
+            assert(obj.acceleration >=(obj.a_feas_min - tolerance) && obj.acceleration <= (tolerance + obj.a_max) ,'Acceleration contraints are violated');            
         end
         function check_for_negative_velocity(obj,dt)
             if (obj.velocity + obj.acceleration*dt) < 0
