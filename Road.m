@@ -20,6 +20,7 @@ classdef Road < handle
         carType = 0
         carTypes = {}
         FixedSeed = false
+        numEmergBreaks = 0
     end
     methods
         function obj = Road(road_args)
@@ -53,6 +54,16 @@ classdef Road < handle
             i = obj.nCarHistory + 1;
             obj.carHistory{i} = [iCar.timeHistory; iCar.locationHistory; iCar.velocityHistory; iCar.accelerationHistory];
             obj.nCarHistory = i;
+        end
+        function count_emegrency_breaks(obj)
+            for iCar = 1:obj.numCars
+                if  (obj.allCars(iCar).acceleration - obj.allCars(iCar).tol) <= obj.allCars(iCar).a_feas_min && obj.allCars(iCar).stopIndex == 0
+                    obj.numEmergBreaks = obj.numEmergBreaks + 1;
+                    obj.allCars(iCar).stopIndex = 1;
+                elseif obj.allCars(iCar).acceleration > obj.allCars(iCar).a_feas_min && obj.allCars(iCar).stopIndex == 1
+                    obj.allCars(iCar).stopIndex = 0;
+                end
+            end
         end
     end
 end

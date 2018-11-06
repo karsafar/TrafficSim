@@ -18,15 +18,30 @@ classdef IdmModel < Car & matlab.mixin.Heterogeneous
         function obj = IdmModel(varargin)
             obj = obj@Car(varargin);
         end
+        function obj = modifyIdm(obj,new_a)
+            obj.a = new_a;
+        end
         function calculate_idm_accel(obj,varargin)
             roadLength = varargin{1};
             if nargin == 2
+                stop_flag = 0;
                 junc_flag = 0;
-            else
-               junc_flag = varargin{2};
+                emerg_flag = 0;
+            elseif varargin{2} == 1
+                stop_flag = 1;
+                junc_flag = 0;
+                emerg_flag = 0;
+            elseif varargin{2} == 2
+                junc_flag = 1;
+                stop_flag = 0;
+                emerg_flag = 0;
+            elseif varargin{2} == 3
+                stop_flag = 0;
+                junc_flag = 0;
+                emerg_flag = 1;
             end
-
-            if junc_flag
+            
+            if stop_flag ||junc_flag
                 obj.s = obj.s_in - obj.pose(1);
                 dV = obj.velocity; 
             elseif obj.leaderFlag == 0 
@@ -41,7 +56,7 @@ classdef IdmModel < Car & matlab.mixin.Heterogeneous
             end
 
             intelligentBreaking = obj.velocity*obj.timeGap + (obj.velocity*dV)/(2*sqrt(obj.a*obj.b));
-            if junc_flag 
+            if stop_flag || junc_flag
                 s_star = 0.1 + max(0,intelligentBreaking);
             else
                 s_star = obj.minimumGap + max(0,intelligentBreaking);
@@ -55,8 +70,12 @@ classdef IdmModel < Car & matlab.mixin.Heterogeneous
             
             if obj.idmAcceleration > obj.a_max
                 obj.idmAcceleration = obj.a_max;
-            elseif obj.idmAcceleration < obj.a_feas_min
-                obj.idmAcceleration =  obj.a_feas_min;
+            elseif obj.idmAcceleration < obj.a_min
+                if (emerg_flag || stop_flag) && obj.idmAcceleration < obj.a_feas_min
+                    obj.idmAcceleration =  obj.a_feas_min;
+                else
+                    obj.idmAcceleration =  obj.a_min;
+                end
             end
         end
         function decide_acceleration(obj,varargin)

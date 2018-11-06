@@ -57,10 +57,15 @@ for iIteration = 1:nIterations
     HorizontalArm.move_all_cars(t,dt,iIteration,nIterations)
     VerticalArm.move_all_cars(t,dt,iIteration,nIterations)
     
-%     if plotFlag
-%         pause(0.001)
-%         junc.delete_car_images();
-%     end
+    if mod(iIteration,36) == 0 && plotFlag == 0
+        % Update waitbar and message
+        f = findall(0,'type','figure','tag','TMWWaitbar');
+        if getappdata(f,'canceling')
+            break;
+        end
+        
+    end
+    
 end
 sim.horizArm = cast_output(HorizontalArm);
 sim.vertArm = cast_output(VerticalArm);

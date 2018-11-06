@@ -67,7 +67,7 @@ classdef AutonomousCar < IdmModel
                     obj.acc_min_ahead = 1e3;
                     obj.juncExitVelocity = sqrt(v^2+2*obj.a_max*(s_out-s));
                 end
-            elseif tol > v_comp
+            elseif tol > v_comp && s_comp <= s_in
                 obj.acc_min_ahead = obj.idmAcceleration;
                 obj.juncExitVelocity = sqrt(v^2+2*obj.a_max*(s_out-s));
             else
@@ -104,9 +104,10 @@ classdef AutonomousCar < IdmModel
                     
                     behindWithZeroVel = ((dt*obj.a_min-2*v) + sqrt(((dt*obj.a_min-2*v)^2 -4*(2*obj.a_min*(s_in-s-v*dt)+v^2))))/(2*dt);
                     
-                    if junctionExitVelocity < 0 || A_min_ahead_next > -50
-                        obj.acc_max_behind = behindWithZeroVel;
-                    elseif  junctionExitVelocity > 0 && A_min_ahead_next <= 50
+%                     if junctionExitVelocity < 0 || A_min_ahead_next > -50
+%                         obj.acc_max_behind = behindWithZeroVel;
+%                     else
+                    if  junctionExitVelocity > 0 && A_min_ahead_next <= 50
                         obj.acc_max_behind =  behindWithNegative_A;
                     else
                         obj.acc_max_behind = -1e3;
@@ -115,7 +116,7 @@ classdef AutonomousCar < IdmModel
                 else
                     obj.acc_max_behind = -1e3;
                 end
-            elseif tol > v_comp
+            elseif tol > v_comp && s_comp <= s_in
                 obj.acc_max_behind = obj.idmAcceleration;
             else
                 obj.acc_max_behind = -1e3;

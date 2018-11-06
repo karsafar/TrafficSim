@@ -1,6 +1,6 @@
 classdef HdmModel < IdmModel
     properties (Constant)
-        Tr = 0.3  % sec, reation time
+        Tr = 0.6 % sec, reation time
         n_a = 5     % num of anticipated cars
         Vs = 0.1     % percent, variation coefficient of gap estimation
         sigma_r = 0.01 % 1/sec, estimation error for the inverse TTC
@@ -41,6 +41,7 @@ classdef HdmModel < IdmModel
             obj.w_l = random(obj.pd_l);
             obj.w_a = random(obj.pd_a);
             obj.J = round(obj.Tr/obj.dt);
+
         end
         function calculate_idm_accel(obj,varargin)
             roadLength = varargin{1};
@@ -49,18 +50,20 @@ classdef HdmModel < IdmModel
             else
                 junc_flag = varargin{2};
             end
-            obj.w_s = obj.k1*obj.w_s  + obj.k2*random(obj.pd_s);
-            obj.w_l = obj.k1*obj.w_l  + obj.k2*random(obj.pd_l);
-            obj.w_a = obj.k11*obj.w_a + obj.k12*random(obj.pd_a);
+%             obj.w_s = obj.k1*obj.w_s  + obj.k2*random(obj.pd_s);
+%             obj.w_l = obj.k1*obj.w_l  + obj.k2*random(obj.pd_l);
+%             obj.w_a = obj.k11*obj.w_a + obj.k12*random(obj.pd_a);
+%            
+            obj.w_s = 0;
+            obj.w_l = 0;
+            obj.w_a = 0;
             
-            %             jj = 1:obj.n_a;
-            %             C_idm = (sum(1./(jj.^2)))^-1;
             a_idm_free  = obj.a*(1 - (obj.velocity/obj.targetVelocity)^obj.delta);
             
             a_int = 0;
             count = 1;
             
-            if obj.historyIndex <= obj.J
+            if obj.historyIndex <= obj.J || obj.J == 0
                 currentCarPoseJ = obj.pose(1);
                 currentCarVelJ = obj.velocity;
                 currentCarAccelJ = obj.acceleration;
@@ -74,7 +77,7 @@ classdef HdmModel < IdmModel
                 leaderCar = obj.Prev;
                 nCarLength = 0;
                 while count <= obj.n_a && leaderCar.pose(1) ~= obj.pose(1) && ~junc_flag
-                    if leaderCar.historyIndex <= obj.J
+                    if leaderCar.historyIndex <= obj.J || obj.J == 0
                         leaderCarPoseJ = leaderCar.pose(1);
                         leaderCarVelJ = leaderCar.velocity;
                     else
@@ -104,7 +107,7 @@ classdef HdmModel < IdmModel
                     nCarLength = nCarLength + obj.dimension(2);
                 end
             end
-            C_idm = max(1,(sum(1./((count-1).^2))))^-1;
+            C_idm = min(1,(sum(1./((1:(count-1)).^2)))^-1);
             
             
             if obj.velocity == 0 && obj.targetVelocity == 0
