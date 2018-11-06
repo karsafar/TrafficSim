@@ -57,10 +57,10 @@ classdef Road < handle
         end
         function count_emegrency_breaks(obj)
             for iCar = 1:obj.numCars
-                if  obj.allCars(iCar).acceleration == obj.allCars(iCar).idmAcceleration && obj.allCars(iCar).stopIndex == 0
+                if  (obj.allCars(iCar).acceleration - obj.allCars(iCar).tol) <= obj.allCars(iCar).a_feas_min && obj.allCars(iCar).stopIndex == 0
                     obj.numEmergBreaks = obj.numEmergBreaks + 1;
                     obj.allCars(iCar).stopIndex = 1;
-                elseif 0.5 < abs(obj.allCars(iCar).acceleration - obj.allCars(iCar).idmAcceleration) && obj.allCars(iCar).stopIndex == 1
+                elseif obj.allCars(iCar).acceleration > obj.allCars(iCar).a_feas_min && obj.allCars(iCar).stopIndex == 1
                     obj.allCars(iCar).stopIndex = 0;
                 end
             end
