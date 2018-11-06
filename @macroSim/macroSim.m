@@ -51,7 +51,7 @@ function macroSim_OpeningFcn(hObject, eventdata, handles, varargin)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to macroSim (see VARARGIN)
-handles.carTypes = {@IdmCar, @HdmCar, @AggressiveCar, @PassiveCar, @HesitantCar, @ManualCar};
+handles.carTypes = {@IdmModel, @HdmModel, @carTypeB, @carTypeC, @HesitantCar, @carTypeA}; 
 handles.roadTypes = {@LoopRoad @FiniteRoad};
 handles.noSpawnAreaLength = 24.4;   % length of no spawn area around the junction + length of a car for safe respawn
 handles.max_density = 1/6.4; % number of cars per metre (0.1562)
@@ -817,12 +817,18 @@ priority = get(handles.checkbox1,'Value');
 nIterations = str2double(get(handles.pushbutton1,'String'));
 dt = str2double(get(handles.edit2,'String'));
 
+if plotFlag == 0
+    f = waitbar(0,'','Name','Running simulation',...
+        'CreateCancelBtn','setappdata(gcbf,''canceling'',1)');
+    
+    setappdata(f,'canceling',0);
+end
+
 for k = 1:handles.numberOfSimRuns_H
     for l = 1:handles.numberOfSimRuns_V
-%         tic
-          Arm.H = handles.Arm(k).H;
-          Arm.V = handles.Arm(l).V;
-          sim(k,l) = run_simulation({handles.roadTypes{roadType.H},...
+        Arm.H = handles.Arm(k).H;
+        Arm.V = handles.Arm(l).V;
+        sim(k,l) = run_simulation({handles.roadTypes{roadType.H},...
             handles.roadTypes{roadType.V}},...
             handles.carTypes,...
             Arm,...
@@ -832,8 +838,13 @@ for k = 1:handles.numberOfSimRuns_H
             roadDims,...
             nIterations,...
             dt);
-%         runTime(k,l) = toc;
+        
+        waitbar(((k-1)*handles.numberOfSimRuns_V+l)/handles.numberOfSimRuns_H*handles.numberOfSimRuns_V,f,sprintf('%d out of %d simulations finished',(k-1)*handles.numberOfSimRuns_V+l,handles.numberOfSimRuns_H*handles.numberOfSimRuns_V))
     end
+end
+if plotFlag == 0
+    f = findall(0,'type','figure','tag','TMWWaitbar');
+    delete(f)
 end
 RunTime = handles.t_rng(end);
 road = roadDims;

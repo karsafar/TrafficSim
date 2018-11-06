@@ -35,7 +35,7 @@ for iIteration = 1:nIterations
         VerticalArm.allCars,...
         HorizontalArm.numCars,...
         VerticalArm.numCars,...
-        plotFlag);
+        plotFlag,t);
     
     % calculate IDM acceleration
     for iCar = 1:HorizontalArm.numCars
@@ -47,20 +47,25 @@ for iIteration = 1:nIterations
     
     % Itersection Collision Avoidance (ICA)
     for iCar = 1:HorizontalArm.numCars
-        HorizontalArm.allCars(iCar).decide_acceleration(VerticalArm,t,dt);
+        HorizontalArm.allCars(iCar).decide_acceleration(VerticalArm,roadDims.Length(1),t,dt);
     end
     for jCar = 1:VerticalArm.numCars
-        VerticalArm.allCars(jCar).decide_acceleration(HorizontalArm,t,dt);
+        VerticalArm.allCars(jCar).decide_acceleration(HorizontalArm,roadDims.Length(2),t,dt);
     end
     
     % Move all the cars along the road
     HorizontalArm.move_all_cars(t,dt,iIteration,nIterations)
     VerticalArm.move_all_cars(t,dt,iIteration,nIterations)
     
-%     if plotFlag
-%         pause(0.001)
-%         junc.delete_car_images();
-%     end
+    if mod(iIteration,36) == 0 && plotFlag == 0
+        % Update waitbar and message
+        f = findall(0,'type','figure','tag','TMWWaitbar');
+        if getappdata(f,'canceling')
+            break;
+        end
+        
+    end
+    
 end
 sim.horizArm = cast_output(HorizontalArm);
 sim.vertArm = cast_output(VerticalArm);

@@ -7,8 +7,10 @@ classdef Car < dlnode
         pose = NaN(1,2)
         velocity = 0
         maximumVelocity = 13
-        acceleration = 1.0
-        maximumAcceleration = [3.5 -9]
+        acceleration = 0.0
+        a_max = 3.5
+        a_min = -3.5
+        a_feas_min = -9
         locationHistory = NaN(1,100000)
         velocityHistory = NaN(1,100000)
         accelerationHistory = NaN(1,100000)
@@ -16,7 +18,7 @@ classdef Car < dlnode
         historyIndex = 1.0
         leaderFlag = true
         demand_tol = 0
-        
+        stopIndex = 0
     end
     properties (SetAccess = immutable)
         ownDistfromRearToBack = NaN
@@ -55,6 +57,9 @@ classdef Car < dlnode
         function move_car(obj,dt)
             obj.pose(1) = obj.pose(1) + obj.velocity*dt + 0.5*obj.acceleration*dt^2;
             obj.velocity = obj.velocity + obj.acceleration*dt;
+            if obj.velocity < obj.tol && obj.velocity > 0
+                obj.velocity = 0;
+            end
         end
 
         function store_state_data(obj,t)
@@ -67,8 +72,9 @@ classdef Car < dlnode
             obj.historyIndex = i + 1;
             
             % unit test the constraints
-%             assert(obj.velocity >= 0 && obj.velocity <= obj.maximumVelocity,'Velocity is out of limit');
-%             assert(obj.acceleration >=(obj.maximumAcceleration(2) - obj.tol) && obj.acceleration <= (obj.tol + 8) ,'Acceleration contraints are violated');            
+            tolerance = 5e-2;
+            assert(obj.velocity >= 0-tolerance && obj.velocity <= obj.maximumVelocity+tolerance,'Velocity is out of limit');
+            assert(obj.acceleration >=(obj.a_feas_min - tolerance) && obj.acceleration <= (tolerance + obj.a_max) ,'Acceleration contraints are violated');            
         end
         function check_for_negative_velocity(obj,dt)
             if (obj.velocity + obj.acceleration*dt) < 0

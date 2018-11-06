@@ -22,7 +22,7 @@ function varargout = microSim(varargin)
 
 % Edit the above text to modify the response to help UI
 
-% Last Modified by GUIDE v2.5 03-Sep-2018 23:59:56
+% Last Modified by GUIDE v2.5 18-Sep-2018 22:30:52
 
 % Begin initialization code - DO NOT EDIT
 
@@ -55,7 +55,7 @@ function UI_OpeningFcn(hObject, eventdata, handles, varargin)
 %            command line (see VARARGIN)
 
 % Choose default command line output for UI
-handles.carTypes = {@IdmCar, @HdmCar, @AggressiveCar, @PassiveCar, @HesitantCar, @ManualCar};
+handles.carTypes = {@IdmModel, @HdmModel, @carTypeB, @carTypeC, @HesitantCar, @carTypeA};
 handles.roadTypes = {@LoopRoad @FiniteRoad};
 
 % handles.hPlot7 = plot(handles.axes7, NaN, NaN)
@@ -369,13 +369,6 @@ end
 % Hint: get(hObject,'Value') returns toggle state of radiobutton10
 
 
-% --- Executes during object creation, after setting all properties.
-function radiobutton10_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to radiobutton10 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-
 % --- Executes on button press in radiobutton11.
 function radiobutton11_Callback(hObject, eventdata, handles)
 % hObject    handle to radiobutton11 (see GCBO)
@@ -430,12 +423,11 @@ roadDims.Width = [str2num(get(handles.edit20,'String')); str2num(get(handles.edi
 roadDims.Length = roadDims.End - roadDims.Start;
 
 if get(handles.checkbox_animate,'Value')
-    set(handles.edit36, 'enable', 'on');
+    % open and run car plotting figure
     run('plotCars');
 end
 
 plotFlag = get(handles.checkbox_animate,'Value');
-priority = get(handles.edit22,'Value');
 nIterations = str2num(get(handles.edit23,'String'));
 dt = str2num(get(handles.edit17,'String'));
 
@@ -455,8 +447,8 @@ guidata(hObject,handles);
 % construct two arms of the junction objects
 if get(handles.pushbutton7,'Value') == 0
     handles.iIteration = 1;
-    HorizontalArm = handles.roadTypes{roadType.H}([{handles.carTypes},0,roadDims,priority],handles.Arm.H);
-    VerticalArm = handles.roadTypes{roadType.V}([{handles.carTypes},90,roadDims,priority],handles.Arm.V);
+    HorizontalArm = handles.roadTypes{roadType.H}([{handles.carTypes},0,roadDims],handles.Arm.H);
+    VerticalArm = handles.roadTypes{roadType.V}([{handles.carTypes},90,roadDims],handles.Arm.V);
 else
     HorizontalArm = handles.HorizontalArm;
     VerticalArm = handles.VerticalArm;
@@ -480,8 +472,11 @@ for iIteration = handles.iIteration:nIterations
     % draw cars
     if plotFlag
         junc.draw_all_cars(HorizontalArm,VerticalArm)
-        drawnow limitrate
-%         drawnow
+        if get(handles.fastRate,'Value')
+            drawnow limitrate
+        else
+            drawnow
+        end
     end
     
     % check for collision
@@ -490,14 +485,8 @@ for iIteration = handles.iIteration:nIterations
         VerticalArm.allCars,...
         HorizontalArm.numCars,...
         VerticalArm.numCars,...
-        plotFlag);
-
-%     if iIteration == 1300
-%         HorizontalArm.allCars(3).BT_plot_flag = 1;
-%         plotFlag = 1;
-%         junc = Junction(roadDims, plotFlag);
-%     end
-
+        plotFlag,t);
+    
     % calculate IDM acceleration
     for iCar = 1:HorizontalArm.numCars
         calculate_idm_accel(HorizontalArm.allCars(iCar),roadDims.Length(1));
@@ -508,11 +497,15 @@ for iIteration = handles.iIteration:nIterations
     
     % Itersection Collision Avoidance (ICA)
     for iCar = 1:HorizontalArm.numCars
-        HorizontalArm.allCars(iCar).decide_acceleration(VerticalArm,t,dt);
+        HorizontalArm.allCars(iCar).decide_acceleration(VerticalArm,roadDims.Length(1),t,dt);
     end
     for jCar = 1:VerticalArm.numCars
-        VerticalArm.allCars(jCar).decide_acceleration(HorizontalArm,t,dt);
+        VerticalArm.allCars(jCar).decide_acceleration(HorizontalArm,roadDims.Length(2),t,dt);
     end
+    
+    count_emegrency_breaks(HorizontalArm);
+%     VerticalArm.count_emegrency_breaks(VerticalArm);
+    
     
     % Move all the cars along the road
     HorizontalArm.move_all_cars(t,dt,iIteration,nIterations)
@@ -538,6 +531,7 @@ for iIteration = handles.iIteration:nIterations
         waitbar(iIteration/nIterations,f,sprintf('%d percent progress',round(iIteration*100/nIterations)))
     end
 end
+HorizontalArm.numEmergBreaks
 if plotFlag == 0
     f = findall(0,'type','figure','tag','TMWWaitbar');
     delete(f)
@@ -838,19 +832,16 @@ function checkbox_animate_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of checkbox_animate
-% if get(hObject,'Value')
-%     set(handles.edit36, 'enable', 'on');
-%     run('plotCars');
-% else
-%     set(handles.edit36, 'enable', 'off');
-%     close(plotCars);
-% end
 allAxesInFigure = findall(0,'type','axes');
 if ~isempty(allAxesInFigure) && strcmpi(allAxesInFigure.Tag,'axes1') 
-    set(handles.edit36, 'enable', 'off');
     close(plotCars);
 end
+
+if get(hObject,'Value')
+     set(findall(handles.updateRateGroup, '-property', 'enable'), 'enable', 'on');
+ else
+     set(findall(handles.updateRateGroup, '-property', 'enable'), 'enable', 'off');
+ end
 
 
 function edit16_Callback(hObject, eventdata, handles)
@@ -924,23 +915,6 @@ function edit21_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-
-% --- Executes on button press in edit22.
-function edit22_Callback(hObject, eventdata, handles)
-% hObject    handle to edit22 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of edit22
-
-
-% --- Executes during object creation, after setting all properties.
-function edit22_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit22 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
 
 
 function handles = edit23_Callback(hObject, eventdata, handles)
@@ -1517,7 +1491,6 @@ sim.runTime = get(handles.edit16,'String');
 sim.timeStepSize = get(handles.edit17,'String');
 sim.t_rng = handles.t_rng;
 sim.Iterations = handles.iIteration;
-sim.rightCarPriority = get(handles.edit22,'Value');
 sim.animate = get(handles.checkbox_animate,'Value');
 
 %% horizontal arm
@@ -1678,7 +1651,6 @@ set(handles.edit16,'String',sim.runTime);
 set(handles.edit17,'String',sim.timeStepSize);
 handles.iIteration = sim.Iterations;
 handles.t_rng = sim.t_rng;
-set(handles.edit22,'Value',sim.rightCarPriority);
 set(handles.checkbox_animate,'Value',sim.animate);
 
 %% horizontal arm
@@ -1775,35 +1747,35 @@ guidata(hObject,handles);
 % Hint: get(hObject,'Value') returns toggle state of checkbox11
 
 
-
-function handles = edit36_Callback(hObject, eventdata, handles)
-% hObject    handle to edit36 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit36 as text
-%        str2double(get(hObject,'String')) returns contents of edit36 as a double
-handles.pauseLength = str2double(get(hObject,'String'));
-
-guidata(hObject,handles);
-
-
-% --- Executes during object creation, after setting all properties.
-function edit36_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit36 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
 % --- Executes on button press in pushbutton_plot_resutls.
 function pushbutton_plot_resutls_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton_plot_resutls (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 run('Results');
+
+
+% --- Executes on button press in fastRate.
+function fastRate_Callback(hObject, eventdata, handles)
+% hObject    handle to fastRate (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of fastRate
+
+
+% --- Executes on button press in slowRate.
+function slowRate_Callback(hObject, eventdata, handles)
+% hObject    handle to slowRate (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of slowRate
+
+
+% --- Executes during object creation, after setting all properties.
+function updateRateGroup_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to updateRateGroup (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+set(findall(hObject, '-property', 'enable'), 'enable', 'on');
