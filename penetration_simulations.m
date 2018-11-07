@@ -6,7 +6,7 @@ roadTypes = {@LoopRoad @FiniteRoad};
 carTypes = {@carTypeA, @carTypeB, @carTypeC};
 
 plotFlag = false;
-runTime = 720;
+runTime = 3600;
 dt = 0.1;
 nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;
@@ -15,8 +15,8 @@ fixedSeed = [true true];
 priority = false;
 
 % road dimensions
-road.Start = [-100; -100];
-road.End = [100; 100];
+road.Start = [-300; -300];
+road.End = [300; 300];
 road.Width = [4; 4];
 road.Length = road.End - road.Start;
 
@@ -42,7 +42,7 @@ for alpha = 0:10:100
     for beta = (100-alpha):-10:0
         gamma = (100-alpha-beta);
         
-        carTypeRatios = [alpha/100 beta/100 gamma/100; 1 0 0];
+        carTypeRatios = [alpha/100 beta/100 gamma/100; alpha/100 beta/100 gamma/100];
         
         allCarsNumArray_H = zeros(1,numel(carTypes));
         allCarsNumArray_V = zeros(1,numel(carTypes));
@@ -75,7 +75,7 @@ for alpha = 0:10:100
         k = k + 1;
         waitbar(k/(((11^2+11))/2),f,sprintf('%d out of %d simulations finished',k,((11^2+11))/2))
         
-        save(['/Users/robot/.CMVolumes/Karam Safarov/PhD/bulk simulations/test-sim-5/test-' num2str(k) '.mat'],...
+        save(['/Users/robot/.CMVolumes/Karam Safarov/PhD/bulk simulations/test-sim-7/test-' num2str(k) '.mat'],...
             'carTypeRatios',...
             'carTypes',...
             'nCars',...

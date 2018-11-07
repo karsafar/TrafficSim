@@ -84,6 +84,7 @@ end
 
 function tempArm = cast_output(arm)
 tempArm.nCarHistory = arm.nCarHistory;
+tempArm.numEmergBreaks = arm.numEmergBreaks;
 if strcmpi(class(arm),'FiniteRoad')
     tempArm.prescription = 1;
     tempArm.numCarsHistory = arm.numCarsHistory(~isnan(arm.numCarsHistory));
