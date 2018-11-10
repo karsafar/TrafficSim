@@ -53,6 +53,11 @@ for iIteration = 1:nIterations
         VerticalArm.allCars(jCar).decide_acceleration(HorizontalArm,roadDims.Length(2),t,dt);
     end
     
+    
+    % Move all the cars along the road
+    count_emegrency_breaks(HorizontalArm);
+    count_emegrency_breaks(VerticalArm);
+    
     % Move all the cars along the road
     HorizontalArm.move_all_cars(t,dt,iIteration,nIterations)
     VerticalArm.move_all_cars(t,dt,iIteration,nIterations)
