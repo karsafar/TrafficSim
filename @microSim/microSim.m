@@ -504,8 +504,7 @@ for iIteration = handles.iIteration:nIterations
     end
     
     count_emegrency_breaks(HorizontalArm);
-%     VerticalArm.count_emegrency_breaks(VerticalArm);
-    
+    count_emegrency_breaks(VerticalArm);
     
     % Move all the cars along the road
     HorizontalArm.move_all_cars(t,dt,iIteration,nIterations)
@@ -531,7 +530,6 @@ for iIteration = handles.iIteration:nIterations
         waitbar(iIteration/nIterations,f,sprintf('%d percent progress',round(iIteration*100/nIterations)))
     end
 end
-HorizontalArm.numEmergBreaks
 if plotFlag == 0
     f = findall(0,'type','figure','tag','TMWWaitbar');
     delete(f)
