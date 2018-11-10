@@ -23,7 +23,7 @@ classdef carTypeA < IdmModel
     end
     
     properties (SetAccess = public)
-        BT_plot_flag = 1
+        BT_plot_flag = 0
         temp_a = 0 % temporary accel for upperIDM
     end
     methods
