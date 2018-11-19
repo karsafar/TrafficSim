@@ -27,7 +27,7 @@ max_density = 1/6.4;    % number of cars per metre (0.1562)
 density = 0.03;
 nCars = round(density * road.Length);
 RealDensity = nCars/road.Length;
-k = 0;
+k = 45;
 
 %%
 if plotFlag == 0
@@ -38,10 +38,10 @@ if plotFlag == 0
     waitbar(k/(((11^2+11))/2),f,sprintf('%d out of %d simulations finished',k,((11^2+11))/2))
 end
 
-for alpha = 0:10:100
+for alpha = 50:10:100
     for beta = (100-alpha):-10:0
         gamma = (100-alpha-beta);
-        
+
         carTypeRatios = [alpha/100 beta/100 gamma/100; alpha/100 beta/100 gamma/100];
         
         allCarsNumArray_H = zeros(1,numel(carTypes));
@@ -75,7 +75,7 @@ for alpha = 0:10:100
         k = k + 1;
         waitbar(k/(((11^2+11))/2),f,sprintf('%d out of %d simulations finished',k,((11^2+11))/2))
         
-        save(['/Users/robot/.CMVolumes/Karam Safarov/PhD/bulk simulations/test-sim-7/test-' num2str(k) '.mat'],...
+        save(['/Users/robot/.CMVolumes/Karam Safarov/PhD/bulk simulations/test-sim-11/test-' num2str(k) '.mat'],...
             'carTypeRatios',...
             'carTypes',...
             'nCars',...

@@ -223,12 +223,6 @@ classdef carTypeB < AutonomousCar
             % update BT
             obj.full_tree.tick;
             obj.acceleration =  obj.it_accel.get_value;
-
-            % if obj.pose(1) > -6.5 && obj.pose(1) < crossingBegin
-            %     obj.BT_plot_flag = 1;
-            % else
-            %     obj.BT_plot_flag = 0;
-            % end
             
             % draw BT
             if obj.BT_plot_flag
