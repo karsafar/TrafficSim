@@ -167,21 +167,21 @@ if get(handles.checkbox_macro,'Value')
         axis(handles.axes_time_av_vel,[0 handles.t_rng(handles.iIteration) 0 (max(road.averageVelocityHistory(1:handles.iIteration))+2)])
     end
     
-    if get(handles.checkbox_time_ag_vel,'Value')
-        %cla(findall(handles.axes_time_ag_vel,'type','axes'));
-        
-        for i = 1:handles.iIteration
-            cumulativeAverage(i) = nanmean(road.averageVelocityHistory(1:i)); %#ok<*AGROW>
-        end
-        
-        title(handles.axes_time_ag_vel,'Cumulative Velocity Average','FontSize',12)
-        xlabel(handles.axes_time_ag_vel,'Time, s','FontSize',12)
-        ylabel(handles.axes_time_ag_vel,' Velocity \langleV\rangle, m/s','FontSize',12)
-        hold(handles.axes_time_ag_vel,'on');
-        grid(handles.axes_time_ag_vel,'on');
-        plot(handles.axes_time_ag_vel,handles.t_rng(1:handles.iIteration),cumulativeAverage,'LineWidth',1)
-        axis(handles.axes_time_ag_vel,[0 handles.t_rng(handles.iIteration) 0 (max(cumulativeAverage)+2)])
-    end
+%     if get(handles.checkbox_time_ag_vel,'Value')
+%         %cla(findall(handles.axes_time_ag_vel,'type','axes'));
+%         
+% %         for i = 1:handles.iIteration
+% %             cumulativeAverage(i) = nanmean(road.averageVelocityHistory(1:i)); %#ok<*AGROW>
+% %         end
+% 
+%         title(handles.axes_time_ag_vel,'Cumulative Velocity Average','FontSize',12)
+%         xlabel(handles.axes_time_ag_vel,'Time, s','FontSize',12)
+%         ylabel(handles.axes_time_ag_vel,' Velocity \langleV\rangle, m/s','FontSize',12)
+%         hold(handles.axes_time_ag_vel,'on');
+%         grid(handles.axes_time_ag_vel,'on');
+%         plot(handles.axes_time_ag_vel,handles.t_rng(1:handles.iIteration),cumulativeAverage,'LineWidth',1)
+%         axis(handles.axes_time_ag_vel,[0 handles.t_rng(handles.iIteration) 0 (max(cumulativeAverage)+2)])
+%     end
     if get(handles.checkbox_var,'Value')
         %cla(findall(handles.axes_speed_var,'type','axes'));
         title(handles.axes_speed_var,'Speed Variance','FontSize',12)
@@ -371,6 +371,17 @@ if get(handles.checkbox_time_vel,'Value') && ~isempty(cars)
     grid(handles.axes_time_vel,'on');
     axis(handles.axes_time_vel,[min(cars(idx).timeHistory) max(cars(idx).timeHistory) 0 cars(1).maximumVelocity])
     plot(handles.axes_time_vel,cars(idx).timeHistory,cars(idx).velocityHistory,'b-','LineWidth',1)
+    
+    
+    
+    cla(findall(handles.axes_time_ag_vel,'type','axes'));
+    title(handles.axes_time_ag_vel,'Acceleration Profile','FontSize',12)
+    xlabel(handles.axes_time_ag_vel,'Time, s','FontSize',12)
+    ylabel(handles.axes_time_ag_vel,' Acceleration V, m/s^2','FontSize',12)
+    hold(handles.axes_time_ag_vel,'on');
+    grid(handles.axes_time_ag_vel,'on');
+    axis(handles.axes_time_ag_vel,[min(cars(idx).timeHistory) max(cars(idx).timeHistory) min(cars(idx).a_feas_min,min(cars(idx).accelerationHistory)) max(cars(idx).a_max,max(cars(idx).accelerationHistory))])
+    plot(handles.axes_time_ag_vel,cars(idx).timeHistory,cars(idx).accelerationHistory,'b-','LineWidth',1)
 end
 guidata(hObject, handles);
 

@@ -38,7 +38,7 @@ classdef carTypeA < IdmModel
             obj.priority = 1;
             obj.temp_a = obj.a;
 
-            %-----------------Initialize Blackboard------------------
+            %% -----------------Initialize Blackboard------------------
             obj.bb = BtBlackboard;
             obj.it_accel = obj.bb.add_item('A',obj.acceleration);
             obj.it_a_follow = obj.bb.add_item('Afollow',obj.idmAcceleration);
@@ -54,53 +54,57 @@ classdef carTypeA < IdmModel
             obj.it_future_min_stop_gap = obj.bb.add_item('futureMinGap',0);
             obj.it_future_gap = obj.bb.add_item('futureGap',1e5);
             obj.it_CarsOpposite = obj.bb.add_item('CarsOpposite',true);
-
             if isempty(obj.Prev) || obj.Prev.pose(1) > -1.125
                 obj.it_frontCarPassedJunction = obj.bb.add_item('frontCarPassedJunction',true);
             else
                 obj.it_frontCarPassedJunction = obj.bb.add_item('frontCarPassedJunction',false);
             end
             
-            assignBehind = BtAssign(obj.it_accel,obj.it_a_follow);
-            
-            
-            passBehind = BtSequence(...
-                obj.it_canPassBehind == 1,...
-                obj.it_canPassAheadNext == 1,...
-                assignBehind);
-            assignAhead = BtAssign(obj.it_accel, obj.it_a_ahead);
-            passAhead = BtSequence(obj.it_canPassAhead == 1,assignAhead);
-            
-            assignStop = BtAssign(obj.it_accel, obj.it_a_emerg_stop);
-%             doEmergencyStop = BtSequence(...
-%                 obj.it_dist_to_junc >= obj.it_min_stop_dist_to_junc,...
-%                 assignStop);
-            
+
+            %% 'Follow Front Car' Tree
+            followFrontCar = BtSelector(...
+                obj.it_CarsOpposite == 0,...
+                obj.it_dist_to_junc >= obj.it_min_stop_dist_to_junc);
+            clearedJunction = BtSequence(...
+                obj.it_frontCarPassedJunction == 0,...
+                followFrontCar);
+            CruisePreOrAfterJunction = BtSelector(...
+                obj.it_dist_to_junc > obj.it_comf_dist_to_junc,...
+                clearedJunction);
             assignIdm = BtAssign(obj.it_accel, obj.it_a_follow);
+            DoCruise = BtSequence(CruisePreOrAfterJunction,assignIdm);
             
-            cruisepreOrAfterJunction = BtSequence(obj.it_dist_to_junc > obj.it_comf_dist_to_junc,assignIdm);
+            %% 'Junction' Tree
+            % 'Stop at Junction' Tree
             assignJuncStop = BtAssign(obj.it_accel, obj.it_a_junc_stop);
             keepJunctionClear = BtSequence(...
                 obj.it_frontCarPassedJunction == 1,...
                 obj.it_CarsOpposite == 1,...
                 obj.it_future_gap < obj.it_future_min_stop_gap,...
                 assignJuncStop);
-            followFrontCar = BtSelector(...
-                obj.it_CarsOpposite == 0,...
-                obj.it_dist_to_junc >= obj.it_min_stop_dist_to_junc);
-            doIdm = BtSequence(...
-                obj.it_frontCarPassedJunction == 0,...
-                followFrontCar,...
-                assignIdm);
             stopBeforeJunction = BtSequence(...
                 obj.it_dist_to_junc >= obj.it_min_stop_dist_to_junc,...
                 assignJuncStop);
+            % 'Cross Behind' Tree
+            assignBehind = BtAssign(obj.it_accel,obj.it_a_follow);
+            passBehind = BtSequence(...
+                obj.it_canPassBehind == 1,...
+                obj.it_canPassAheadNext == 1,...
+                assignBehind);
+            % 'Cross Ahead' Tree
+            assignAhead = BtAssign(obj.it_accel, obj.it_a_ahead);
+            passAhead = BtSequence(obj.it_canPassAhead == 1,assignAhead);
+            % Choose 'Ahead or Behind' Tree
             selectAheadOrBehind = BtSelector(passAhead,passBehind,stopBeforeJunction);
             doAheadOrBehind = BtSequence(...
                 obj.it_future_gap > obj.it_future_min_stop_gap,...
                 selectAheadOrBehind);
             
-            obj.full_tree = BtSelector(cruisepreOrAfterJunction,keepJunctionClear,doIdm,doAheadOrBehind,assignStop);
+            %% 'Emengency Stop' Tree
+            assignStop = BtAssign(obj.it_accel, obj.it_a_emerg_stop);
+            
+            %% Full Behaviour Tree
+            obj.full_tree = BtSelector(DoCruise,keepJunctionClear,doAheadOrBehind,assignStop);
         end
         function decide_acceleration(obj,oppositeRoad,roadLength,t,dt)
             oppositeCars = oppositeRoad.allCars;
@@ -146,7 +150,7 @@ classdef carTypeA < IdmModel
             
             %% 
             obj.juncExitVelocity = min(obj.maximumVelocity,sqrt(max(0,obj.velocity^2+2*pass_ahead_accel*(crossingEnd-obj.pose(1)))));
-            futureMinStopGap = calc_safe_gap(obj.a,obj.b,obj.juncExitVelocity,obj.targetVelocity,obj.timeGap,obj.minimumGap,obj.delta,obj.a_min,1);
+            futureMinStopGap = calc_safe_gap(obj.a,obj.b,obj.juncExitVelocity,obj.targetVelocity,obj.timeGap,obj.minimumGap,obj.delta,obj.a_min,1)+obj.minimumGap;
             obj.it_future_min_stop_gap.set_value(futureMinStopGap)
            
             %% update t_in_self and t_out_self
@@ -180,7 +184,7 @@ classdef carTypeA < IdmModel
             calculate_idm_accel(obj,roadLength,2)
             obj.it_a_junc_stop.set_value(obj.idmAcceleration);
             
-            %%
+            %% Change this logic for emergency stop
             if obj.pose(1) < crossingBegin
                 calculate_idm_accel(obj,roadLength,1)
                 obj.it_a_emerg_stop.set_value(obj.idmAcceleration);
@@ -252,13 +256,6 @@ classdef carTypeA < IdmModel
             
             obj.full_tree.tick;
             obj.acceleration =  obj.it_accel.get_value;
-            
-                
-%             if obj.pose(1) > -8 && obj.pose(1) < 0
-%                 obj.BT_plot_flag = 1;
-%             else
-%                 obj.BT_plot_flag = 0;
-%             end
 
             % draw behaviour tree
             if obj.BT_plot_flag
@@ -274,17 +271,10 @@ classdef carTypeA < IdmModel
             
             % check for negative velocities
             check_for_negative_velocity(obj,dt);
-            
-%             % reduce speed before the junction
-%             if abs(obj.pose(1)-crossingBegin) < comfortableStopGap && obj.targetVelocity ~= 6 && obj.pose(1) < crossingEnd && frontCarValue == 0
-%                 obj.targetVelocity = 13;
-%             elseif obj.targetVelocity == 6 && obj.pose(1) > crossingEnd
-%                 obj.targetVelocity = 13;
-%             end
         end
         function [t_in, t_out] = calculate_t_in_and_out(obj,a,v,s,t,roadLength,varargin)
-            s_in = obj.s_in;
-            s_out = obj.s_out;
+            crossingBegin = obj.s_in;
+            crossingEnd = obj.s_out;
             
             if nargin == 7
                 time_tol = varargin{1};
@@ -292,23 +282,22 @@ classdef carTypeA < IdmModel
                 time_tol = 0;
             end
             
-            if s > obj.s_out
+            if s > crossingEnd
                 s = s - roadLength;
             end
             
-            v_f_sqr_in = min(obj.maximumVelocity^2,v^2+2*a*(s_in-s));
-            v_f_sqr_out = min(obj.maximumVelocity^2,v^2+2*a*(s_out-s));
+            v_f_sqr_in = min(obj.maximumVelocity^2,v^2+2*a*(crossingBegin-s));
+            v_f_sqr_out = min(obj.maximumVelocity^2,v^2+2*a*(crossingEnd-s));
             
-            if (v_f_sqr_in >=0 || s > s_in) && v_f_sqr_out >= 0 && obj.tol < abs(a)
-                if s > s_in
-                    t_in = 0;
-                else
-                    t_in = (-v+sqrt(v_f_sqr_in))/a+t-time_tol;
-                end
+            if s > crossingBegin && s < crossingEnd
+                t_in = 0;
+                t_out = (-v+sqrt(v_f_sqr_out))/a+t+time_tol;
+            elseif (v_f_sqr_in >= 0 || s > crossingBegin) && v_f_sqr_out >= 0 && obj.tol < abs(a)
+                t_in = (-v+sqrt(v_f_sqr_in))/a+t-time_tol;
                 t_out = (-v+sqrt(v_f_sqr_out))/a+t+time_tol;
             elseif obj.tol >= abs(a) && obj.tol < abs(v)
-                t_in = (s_in - s)/v+t-time_tol;
-                t_out = (s_out - s)/v+t+time_tol;
+                t_in = (crossingBegin - s)/v+t-time_tol;
+                t_out = (crossingEnd - s)/v+t+time_tol;
             else
                 t_in = 1e5;
                 t_out = 1e5;

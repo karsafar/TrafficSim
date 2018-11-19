@@ -55,7 +55,36 @@ classdef carTypeB < AutonomousCar
                 obj.it_frontCarPassedJunction = obj.bb.add_item('frontCarPassedJunction',false);
             end
             
-            % Ahead logic
+            %% 'Follow Front Car' Tree
+            followFrontCar = BtSelector(...
+                obj.it_CarsOpposite == 0,...
+                obj.it_dist_to_junc >= obj.it_min_stop_dist_to_junc);
+            clearedJunction = BtSequence(...
+                obj.it_frontCarPassedJunction == 0,...
+                followFrontCar);
+            CruisePreOrAfterJunction = BtSelector(...
+                obj.it_dist_to_junc > obj.it_comf_dist_to_junc,...
+                clearedJunction);
+            assignIdm = BtAssign(obj.it_accel, obj.it_a_follow);
+            DoCruise = BtSequence(CruisePreOrAfterJunction,assignIdm);
+            
+            %% 'Junction' Tree
+            % 'Stop at Junction' Tree
+            assignJuncStop = BtAssign(obj.it_accel, obj.it_a_junc_stop);
+            keepJunctionClear = BtSequence(...
+                obj.it_frontCarPassedJunction == 1,...
+                obj.it_CarsOpposite == 1,...
+                obj.it_future_gap < obj.it_future_min_stop_gap,...
+                assignJuncStop);
+            % 'Cross Behind' Tree
+            assignBehind = BtAssign(obj.it_accel,obj.it_A_max_behind);
+            behindWithIdm = BtSequence(...
+                obj.it_A_max_behind > obj.it_a_follow,...
+                BtAssign(obj.it_accel,obj.it_a_follow));
+            
+            behindOrIdm = BtSelector(obj.it_A_max_behind<=0,obj.it_A_max_behind<=obj.it_a_follow);
+            behindCar = BtSequence(obj.it_A_max_behind>=obj.it_a_max_decel,behindOrIdm,assignBehind);
+            % 'Cross Ahead' Tree
             assignAhead = BtAssign(obj.it_accel,obj.it_A_min_ahead);
             aheadCar = BtSequence(...
                 obj.it_A_min_ahead > 0,...
@@ -64,43 +93,16 @@ classdef carTypeB < AutonomousCar
             aheadWithIdm = BtSequence(...
                 obj.it_A_min_ahead <= 0,...
                 BtAssign(obj.it_accel,obj.it_a_follow));
-            
-            % Behind logic
-            assignBehind = BtAssign(obj.it_accel,obj.it_A_max_behind);
-            behindWithIdm = BtSequence(...
-                obj.it_A_max_behind > obj.it_a_follow,...
-                BtAssign(obj.it_accel,obj.it_a_follow));
-            
-            behindOrIdm = BtSelector(obj.it_A_max_behind<=0,obj.it_A_max_behind<=obj.it_a_follow);
-            behindCar = BtSequence(obj.it_A_max_behind>=obj.it_a_max_decel,behindOrIdm,assignBehind);
-            
-            % Emergency stop before the junction
-            assignStop = BtAssign(obj.it_accel, obj.it_a_emerg_stop);
-           % doEmergencyStop = BtSequence(obj.it_dist_to_junc >= obj.it_min_stop_dist_to_junc,assignStop);
-            
-            % normal IDM leading car following acceleration
-            assignIdm = BtAssign(obj.it_accel, obj.it_a_follow);
-            
-            cruisepreOrAfterJunction = BtSequence(obj.it_dist_to_junc > obj.it_comf_dist_to_junc,assignIdm);
-            assignJuncStop = BtAssign(obj.it_accel, obj.it_a_junc_stop);
-            keepJunctionClear = BtSequence(...
-                obj.it_frontCarPassedJunction == 1,...
-                obj.it_CarsOpposite == 1,...
-                obj.it_future_gap < obj.it_future_min_stop_gap,...
-                assignJuncStop);
-            followFrontCar = BtSelector(...
-                obj.it_CarsOpposite == 0,...
-                obj.it_dist_to_junc >= obj.it_min_stop_dist_to_junc);
-            doIdm = BtSequence(...
-                obj.it_frontCarPassedJunction == 0,...
-                followFrontCar,...
-                assignIdm);
-            
-            % Ahead or Behind logic
+            % Choose 'Ahead or Behind' Tree
             Crossing = BtSelector(aheadWithIdm,aheadCar,behindWithIdm,behindCar);
             doJunction = BtSequence(obj.it_future_gap > obj.it_future_min_stop_gap, Crossing);
             
-            obj.full_tree = BtSelector(cruisepreOrAfterJunction,keepJunctionClear,doIdm, doJunction,assignStop);
+            %% 'Emengency Stop' Tree
+            assignStop = BtAssign(obj.it_accel, obj.it_a_emerg_stop);
+            
+            %% Full Behaviour Tree
+            obj.full_tree = BtSelector(DoCruise,keepJunctionClear,doJunction,assignStop);
+            
         end
         %%
         function decide_acceleration(obj,oppositeRoad,roadLength,t,dt)
@@ -221,15 +223,6 @@ classdef carTypeB < AutonomousCar
             % update BT
             obj.full_tree.tick;
             obj.acceleration =  obj.it_accel.get_value;
-
-            % if obj.pose(1) > -6.5 && obj.pose(1) < crossingBegin
-            %     obj.BT_plot_flag = 1;
-            % else
-            %     obj.BT_plot_flag = 0;
-            % end
-            % if t == 17.5
-            %     obj.BT_plot_flag = 1;
-            % end
             
             % draw BT
             if obj.BT_plot_flag

@@ -838,7 +838,9 @@ for k = 1:handles.numberOfSimRuns_H
             roadDims,...
             nIterations,...
             dt);
-        
+        if getappdata(f,'canceling')
+            break
+        end
         waitbar(((k-1)*handles.numberOfSimRuns_V+l)/handles.numberOfSimRuns_H*handles.numberOfSimRuns_V,f,sprintf('%d out of %d simulations finished',(k-1)*handles.numberOfSimRuns_V+l,handles.numberOfSimRuns_H*handles.numberOfSimRuns_V))
     end
 end

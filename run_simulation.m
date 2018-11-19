@@ -16,17 +16,18 @@ VerticalArm = roadTypes{2}([{carTypes},90,roadDims,priority],Arm.V);
 % plot the junction
 junc = Junction(roadDims, plotFlag);
 
-% controlled break of the simulation
-% finishup = onCleanup(@() myCleanupFun(HorizontalArm, VerticalArm));
 for iIteration = 1:nIterations
     % update time
     t = t_rng(iIteration);
-    
+        
     % draw cars
     if plotFlag
         junc.draw_all_cars(HorizontalArm,VerticalArm)
-        drawnow limitrate
-%         drawnow
+        if getappdata(0,'drawRAte')
+            drawnow limitrate
+        else
+            drawnow
+        end
     end
 
     % check for collision
@@ -53,7 +54,6 @@ for iIteration = 1:nIterations
         VerticalArm.allCars(jCar).decide_acceleration(HorizontalArm,roadDims.Length(2),t,dt);
     end
     
-    
     % Move all the cars along the road
     count_emegrency_breaks(HorizontalArm);
     count_emegrency_breaks(VerticalArm);
@@ -62,30 +62,22 @@ for iIteration = 1:nIterations
     HorizontalArm.move_all_cars(t,dt,iIteration,nIterations)
     VerticalArm.move_all_cars(t,dt,iIteration,nIterations)
     
-    if mod(iIteration,36) == 0 && plotFlag == 0
+    if plotFlag == 0 && mod(iIteration,36) == 0
         % Update waitbar and message
         f = findall(0,'type','figure','tag','TMWWaitbar');
-        if getappdata(f,'canceling')
-            break;
+        if getappdata(0,'simType') == 0
+            waitbar(iIteration/nIterations,f,sprintf('%d percent out of %d iterations',round(iIteration*100/nIterations),nIterations))
         end
-        
+        if getappdata(f,'canceling')
+            sim.horizArm = cast_output(HorizontalArm);
+            sim.vertArm = cast_output(VerticalArm);
+            return
+        end
     end
-    
 end
 sim.horizArm = cast_output(HorizontalArm);
 sim.vertArm = cast_output(VerticalArm);
 end
-
-% function myCleanupFun(HorizontalArm, VerticalArm)
-% sim.horizArm = cast_output(HorizontalArm);
-% sim.vertArm = cast_output(VerticalArm);
-% iSim = 1;
-% % Arm = 'horizontal';
-% Arm = 'vertical';
-% iCar = 1;
-% figure(3);
-% time_velocity_plot(iCar,iSim,sim,Arm)
-% end
 
 function tempArm = cast_output(arm)
 tempArm.nCarHistory = arm.nCarHistory;
