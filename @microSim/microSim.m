@@ -468,7 +468,7 @@ set(handles.pushbutton3,'userdata',0);
 for iIteration = handles.iIteration:nIterations
     % update time
     t = handles.t_rng(iIteration);
-    
+
     % draw cars
     if plotFlag
         junc.draw_all_cars(HorizontalArm,VerticalArm)

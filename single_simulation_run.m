@@ -5,10 +5,10 @@ clc
 roadTypes = {@LoopRoad @FiniteRoad};
 carTypes = {@carTypeA, @carTypeB, @carTypeC};
 
-plotFlag = true;
+plotFlag = false;
 setappdata(0,'drawRAte',0);
 
-runTime = 360;
+runTime = 3600;
 dt = 0.1;
 nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;
@@ -17,8 +17,8 @@ fixedSeed = [true true];
 priority = false;
 
 % road dimensions
-road.Start = [-50; -50];
-road.End = [50; 50];
+road.Start = [-300; -300];
+road.End = [300; 300];
 road.Width = [4; 4];
 road.Length = road.End - road.Start;
 
@@ -26,7 +26,7 @@ noSpawnAreaLength = 24.4; % length of no spawn area around the junction + length
 max_density = 1/6.4;    % number of cars per metre (0.1562)
 
 %%
-density = 0.09;
+density = 0.03;
 nCars = round(density * road.Length);
 RealDensity = nCars/road.Length;
 
@@ -41,7 +41,7 @@ end
 %single simulation flag 
 setappdata(0,'simType',0);
 
-carTypeRatios = [0.6 0.1 0.3; 1 0 0];
+carTypeRatios = [0.4 0.2 0.4; 0.4 0.2 0.4];
 
 allCarsNumArray_H = zeros(1,numel(carTypes));
 allCarsNumArray_V = zeros(1,numel(carTypes));
@@ -72,7 +72,7 @@ sim = run_simulation(...
     dt);
 
 %% save the simulation results
-save(['/Users/robot/.CMVolumes/Karam Safarov/PhD/SimTests/single-run-sim/test-' num2str(1) '.mat'],...
+save(['/Users/robot/.CMVolumes/Karam Safarov/PhD/short simulations/single-run-sim/test-' num2str(1) '.mat'],...
     'carTypeRatios',...
     'carTypes',...
     'nCars',...

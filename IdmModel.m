@@ -70,14 +70,16 @@ classdef IdmModel < Car & matlab.mixin.Heterogeneous
             
             if obj.idmAcceleration > obj.a_max
                 obj.idmAcceleration = obj.a_max;
-%             elseif obj.idmAcceleration < obj.a_min
-%                 if (emerg_flag || stop_flag) && obj.idmAcceleration < obj.a_feas_min
-%                     % LJ potential goes here instead of the current
-%                     % a_feas_min
-%                     obj.idmAcceleration =  obj.a_feas_min;
-%                 else
-%                     obj.idmAcceleration =  obj.a_min;
-%                 end
+            elseif obj.idmAcceleration < obj.a_min
+                if (emerg_flag == 0 && stop_flag == 0) 
+                    if obj.idmAcceleration < obj.a_feas_min
+                        obj.idmAcceleration =  obj.a_feas_min;
+                    end
+                elseif (emerg_flag || stop_flag)  && obj.idmAcceleration < obj.a_feas_min
+                    obj.idmAcceleration = -Lennard_Jones(obj.s,obj.a_feas_min);
+                else
+                    obj.idmAcceleration =  obj.a_feas_min;
+                end
             end
         end
         function decide_acceleration(obj,varargin)

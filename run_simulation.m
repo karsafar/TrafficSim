@@ -19,7 +19,7 @@ junc = Junction(roadDims, plotFlag);
 for iIteration = 1:nIterations
     % update time
     t = t_rng(iIteration);
-    
+        
     % draw cars
     if plotFlag
         junc.draw_all_cars(HorizontalArm,VerticalArm)
