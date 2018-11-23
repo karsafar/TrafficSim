@@ -99,9 +99,9 @@ classdef SpawnCars < handle
                             allCarsArray = [allCarsArray new_car];
                         end
                     end
-                end
-                
-                obj.allCars = allCarsArray(randperm(length(allCarsArray)));
+                end                    
+                    
+                obj.allCars = allCarsArray(randperm(length(allCarsArray)));      
                 allCarsPoseArray = flip(allCarsPoseArray);
                 for iCar = 1:obj.numCars
                     obj.allCars(iCar).pose(1) = allCarsPoseArray(iCar);
