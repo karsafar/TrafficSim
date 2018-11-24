@@ -1,7 +1,8 @@
 function  [sim] = run_simulation(...
                         roadTypes,...
                         carTypes,...
-                        Arm,...
+                        ArmH,...
+                        ArmV,...
                         t_rng,...
                         plotFlag,...
                         priority,...
@@ -10,8 +11,8 @@ function  [sim] = run_simulation(...
                         dt)
 
 % construct two arms of the junction objects
-HorizontalArm = roadTypes{1}([{carTypes},0,roadDims,priority],Arm.H);
-VerticalArm = roadTypes{2}([{carTypes},90,roadDims,priority],Arm.V);
+HorizontalArm = roadTypes{1}([{carTypes},0,roadDims,priority],ArmH);
+VerticalArm = roadTypes{2}([{carTypes},90,roadDims,priority],ArmV);
 
 % plot the junction
 junc = Junction(roadDims, plotFlag);
@@ -62,23 +63,38 @@ for iIteration = 1:nIterations
     HorizontalArm.move_all_cars(t,dt,iIteration,nIterations)
     VerticalArm.move_all_cars(t,dt,iIteration,nIterations)
     
-    if plotFlag == 0 && mod(iIteration,36) == 0
-        % Update waitbar and message
-        f = findall(0,'type','figure','tag','TMWWaitbar');
-        if getappdata(0,'simType') == 0
-            waitbar(iIteration/nIterations,f,sprintf('%d percent out of %d iterations',round(iIteration*100/nIterations),nIterations))
-        end
-        if getappdata(f,'canceling')
-            sim.horizArm = cast_output(HorizontalArm);
-            sim.vertArm = cast_output(VerticalArm);
-            return
-        end
-    end
+%     if plotFlag == 0 && mod(iIteration,36) == 0
+%         % Update waitbar and message
+%         f = findall(0,'type','figure','tag','TMWWaitbar');
+%         if getappdata(0,'simType') == 0
+%             waitbar(iIteration/nIterations,f,sprintf('%d percent out of %d iterations',round(iIteration*100/nIterations),nIterations))
+%         end
+%         if getappdata(f,'canceling')
+%             sim.horizArm = cast_output(HorizontalArm);
+%             sim.vertArm = cast_output(VerticalArm);
+%             return
+%         end
+%     end
+%     orderNums = [];
+%     for i = 1:numel(HorizontalArm.allCars)
+%         if isa(HorizontalArm.allCars(i),'carTypeA')
+%             orderNums(i) = 1;
+%         elseif isa(HorizontalArm.allCars(i),'carTypeB')
+%             orderNums(i) = 2;
+%         elseif isa(HorizontalArm.allCars(i),'carTypeC')
+%             orderNums(i) = 3;
+%         end
+%     end
+%     sim = orderNums;
+%     return 
 end
 sim.horizArm = cast_output(HorizontalArm);
 sim.vertArm = cast_output(VerticalArm);
 end
 
+
+
+%%
 function tempArm = cast_output(arm)
 tempArm.nCarHistory = arm.nCarHistory;
 tempArm.numEmergBreaks = arm.numEmergBreaks;

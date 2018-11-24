@@ -5,7 +5,7 @@ clc
 roadTypes = {@LoopRoad @FiniteRoad};
 carTypes = {@carTypeA, @carTypeB, @carTypeC};
 
-plotFlag = false;
+plotFlag = true;
 setappdata(0,'drawRAte',0);
 
 runTime = 3600;
@@ -13,7 +13,7 @@ dt = 0.1;
 nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;
 t_rng = 0:dt:runTime;
-fixedSeed = [true true];
+fixedSeed = [false false];
 priority = false;
 
 % road dimensions

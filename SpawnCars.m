@@ -65,8 +65,8 @@ classdef SpawnCars < handle
                     end
                 end
                 unoccupiedSpace =  obj.roadEnd - allCarsPoseArray(end) - 24.4;
-                if FixedSeed
-                    rng(1);
+                if FixedSeed > 0
+                    rng(FixedSeed);
                 end
                 initPoseProbDist = makedist('uniform','lower',0,'upper',unoccupiedSpace);
                 addonPositions = NaN(1,obj.numCars);
@@ -99,9 +99,9 @@ classdef SpawnCars < handle
                             allCarsArray = [allCarsArray new_car];
                         end
                     end
-                end
-                
-                obj.allCars = allCarsArray(randperm(length(allCarsArray)));
+                end                    
+                    
+                obj.allCars = allCarsArray(randperm(length(allCarsArray)));      
                 allCarsPoseArray = flip(allCarsPoseArray);
                 for iCar = 1:obj.numCars
                     obj.allCars(iCar).pose(1) = allCarsPoseArray(iCar);
