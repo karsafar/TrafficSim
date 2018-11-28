@@ -88,8 +88,11 @@ for iIteration = 1:nIterations
 %     sim = orderNums;
 %     return 
 end
-sim.horizArm = cast_output(HorizontalArm);
-sim.vertArm = cast_output(VerticalArm);
+sim.horizArm = HorizontalArm;
+sim.vertArm = VerticalArm;
+
+% sim.horizArm = cast_output(HorizontalArm);
+% sim.vertArm = cast_output(VerticalArm);
 end
 
 

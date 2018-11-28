@@ -1,7 +1,7 @@
 classdef IdmModel < Car & matlab.mixin.Heterogeneous
     properties (Constant)
         delta = 1
-        minimumGap = 6.4
+        minimumGap = 2
     end
     properties (SetAccess = protected)
         idmAcceleration = NaN
@@ -45,10 +45,10 @@ classdef IdmModel < Car & matlab.mixin.Heterogeneous
                 obj.s = obj.s_in - obj.pose(1);
                 dV = obj.velocity; 
             elseif obj.leaderFlag == 0 
-                obj.s = obj.Prev.pose(1) - obj.pose(1);
+                obj.s = obj.Prev.pose(1) - obj.pose(1)-obj.dimension(2);
                 dV = (obj.velocity - obj.Prev.velocity);
             elseif ~isempty(obj.Prev)
-                obj.s = obj.Prev.pose(1) - obj.pose(1) + roadLength+obj.demand_tol;
+                obj.s = obj.Prev.pose(1) - obj.pose(1) - obj.dimension(2) + roadLength + obj.demand_tol;
                 dV = (obj.velocity - obj.Prev.velocity);
             else
                 obj.s = 1e5;

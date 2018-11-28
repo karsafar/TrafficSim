@@ -1,7 +1,7 @@
 classdef HdmModel < IdmModel
     properties (Constant)
-        Tr = 0.6 % sec, reation time
-        n_a = 5     % num of anticipated cars
+        Tr = 0 % sec, reation time
+        n_a = 1     % num of anticipated cars
         Vs = 0.1     % percent, variation coefficient of gap estimation
         sigma_r = 0.01 % 1/sec, estimation error for the inverse TTC
         sigma_a = 0.1  % m/s^2, magnitude of acceleration noise
@@ -85,7 +85,8 @@ classdef HdmModel < IdmModel
             
             %% temporal anticipation 
             % using values of position, velocity and acceleration at time (t-Tr)
-            obj.t_Minus_Tr = obj.historyIndex - obj.stepsDelay;
+%             obj.t_Minus_Tr = obj.historyIndex - obj.stepsDelay;
+            obj.t_Minus_Tr = 0;
             if  obj.t_Minus_Tr <= 0
                 currentCarPose_t_Minus_Tr = obj.pose(1);
                 currentCarVel_t_Minus_Tr = obj.velocity;
@@ -99,10 +100,11 @@ classdef HdmModel < IdmModel
             %% Multi-vehicle anticipation
             if ~isempty(obj.Prev) && ~junc_flag
                 leadingCar = obj.Prev;
-                nCarLength = 0;
+                nCarLength = obj.dimension(2);
                 while count <= obj.n_a && leadingCar.pose(1) ~= obj.pose(1) && ~junc_flag
                     %% temporal anticipation for the current leading car
-                    leadingCar.t_Minus_Tr = leadingCar.historyIndex - leadingCar.stepsDelay;
+%                     leadingCar.t_Minus_Tr = leadingCar.historyIndex - leadingCar.stepsDelay;
+                    leadingCar.t_Minus_Tr = 0;
                     if leadingCar.t_Minus_Tr <= 0
                         leadingCarPose_t_Minus_Tr = leadingCar.pose(1);
                         leadingCarVel_t_Minus_Tr = leadingCar.velocity;
@@ -140,7 +142,7 @@ classdef HdmModel < IdmModel
                 end
             end
             %% speed independent reduction factor
-            C_idm = min(1,(sum(1./((1:(count-1)).^2)))^-1);
+            C_idm = 1/(sum(1./((1:(obj.n_a)).^2)));
             
             %%
             if obj.velocity == 0 && obj.targetVelocity == 0

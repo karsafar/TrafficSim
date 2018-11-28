@@ -15,8 +15,8 @@ fixedSeed = [0 0];
 priority = false;
 
 % road dimensions
-road.Start = [-300; -300];
-road.End = [300; 300];
+road.Start = [-600; -600];
+road.End = [600; 600];
 road.Width = [4; 4];
 road.Length = road.End - road.Start;
 
@@ -59,7 +59,7 @@ for alpha = 100:-10:0
         temp = [temp ;alpha, beta, gamma, k];
     end
 end
-tic
+
 for alpha = 100:-10:0
     idx = round(alpha/10)+1;
     parfor i = 1:(12-idx)
@@ -88,11 +88,11 @@ for alpha = 100:-10:0
         parsave(carTypeRatios,carTypes,nCars,allCarsNumArray_H,allCarsNumArray_V,runTime,dt,t_rng,plotFlag,priority,density,road,nIterations,sim,alpha,beta,gamma,temp);
     end
 end
-toc
+
 function parsave(carTypeRatios,carTypes,nCars,allCarsNumArray_H,allCarsNumArray_V,runTime,dt,t_rng,plotFlag,priority,density,road,nIterations,sim,alpha,beta,gamma,temp)
 
 [lia, loc] = ismember([alpha,beta,gamma],temp(:,1:3),'rows');
-save(['/Users/robot/.CMVolumes/Karam Safarov/PhD/bulk simulations/test-sim-16/test-' num2str(loc) '.mat'],...
+save(['/Users/robot/.CMVolumes/Karam Safarov/PhD/bulk simulations/test-sim-18/test-' num2str(loc) '.mat'],...
     'carTypeRatios',...
     'carTypes',...
     'nCars',...
@@ -111,5 +111,4 @@ save(['/Users/robot/.CMVolumes/Karam Safarov/PhD/bulk simulations/test-sim-16/te
     'beta',...
     'gamma',...
     '-v7.3')
-
 end
