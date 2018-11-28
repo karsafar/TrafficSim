@@ -1,7 +1,7 @@
 classdef HdmModel < IdmModel
     properties (Constant)
         Tr = 0.6 % sec, reation time
-        n_a = 5     % num of anticipated cars
+        n_a = 2     % num of anticipated cars
         Vs = 0.1     % percent, variation coefficient of gap estimation
         sigma_r = 0.01 % 1/sec, estimation error for the inverse TTC
         sigma_a = 0.1  % m/s^2, magnitude of acceleration noise
@@ -86,6 +86,7 @@ classdef HdmModel < IdmModel
             %% temporal anticipation 
             % using values of position, velocity and acceleration at time (t-Tr)
             obj.t_Minus_Tr = obj.historyIndex - obj.stepsDelay;
+%             obj.t_Minus_Tr = 0;
             if  obj.t_Minus_Tr <= 0
                 currentCarPose_t_Minus_Tr = obj.pose(1);
                 currentCarVel_t_Minus_Tr = obj.velocity;
@@ -99,16 +100,17 @@ classdef HdmModel < IdmModel
             %% Multi-vehicle anticipation
             if ~isempty(obj.Prev) && ~junc_flag
                 leadingCar = obj.Prev;
-                nCarLength = 0;
+                nCarLength = obj.dimension(2);
                 while count <= obj.n_a && leadingCar.pose(1) ~= obj.pose(1) && ~junc_flag
                     %% temporal anticipation for the current leading car
-                    leadingCar.t_Minus_Tr = leadingCar.historyIndex - leadingCar.stepsDelay;
-                    if leadingCar.t_Minus_Tr <= 0
+                    leadingCar_t_Minus_Tr = leadingCar.historyIndex - obj.stepsDelay;
+%                     leadingCar_t_Minus_Tr = 0;
+                    if leadingCar_t_Minus_Tr <= 0
                         leadingCarPose_t_Minus_Tr = leadingCar.pose(1);
                         leadingCarVel_t_Minus_Tr = leadingCar.velocity;
                     else
-                        leadingCarPose_t_Minus_Tr = leadingCar.locationHistory(leadingCar.t_Minus_Tr);
-                        leadingCarVel_t_Minus_Tr = leadingCar.velocityHistory(leadingCar.t_Minus_Tr);
+                        leadingCarPose_t_Minus_Tr = leadingCar.locationHistory(leadingCar_t_Minus_Tr);
+                        leadingCarVel_t_Minus_Tr = leadingCar.velocityHistory(leadingCar_t_Minus_Tr);
                     end
                     % subtract the lengths of all cars between current and
                     % leading car
@@ -117,16 +119,19 @@ classdef HdmModel < IdmModel
                     else
                         s_ab = leadingCarPose_t_Minus_Tr - currentCarPose_t_Minus_Tr + roadLength - nCarLength;
                     end
+                    
                     %% all noise set to zero
                     dV = currentCarVel_t_Minus_Tr - leadingCarVel_t_Minus_Tr;
                     dV_est = dV + s_ab*obj.sigma_r*obj.w_l;
+                    
                     s_ab_prog = s_ab*exp(obj.Vs*obj.w_s) - obj.Tr*dV_est;
+                    
                     v_prog = currentCarVel_t_Minus_Tr + obj.Tr*currentCarAccel_t_Minus_Tr;
                     v_l_prog = leadingCarVel_t_Minus_Tr - s_ab*obj.sigma_r*obj.w_l;
                     
                     intelligentBreaking = v_prog*obj.timeGap + (v_prog*(v_prog-v_l_prog))/(2*sqrt(obj.a*obj.b));
-                    
                     s_star = obj.minimumGap + max(0,intelligentBreaking);
+                    
                     %% interaction acceleration 
                     % sum of all interaction accelerations 
                     a_int = a_int - obj.a*(s_star/s_ab_prog)^2;
@@ -136,11 +141,11 @@ classdef HdmModel < IdmModel
                     count = count + 1;
                     % add one car length to subtract the sum of all cars
                     % between current car and next leading car
-                    nCarLength = nCarLength + obj.dimension(2);
+%                     nCarLength = count*obj.dimension(2);
                 end
             end
             %% speed independent reduction factor
-            C_idm = min(1,(sum(1./((1:(count-1)).^2)))^-1);
+            C_idm = 1/(sum(1./((1:(obj.n_a)).^2)));
             
             %%
             if obj.velocity == 0 && obj.targetVelocity == 0

@@ -1,4 +1,4 @@
-classdef Car < dlnode
+classdef Car < dlnode & matlab.mixin.Copyable
     properties (SetAccess = protected)
     end
     properties (Access = public)

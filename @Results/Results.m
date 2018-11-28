@@ -122,11 +122,13 @@ if get(handles.checkbox_micro,'Value')
         yyaxis(handles.axes_time_disp,'left')
         patch(handles.axes_time_disp,x,y,[0.5 0.5 0.5],'EdgeColor','None');
         for iCar = 1:handles.HorizontalArm.nCarHistory
-            plot(handles.axes_time_disp,handles.HorizontalArm.carHistory{iCar}(1,1:end),handles.HorizontalArm.carHistory{iCar}(2,1:end),'b-','LineWidth',1);
+%             plot(handles.axes_time_disp,handles.HorizontalArm.carHistory{iCar}(1,1:end),handles.HorizontalArm.carHistory{iCar}(2,1:end),'b-','LineWidth',1);
+            plot(handles.axes_time_disp,handles.HorizontalArm.carHistory(iCar).timeHistory,handles.HorizontalArm.carHistory(iCar).locationHistory,'b-','LineWidth',1);
         end
         yyaxis(handles.axes_time_disp,'right')
         for jCar = 1:handles.VerticalArm.nCarHistory
-            plot(handles.axes_time_disp,handles.VerticalArm.carHistory{jCar}(1,1:end),handles.VerticalArm.carHistory{jCar}(2,1:end),'r-','LineWidth',1);
+%             plot(handles.axes_time_disp,handles.VerticalArm.carHistory{jCar}(1,1:end),handles.VerticalArm.carHistory{jCar}(2,1:end),'r-','LineWidth',1);
+            plot(handles.axes_time_disp,handles.VerticalArm.carHistory(jCar).timeHistory,handles.VerticalArm.carHistory(jCar).locationHistory,'r-','LineWidth',1);
         end
         ylabel(handles.axes_time_disp,'Vertical Position, m','FontSize',12)
         set(handles.axes_time_disp, 'Ydir', 'reverse')
@@ -144,13 +146,14 @@ if get(handles.checkbox_micro,'Value')
         axis(handles.axes_heatmap,[0 handles.t_rng(handles.iIteration) road.startPoint road.endPoint] )
         sz = 5;
         for iCar = 1:road.nCarHistory
-            scatter(handles.axes_heatmap,road.carHistory{iCar}(1,1:end),road.carHistory{iCar}(2,1:end),sz,road.carHistory{iCar}(3,1:end),'filled');
+%             scatter(handles.axes_heatmap,road.carHistory{iCar}(1,1:end),road.carHistory{iCar}(2,1:end),sz,road.carHistory{iCar}(3,1:end),'filled');
+            scatter(handles.axes_heatmap,road.carHistory(iCar).timeHistory,road.carHistory(iCar).locationHistory,sz,road.carHistory(iCar).velocityHistory,'filled');
         end
         axes(handles.axes_heatmap)
         c = colorbar;
         c.Label.String = 'Velocity, m/s';
         c.Label.FontSize = 12;
-        caxis([0 max(road.carHistory{iCar}(3,1:end))])
+        caxis([0 max(road.carHistory(iCar).velocityHistory)])
         colormap(flipud(jet));
     end
 end
@@ -217,8 +220,8 @@ if get(handles.checkbox_macro,'Value')
         O_out = -10+cars(1).ownDistfromRearToBack;
         occupancy = zeros(length(handles.t_rng(1:handles.iIteration)),1);
         for iCar = 1:road.nCarHistory
-            iCar_pos = road.carHistory{iCar}(2,:);
-            iCar_times = road.carHistory{iCar}(1,:);
+            iCar_pos = road.carHistory(iCar).locationHistory;
+            iCar_times = road.carHistory(iCar).timeHistory;
             iCar_times = iCar_times(iCar_pos>=O_in & iCar_pos<=O_out);
             iCar_pos = iCar_pos(iCar_pos>=O_in & iCar_pos<=O_out);
             [tf,loc]=ismember(iCar_times,handles.t_rng);

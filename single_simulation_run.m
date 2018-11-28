@@ -3,17 +3,18 @@ close all
 clc
 
 roadTypes = {@LoopRoad @FiniteRoad};
-carTypes = {@carTypeA, @carTypeB, @carTypeC};
+carTypes = {@IdmModel, @HdmModel, @carTypeA, @carTypeB, @carTypeC};
 
-plotFlag = true;
-setappdata(0,'drawRAte',0);
+plotFlag = false;
+setappdata(0,'drawRAte',1);
 
-runTime = 3600;
+runTime = 360;
 dt = 0.1;
 nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;
 t_rng = 0:dt:runTime;
-fixedSeed = [false false];
+fixedSeed = [1 1];
+seedType = rng('shuffle', 'combRecursive');
 priority = false;
 
 % road dimensions
@@ -27,21 +28,23 @@ max_density = 1/6.4;    % number of cars per metre (0.1562)
 
 %%
 density = 0.03;
-nCars = round(density * road.Length);
-RealDensity = nCars/road.Length;
-
+nCars(1,1) = round(density * road.Length(1));
+nCars(2,1) = round(density * road.Length(2));
+% nCars(2,1) = 0;
+RealDensity(1) = nCars(1)/road.Length(1);
+RealDensity(2) = nCars(2)/road.Length(2);
 %%
 iIteration = 0;
-if plotFlag == 0
-    f = waitbar(0,'','Name','Running simulation',...
-        'CreateCancelBtn','setappdata(gcbf,''canceling'',1)');
-    setappdata(f,'canceling',0);
-    waitbar(0,f,sprintf('%d percent out of %d iterations',round(iIteration*100/nIterations),nIterations))
-end
-%single simulation flag 
-setappdata(0,'simType',0);
+% if plotFlag == 0
+%     f = waitbar(0,'','Name','Running simulation',...
+%         'CreateCancelBtn','setappdata(gcbf,''canceling'',1)');
+%     setappdata(f,'canceling',0);
+%     waitbar(0,f,sprintf('%d percent out of %d iterations',round(iIteration*100/nIterations),nIterations))
+% end
+% %single simulation flag 
+% setappdata(0,'simType',0);
 
-carTypeRatios = [0.4 0.2 0.4; 0.4 0.2 0.4];
+carTypeRatios = [0 0 0.3 0.2 0.5; 0 0 0.3 0.2 0.5];
 
 allCarsNumArray_H = zeros(1,numel(carTypes));
 allCarsNumArray_V = zeros(1,numel(carTypes));
@@ -57,13 +60,14 @@ end
 
 Arm.H = SpawnCars([{allCarsNumArray_H},fixedSeed(1),{carTypes}],'horizontal',road.Start(1),road.End(1),road.Width(1),dt,nIterations);
 Arm.V = SpawnCars([{allCarsNumArray_V},fixedSeed(1),{carTypes}],'vertical',road.Start(2),road.End(2),road.Width(2),dt,nIterations);
-
+tic
 %% run the simuation
 sim = run_simulation(...
     {roadTypes{1},...
     roadTypes{1}},...
     carTypes,...
-    Arm,...
+    Arm.H,...
+    Arm.V,...
     t_rng,...
     plotFlag,...
     priority,...
@@ -72,7 +76,7 @@ sim = run_simulation(...
     dt);
 
 %% save the simulation results
-save(['/Users/robot/.CMVolumes/Karam Safarov/PhD/short simulations/single-run-sim/test-' num2str(1) '.mat'],...
+save(['test-' num2str(1) '.mat'],...
     'carTypeRatios',...
     'carTypes',...
     'nCars',...
@@ -88,10 +92,10 @@ save(['/Users/robot/.CMVolumes/Karam Safarov/PhD/short simulations/single-run-si
     'nIterations',...
     'sim',...
     '-v7.3')
-
-%% close the waitbar
-if plotFlag == 0
+toc
+% %% close the waitbar
+% if plotFlag == 0
     f = findall(0,'type','figure','tag','TMWWaitbar');
     delete(f)
-end
+% end
 
