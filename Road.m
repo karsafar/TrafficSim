@@ -12,8 +12,8 @@ classdef Road < handle
     properties (SetAccess = protected)
         numCars = 0
         allCars = []
-        %nextCarApproachingCrossing = []
-        carHistory = {}
+        carHistory = []
+%         carHistory = {}
         nCarHistory = 0
         averageVelocityHistory = []
         variance
@@ -52,7 +52,9 @@ classdef Road < handle
         end
         function collect_car_history(obj,iCar)
             i = obj.nCarHistory + 1;
-            obj.carHistory{i} = [iCar.timeHistory; iCar.locationHistory; iCar.velocityHistory; iCar.accelerationHistory];
+            %             obj.carHistory{i} = [iCar.timeHistory; iCar.locationHistory; iCar.velocityHistory; iCar.accelerationHistory];
+            cloneCar = copy(iCar);
+            obj.carHistory = [obj.carHistory;cloneCar];
             obj.nCarHistory = i;
         end
         function count_emegrency_breaks(obj)

@@ -8,7 +8,7 @@ carTypes = {@IdmModel, @HdmModel, @carTypeA, @carTypeB, @carTypeC};
 plotFlag = false;
 setappdata(0,'drawRAte',1);
 
-runTime = 3600;
+runTime = 360;
 dt = 0.1;
 nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;
@@ -17,8 +17,8 @@ fixedSeed = [0 0];
 priority = false;
 
 % road dimensions
-road.Start = [-600; -600];
-road.End = [600; 600];
+road.Start = [-300; -300];
+road.End = [300; 300];
 road.Width = [4; 4];
 road.Length = road.End - road.Start;
 
@@ -29,7 +29,7 @@ max_density = 1/6.4;    % number of cars per metre (0.1562)
 density = 0.03;
 nCars(1,1) = round(density * road.Length(1));
 nCars(2,1) = round(density * road.Length(2));
-nCars(2,1) = 0;
+% nCars(2,1) = 0;
 RealDensity(1) = nCars(1)/road.Length(1);
 RealDensity(2) = nCars(2)/road.Length(2);
 %%
@@ -75,7 +75,7 @@ sim = run_simulation(...
     dt);
 
 %% save the simulation results
-save(['test-' num2str(2) '.mat'],...
+save(['test-' num2str(1) '.mat'],...
     'carTypeRatios',...
     'carTypes',...
     'nCars',...
@@ -94,7 +94,7 @@ save(['test-' num2str(2) '.mat'],...
 toc
 % %% close the waitbar
 % if plotFlag == 0
-%     f = findall(0,'type','figure','tag','TMWWaitbar');
-%     delete(f)
+    f = findall(0,'type','figure','tag','TMWWaitbar');
+    delete(f)
 % end
 
