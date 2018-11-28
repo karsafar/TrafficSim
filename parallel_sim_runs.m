@@ -12,6 +12,7 @@ nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;
 t_rng = 0:dt:runTime;
 fixedSeed = [0 0];
+seedType = rng('shuffle', 'combRecursive');
 priority = false;
 
 % road dimensions
@@ -59,7 +60,7 @@ for alpha = 100:-10:0
         temp = [temp ;alpha, beta, gamma, k];
     end
 end
-
+p = parpool(4);
 for alpha = 100:-10:0
     idx = round(alpha/10)+1;
     parfor i = 1:(12-idx)
@@ -88,7 +89,7 @@ for alpha = 100:-10:0
         parsave(carTypeRatios,carTypes,nCars,allCarsNumArray_H,allCarsNumArray_V,runTime,dt,t_rng,plotFlag,priority,density,road,nIterations,sim,alpha,beta,gamma,temp);
     end
 end
-
+delete(gcp);
 function parsave(carTypeRatios,carTypes,nCars,allCarsNumArray_H,allCarsNumArray_V,runTime,dt,t_rng,plotFlag,priority,density,road,nIterations,sim,alpha,beta,gamma,temp)
 
 [lia, loc] = ismember([alpha,beta,gamma],temp(:,1:3),'rows');

@@ -13,7 +13,8 @@ dt = 0.1;
 nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;
 t_rng = 0:dt:runTime;
-fixedSeed = [0 0];
+fixedSeed = [1 1];
+seedType = rng('shuffle', 'combRecursive');
 priority = false;
 
 % road dimensions
