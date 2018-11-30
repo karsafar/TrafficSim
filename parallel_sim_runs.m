@@ -11,13 +11,13 @@ dt = 0.1;
 nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;
 t_rng = 0:dt:runTime;
-fixedSeed = [0 0];
-seedType = rng('shuffle', 'combRecursive');
+fixedSeed = [1 2];
+ringType = rng('shuffle','combRecursive');
 priority = false;
 
 % road dimensions
-road.Start = [-600; -600];
-road.End = [600; 600];
+road.Start = [-300; -300];
+road.End = [300; 300];
 road.Width = [4; 4];
 road.Length = road.End - road.Start;
 
@@ -51,20 +51,23 @@ roadWidth2 = road.Width(2);
 %% get the ma
 k = 0;
 temp = [];
-for alpha = 100:-10:0
-    idx = round(alpha/10)+1;
-    for i = 1:(12-idx)
-        beta = (i-1)*10;
+for i = 1:12
+    alpha = (i-1)*10;
+    for beta = (100-alpha):-10:0
         gamma = 100-alpha-beta;
         k = k+1;
         temp = [temp ;alpha, beta, gamma, k];
     end
 end
-p = parpool(4);
-for alpha = 100:-10:0
-    idx = round(alpha/10)+1;
-    parfor i = 1:(12-idx)
-        beta = (i-1)*10;
+spmd
+    ringType;
+end
+
+parfor i = 1:12
+    stream = RandStream.getGlobalStream();
+    stream.Substream = i;
+    alpha = (i-1)*10;
+    for beta = (100-alpha):-10:0
         gamma = 100-alpha-beta;
         
         carTypeRatios = [alpha/100 beta/100 gamma/100; alpha/100 beta/100 gamma/100];
@@ -86,14 +89,15 @@ for alpha = 100:-10:0
         
         sim = run_simulation({roadTypes1,roadTypes1},carTypes,ArmH,ArmV,t_rng,plotFlag,priority,road,nIterations,dt);
         
-        parsave(carTypeRatios,carTypes,nCars,allCarsNumArray_H,allCarsNumArray_V,runTime,dt,t_rng,plotFlag,priority,density,road,nIterations,sim,alpha,beta,gamma,temp);
+        parsave(carTypeRatios,carTypes,nCars,allCarsNumArray_H,allCarsNumArray_V,runTime,dt,t_rng,plotFlag,priority,density,road,nIterations,sim,alpha,beta,gamma,temp,ringType,stream);
     end
 end
+
 delete(gcp);
-function parsave(carTypeRatios,carTypes,nCars,allCarsNumArray_H,allCarsNumArray_V,runTime,dt,t_rng,plotFlag,priority,density,road,nIterations,sim,alpha,beta,gamma,temp)
+function parsave(carTypeRatios,carTypes,nCars,allCarsNumArray_H,allCarsNumArray_V,runTime,dt,t_rng,plotFlag,priority,density,road,nIterations,sim,alpha,beta,gamma,temp,ringType,stream)
 
 [lia, loc] = ismember([alpha,beta,gamma],temp(:,1:3),'rows');
-save(['/Users/robot/.CMVolumes/Karam Safarov/PhD/bulk simulations/test-sim-18/test-' num2str(loc) '.mat'],...
+save(['/Users/robot/Desktop/sim-test-21/test-' num2str(loc) '.mat'],...
     'carTypeRatios',...
     'carTypes',...
     'nCars',...
@@ -111,5 +115,7 @@ save(['/Users/robot/.CMVolumes/Karam Safarov/PhD/bulk simulations/test-sim-18/te
     'alpha',...
     'beta',...
     'gamma',...
+    'ringType',...
+    'stream',...
     '-v7.3')
 end
