@@ -13,7 +13,7 @@ dt = 0.1;
 nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;
 t_rng = 0:dt:runTime;
-fixedSeed = [1 1];
+fixedSeed = [1 2];
 seedType = rng('shuffle', 'combRecursive');
 priority = false;
 
@@ -59,7 +59,7 @@ for j = 1:numel(carTypes)
 end
 
 Arm.H = SpawnCars([{allCarsNumArray_H},fixedSeed(1),{carTypes}],'horizontal',road.Start(1),road.End(1),road.Width(1),dt,nIterations);
-Arm.V = SpawnCars([{allCarsNumArray_V},fixedSeed(1),{carTypes}],'vertical',road.Start(2),road.End(2),road.Width(2),dt,nIterations);
+Arm.V = SpawnCars([{allCarsNumArray_V},fixedSeed(2),{carTypes}],'vertical',road.Start(2),road.End(2),road.Width(2),dt,nIterations);
 tic
 %% run the simuation
 sim = run_simulation(...

@@ -45,10 +45,10 @@ classdef IdmModel < Car & matlab.mixin.Heterogeneous
                 obj.s = obj.s_in - obj.pose(1);
                 dV = obj.velocity; 
             elseif obj.leaderFlag == 0 
-                obj.s = obj.Prev.pose(1) - obj.pose(1) - obj.dimension(2);
+                obj.s = obj.Prev.pose(1) - obj.pose(1);
                 dV = (obj.velocity - obj.Prev.velocity);
             elseif ~isempty(obj.Prev)
-                obj.s = obj.Prev.pose(1) - obj.pose(1) - obj.dimension(2)+ roadLength + obj.demand_tol;
+                obj.s = obj.Prev.pose(1) - obj.pose(1)+ roadLength;
                 dV = (obj.velocity - obj.Prev.velocity);
             else
                 obj.s = 1e5;
@@ -59,7 +59,7 @@ classdef IdmModel < Car & matlab.mixin.Heterogeneous
             if stop_flag || junc_flag
                 s_star = 0.1 + max(0,intelligentBreaking);
             else
-                s_star = obj.minimumGap + max(0,intelligentBreaking);
+                s_star = (obj.minimumGap+obj.dimension(2)) + max(0,intelligentBreaking);
             end
             
             if obj.velocity == 0 && obj.targetVelocity == 0

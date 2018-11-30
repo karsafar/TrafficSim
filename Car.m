@@ -17,7 +17,6 @@ classdef Car < dlnode & matlab.mixin.Copyable
         timeHistory = NaN(1,100000)
         historyIndex = 1.0
         leaderFlag = true
-        demand_tol = 0
         stopIndex = 0
     end
     properties (SetAccess = immutable)
