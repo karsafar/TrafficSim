@@ -1,19 +1,19 @@
 clear
 close all
 clc
-
+profile on
 roadTypes = {@LoopRoad @FiniteRoad};
 carTypes = {@IdmModel, @HdmModel, @carTypeA, @carTypeB, @carTypeC};
 
-plotFlag = false;
+plotFlag = true;
 setappdata(0,'drawRAte',1);
 
-runTime = 360;
+runTime = 3600;
 dt = 0.1;
 nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;
 t_rng = 0:dt:runTime;
-fixedSeed = [1 2];
+fixedSeed = [1 1];
 seedType = rng('shuffle', 'combRecursive');
 priority = false;
 
@@ -27,7 +27,7 @@ noSpawnAreaLength = 24.4; % length of no spawn area around the junction + length
 max_density = 1/6.4;    % number of cars per metre (0.1562)
 
 %%
-density = 0.03;
+density = 0.05;
 nCars(1,1) = round(density * road.Length(1));
 nCars(2,1) = round(density * road.Length(2));
 % nCars(2,1) = 0;
@@ -60,7 +60,7 @@ end
 
 Arm.H = SpawnCars([{allCarsNumArray_H},fixedSeed(1),{carTypes}],'horizontal',road.Start(1),road.End(1),road.Width(1),dt,nIterations);
 Arm.V = SpawnCars([{allCarsNumArray_V},fixedSeed(2),{carTypes}],'vertical',road.Start(2),road.End(2),road.Width(2),dt,nIterations);
-tic
+%tic
 %% run the simuation
 sim = run_simulation(...
     {roadTypes{1},...
@@ -76,7 +76,7 @@ sim = run_simulation(...
     dt);
 
 %% save the simulation results
-save(['test-' num2str(1) '.mat'],...
+save(['test-' num2str(2) '.mat'],...
     'carTypeRatios',...
     'carTypes',...
     'nCars',...
@@ -92,7 +92,7 @@ save(['test-' num2str(1) '.mat'],...
     'nIterations',...
     'sim',...
     '-v7.3')
-toc
+%toc
 % %% close the waitbar
 % if plotFlag == 0
     f = findall(0,'type','figure','tag','TMWWaitbar');

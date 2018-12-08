@@ -52,19 +52,23 @@ classdef Road < handle
         end
         function collect_car_history(obj,iCar)
             i = obj.nCarHistory + 1;
-            %             obj.carHistory{i} = [iCar.timeHistory; iCar.locationHistory; iCar.velocityHistory; iCar.accelerationHistory];
             cloneCar = copy(iCar);
             obj.carHistory = [obj.carHistory;cloneCar];
             obj.nCarHistory = i;
         end
         function count_emegrency_breaks(obj)
             for iCar = 1:obj.numCars
-                if  (round(obj.allCars(iCar).acceleration,2)) < obj.allCars(iCar).a_feas_min && obj.allCars(iCar).stopIndex == 0
+                currentCar = obj.allCars(iCar);
+                a = currentCar.acceleration;
+                a_f = currentCar.a_feas_min;
+                sIdx = currentCar.stopIndex;
+                if  (round(a,2)) < a_f && sIdx == 0
                     obj.numEmergBreaks = obj.numEmergBreaks + 1;
-                    obj.allCars(iCar).stopIndex = 1;
-                elseif obj.allCars(iCar).acceleration > obj.allCars(iCar).a_feas_min && obj.allCars(iCar).stopIndex == 1
-                    obj.allCars(iCar).stopIndex = 0;
+                    currentCar.stopIndex = 1;
+                elseif a > a_f && sIdx == 1
+                    currentCar.stopIndex = 0;
                 end
+                
             end
         end
     end
