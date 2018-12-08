@@ -91,17 +91,21 @@ classdef Junction < handle
         
         function collision_check(obj,allCarsHoriz,allCarsVert,nCars,mCars,plotFlag,t)
                 hCar = 0;
+                x1 = allCarsHoriz(1).s_in;
+                x2 = allCarsHoriz(1).s_out;
                 for iCar = 1:nCars
-                    if allCarsHoriz(iCar).pose(1) > allCarsHoriz(iCar).s_in &&...
-                            allCarsHoriz(iCar).pose(1) < allCarsHoriz(iCar).s_out
+                    x = allCarsHoriz(iCar).pose(1);
+                    alpha = (x-x1)/(x2-x1);
+                    if alpha >= 0 && alpha <= 1
                         hCar = iCar;
                         break;
                     end
                 end
                 for jCar = 1:mCars
                     vCar = 0;
-                    if allCarsVert(jCar).pose(1) > allCarsVert(jCar).s_in &&...
-                            allCarsVert(jCar).pose(1) < allCarsVert(jCar).s_out
+                    x = allCarsVert(jCar).pose(1);
+                    alpha = (x-x1)/(x2-x1);
+                    if alpha >= 0 && alpha <= 1
                         vCar = jCar;
                         break;
                     end
@@ -115,7 +119,8 @@ classdef Junction < handle
                     end
                 end
             if obj.collisionFlag
-                msg = sprintf('Collision occured at time t = %f',t);
+                msg = sprintf('Collision occured at time t = %f. collided cars = [%d %d] %i',t,hCar,vCar);
+                save(['coll_t-' num2str(t) '.mat'],'allCarsHoriz','allCarsVert');
                 disp(msg);
                 
                 if plotFlag

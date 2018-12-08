@@ -61,18 +61,18 @@ classdef Car < dlnode & matlab.mixin.Copyable
             end
         end
 
-        function store_state_data(obj,t)
+        function store_state_data(obj,s,v,a,t)
 
             i = obj.historyIndex;
-            obj.locationHistory(i) = obj.pose(1);
-            obj.velocityHistory(i) = obj.velocity;
-            obj.accelerationHistory(i) = obj.acceleration;
+            obj.locationHistory(i) = s;
+            obj.velocityHistory(i) = v;
+            obj.accelerationHistory(i) = a;
             obj.timeHistory(i) = t;
             obj.historyIndex = i + 1;
             
             % unit test the constraints
-            tolerance = 5e-2;
-            assert(obj.velocity >= 0-tolerance && obj.velocity <= obj.maximumVelocity+tolerance,'Velocity is out of limit');
+%             tolerance = 5e-2;
+%             assert(obj.velocity >= 0-tolerance && obj.velocity <= obj.maximumVelocity+tolerance,'Velocity is out of limit');
 %             assert(obj.acceleration >=(obj.a_feas_min - tolerance) && obj.acceleration <= (tolerance + obj.a_max) ,'Acceleration contraints are violated');            
         end
         function check_for_negative_velocity(obj,dt)

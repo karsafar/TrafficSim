@@ -120,17 +120,20 @@ classdef FiniteRoad < Road
                 end
             end
             for iCar = 1:obj.numCars
-                obj.allCars(iCar).store_state_data(t)
-                obj.allCars(iCar).move_car(dt)
+                currentCar = obj.allCars(iCar);
+                currentCar.store_state_data(currentCar.pose(1),currentCar.velocity,currentCar.acceleration,t)
+                currentCar.move_car(dt)
             end
             if t >= obj.tolerance
-                obj.averageVelocityHistory(iIteration) = aggregatedVelocities/cutNumCars;
+                avVel = aggregatedVelocities/cutNumCars;
+                obj.averageVelocityHistory(iIteration) = avVel;
                 obj.numCarsHistory(iIteration) = cutNumCars;
             end
             
             deltaV = 0;
             for iCar = 1:obj.numCars
-                deltaV = deltaV + (obj.allCars(iCar).velocity - obj.averageVelocityHistory(iIteration))^2;
+                v = obj.allCars(iCar).velocity;
+                deltaV = deltaV + (v - avVel)^2;
             end
             obj.variance(iIteration) = deltaV/obj.numCars;
             if iIteration == nIterations

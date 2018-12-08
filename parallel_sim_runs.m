@@ -11,7 +11,7 @@ dt = 0.1;
 nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;
 t_rng = 0:dt:runTime;
-fixedSeed = [1 2];
+fixedSeed = [1 1];
 ringType = rng('shuffle','combRecursive');
 priority = false;
 
@@ -97,7 +97,7 @@ delete(gcp);
 function parsave(carTypeRatios,carTypes,nCars,allCarsNumArray_H,allCarsNumArray_V,runTime,dt,t_rng,plotFlag,priority,density,road,nIterations,sim,alpha,beta,gamma,temp,ringType,stream)
 
 [lia, loc] = ismember([alpha,beta,gamma],temp(:,1:3),'rows');
-save(['/Users/robot/Desktop/sim-test-21/test-' num2str(loc) '.mat'],...
+save(['/Users/robot/Desktop/test-sim-24/test-' num2str(loc) '.mat'],...
     'carTypeRatios',...
     'carTypes',...
     'nCars',...

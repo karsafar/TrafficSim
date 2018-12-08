@@ -125,18 +125,20 @@ classdef LoopRoad < Road
         function move_all_cars(obj,t,dt,iIteration,nIterations)
             aggregatedVelocities = 0;
             for iCar = 1:obj.numCars
-                if obj.allCars(iCar).pose(1) > obj.endPoint
-                    obj.respawn_car(obj.allCars(iCar));
+                currentCar = obj.allCars(iCar);
+                if currentCar.pose(1) > obj.endPoint
+                    obj.respawn_car(currentCar);
                 end
-                obj.allCars(iCar).store_state_data(t)
-                obj.allCars(iCar).move_car(dt);
-                aggregatedVelocities = aggregatedVelocities + obj.allCars(iCar).velocity;
+                currentCar.store_state_data(currentCar.pose(1),currentCar.velocity,currentCar.acceleration,t)
+                currentCar.move_car(dt);
+                aggregatedVelocities = aggregatedVelocities + currentCar.velocity;
             end
-            obj.averageVelocityHistory(iIteration) = aggregatedVelocities/obj.numCars;
-            
+            avVel = aggregatedVelocities/obj.numCars;
+            obj.averageVelocityHistory(iIteration) = avVel;
             deltaV = 0;
             for iCar = 1:obj.numCars
-                deltaV = deltaV + (obj.allCars(iCar).velocity - obj.averageVelocityHistory(iIteration))^2;
+                v = obj.allCars(iCar).velocity;
+                deltaV = deltaV + (v - avVel)^2;
             end
             obj.variance(iIteration) = deltaV/obj.numCars;
             if iIteration == nIterations
