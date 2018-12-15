@@ -123,12 +123,14 @@ classdef carTypeB < AutonomousCar
                 % if no cars on competing arm
                 notAllCarsPassedJunction = false;
             else
-                oppositeDistToJunc = NaN(1,oppositeRoad.numCars);
-                for jCar = 1:numel(oppositeDistToJunc)
-                    s_op = oppositeCars(jCar).pose(1);
-                    oppositeDistToJunc(jCar) = crossingEnd - s_op;
-                end
-                
+%                 oppositeDistToJunc = NaN(1,oppositeRoad.numCars);
+%                 for jCar = 1:numel(oppositeDistToJunc)
+%                     s_op = oppositeCars(jCar).pose(1);
+%                     oppositeDistToJunc(jCar) = crossingEnd - s_op;
+%                 end
+                s_op = [ oppositeCars(:).pose];
+                s_op(:,2:2:end) = [];
+                oppositeDistToJunc = crossingEnd - s_op;
                 % 0 - all competing cars passed junction 1 - not all passed
                 notAllCarsPassedJunction = any(oppositeDistToJunc > 0);
                 

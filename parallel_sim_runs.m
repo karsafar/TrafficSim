@@ -11,7 +11,7 @@ dt = 0.1;
 nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;
 t_rng = 0:dt:runTime;
-fixedSeed = [1 1];
+fixedSeed = [0 0];
 ringType = rng('shuffle','combRecursive');
 priority = false;
 
@@ -25,7 +25,7 @@ noSpawnAreaLength = 24.4; % length of no spawn area around the junction + length
 max_density = 1/6.4;    % number of cars per metre (0.1562)
 
 %%
-density = 0.03;
+density = 0.05;
 nCars = round(density * road.Length);
 RealDensity = nCars/road.Length;
 
@@ -62,10 +62,9 @@ end
 spmd
     ringType;
 end
-
+stream = RandStream.getGlobalStream();
 parfor i = 1:12
-    stream = RandStream.getGlobalStream();
-    stream.Substream = i;
+%     stream.Substream = i;
     alpha = (i-1)*10;
     for beta = (100-alpha):-10:0
         gamma = 100-alpha-beta;
@@ -97,7 +96,7 @@ delete(gcp);
 function parsave(carTypeRatios,carTypes,nCars,allCarsNumArray_H,allCarsNumArray_V,runTime,dt,t_rng,plotFlag,priority,density,road,nIterations,sim,alpha,beta,gamma,temp,ringType,stream)
 
 [lia, loc] = ismember([alpha,beta,gamma],temp(:,1:3),'rows');
-save(['/Users/robot/Desktop/test-sim-24/test-' num2str(loc) '.mat'],...
+save(['/Users/robot/Desktop/test-sim-26/test-' num2str(loc) '.mat'],...
     'carTypeRatios',...
     'carTypes',...
     'nCars',...
