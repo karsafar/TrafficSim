@@ -201,12 +201,14 @@ classdef carTypeA < IdmModel
                 obj.it_canPassBehind.set_value(0);
                 obj.it_canPassAheadNext.set_value(0);
             else
-                oppositeDistToJunc = NaN(1,oppositeRoad.numCars);
-                for jCar = 1:numel(oppositeDistToJunc)
-                    s_op = oppositeCars(jCar).pose(1);
-                    oppositeDistToJunc(jCar) = crossingEnd - s_op;
-                end
-                
+%                 oppositeDistToJunc = NaN(1,oppositeRoad.numCars);
+%                 for jCar = 1:numel(oppositeDistToJunc)
+%                     s_op = oppositeCars(jCar).pose(1);
+%                     oppositeDistToJunc(jCar) = crossingEnd - s_op;
+%                 end
+                s_op = [ oppositeCars(:).pose];
+                s_op(:,2:2:end) = [];
+                oppositeDistToJunc = crossingEnd - s_op;
                 % 0 - all competing cars passed junction 1 - not all passed
                 notAllCarsPassedJunction = any(oppositeDistToJunc > 0);
                 

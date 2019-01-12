@@ -1,12 +1,11 @@
 clear
 close all
 clc
-profile on
 roadTypes = {@LoopRoad @FiniteRoad};
 carTypes = {@IdmModel, @HdmModel, @carTypeA, @carTypeB, @carTypeC};
 
-plotFlag = true;
-setappdata(0,'drawRAte',1);
+plotFlag = false;
+setappdata(0,'drawRAte',0);
 
 runTime = 3600;
 dt = 0.1;
@@ -44,7 +43,7 @@ iIteration = 0;
 % %single simulation flag 
 % setappdata(0,'simType',0);
 
-carTypeRatios = [0 0 0.3 0.2 0.5; 0 0 0.3 0.2 0.5];
+carTypeRatios = [0 0 0.5 0.5 0; 0 0 0.5 0.5 0];
 
 allCarsNumArray_H = zeros(1,numel(carTypes));
 allCarsNumArray_V = zeros(1,numel(carTypes));
@@ -60,7 +59,7 @@ end
 
 Arm.H = SpawnCars([{allCarsNumArray_H},fixedSeed(1),{carTypes}],'horizontal',road.Start(1),road.End(1),road.Width(1),dt,nIterations);
 Arm.V = SpawnCars([{allCarsNumArray_V},fixedSeed(2),{carTypes}],'vertical',road.Start(2),road.End(2),road.Width(2),dt,nIterations);
-%tic
+% tic
 %% run the simuation
 sim = run_simulation(...
     {roadTypes{1},...
@@ -76,7 +75,8 @@ sim = run_simulation(...
     dt);
 
 %% save the simulation results
-save(['test-' num2str(2) '.mat'],...
+
+save(['test-' num2str(1) '.mat'],...
     'carTypeRatios',...
     'carTypes',...
     'nCars',...
@@ -92,7 +92,7 @@ save(['test-' num2str(2) '.mat'],...
     'nIterations',...
     'sim',...
     '-v7.3')
-%toc
+% toc
 % %% close the waitbar
 % if plotFlag == 0
     f = findall(0,'type','figure','tag','TMWWaitbar');

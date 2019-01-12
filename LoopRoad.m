@@ -1,13 +1,13 @@
 classdef LoopRoad < Road
     properties (SetAccess = protected)
-%          initPoseProbDist = []
-%          allCarsNumArray = 0
+        %          initPoseProbDist = []
+        %          allCarsNumArray = 0
     end
     
     methods
         function obj = LoopRoad(road_args,loop_road_args)
             obj = obj@Road(road_args);
-
+            
             if numel(loop_road_args) == 1
                 obj.numCars = loop_road_args.numCars;
                 obj.allCars = loop_road_args.allCars;
@@ -106,10 +106,12 @@ classdef LoopRoad < Road
                 obj.allCars(iCar).Next = leaderCar;
             end
         end
-        function respawn_car(obj,leaderCar)
+        function respawn_car(obj,leaderCar,t)
             leaderCar.pose(1) = leaderCar.pose(1) - (obj.endPoint-obj.startPoint);
             
-            obj.collect_car_history(leaderCar);
+            if t >= 500
+                obj.collect_car_history(leaderCar);
+            end
             
             leaderCar.historyIndex = 1;
             leaderCar.locationHistory = leaderCar.locationHistory*NaN;
@@ -127,24 +129,30 @@ classdef LoopRoad < Road
             for iCar = 1:obj.numCars
                 currentCar = obj.allCars(iCar);
                 if currentCar.pose(1) > obj.endPoint
-                    obj.respawn_car(currentCar);
+                    obj.respawn_car(currentCar,t);
                 end
                 currentCar.store_state_data(currentCar.pose(1),currentCar.velocity,currentCar.acceleration,t)
                 currentCar.move_car(dt);
-                aggregatedVelocities = aggregatedVelocities + currentCar.velocity;
-            end
-            avVel = aggregatedVelocities/obj.numCars;
-            obj.averageVelocityHistory(iIteration) = avVel;
-            deltaV = 0;
-            for iCar = 1:obj.numCars
-                v = obj.allCars(iCar).velocity;
-                deltaV = deltaV + (v - avVel)^2;
-            end
-            obj.variance(iIteration) = deltaV/obj.numCars;
-            if iIteration == nIterations
-                for iCar = 1:obj.numCars
-                    obj.collect_car_history(obj.allCars(iCar));
+                if t >= 500
+                    aggregatedVelocities = aggregatedVelocities + currentCar.velocity;
                 end
+            end
+            if t >= 500
+                avVel = aggregatedVelocities/obj.numCars;
+                obj.averageVelocityHistory(iIteration) = avVel;
+                deltaV = 0;
+                for iCar = 1:obj.numCars
+                    v = obj.allCars(iCar).velocity;
+                    deltaV = deltaV + (v - avVel)^2;
+                end
+                obj.variance(iIteration) = deltaV/obj.numCars;
+                if iIteration == nIterations
+                    for iCar = 1:obj.numCars
+                        obj.collect_car_history(obj.allCars(iCar));
+                    end
+                end
+            else
+                obj.variance(iIteration) = NaN;
             end
         end
     end
