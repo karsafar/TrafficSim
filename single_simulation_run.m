@@ -4,7 +4,7 @@ clc
 roadTypes = {@LoopRoad @FiniteRoad};
 carTypes = {@IdmModel, @HdmModel, @carTypeA, @carTypeB, @carTypeC};
 
-plotFlag = false;
+plotFlag = true;
 setappdata(0,'drawRAte',0);
 
 runTime = 3600;
@@ -17,8 +17,8 @@ seedType = rng('shuffle', 'combRecursive');
 priority = false;
 
 % road dimensions
-road.Start = [-300; -300];
-road.End = [300; 300];
+road.Start = [-100; -100];
+road.End = [100; 100];
 road.Width = [4; 4];
 road.Length = road.End - road.Start;
 
@@ -26,7 +26,7 @@ noSpawnAreaLength = 24.4; % length of no spawn area around the junction + length
 max_density = 1/6.4;    % number of cars per metre (0.1562)
 
 %%
-density = 0.05;
+density = 0.03;
 nCars(1,1) = round(density * road.Length(1));
 nCars(2,1) = round(density * road.Length(2));
 % nCars(2,1) = 0;

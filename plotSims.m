@@ -12,6 +12,14 @@
 % load(['test-' num2str(loc) '.mat']);
 
 
+%% run 
+
+plot(sim.crossOrder+1,'-r')
+axis([0 numel(sim.crossOrder) 0 3])
+grid on 
+
+%%
+
 %{%
 %% Spatiotenporal Velocity Profiles
 
@@ -52,7 +60,7 @@ c.Label.String = 'Velocity, m/s';
 c.Label.FontSize = 12;
 caxis([0 max(sim.vertArm.carHistory(iCar).velocityHistory)])
 colormap(flipud(jet));
-%}
+%}%
 
 
 
@@ -135,7 +143,7 @@ ylabel(ax5,'Vertical Position, m')
 set(ax5, 'Ydir', 'reverse')
 legend([h1,h2],'West-East Arm Flow','South-North Arm Flow')
 axis(ax5,[0 t_rng(nIterations) sim.vertArm.startPoint sim.vertArm.endPoint] )
-%}
+%}%
 
 %% plot individual car profiles
 i = 2;
@@ -206,4 +214,4 @@ axis(ax8,[min(nCars(1).timeHistory) max(iCar.timeHistory) min(iCar.a_feas_min,mi
 
 
 
-
+%}

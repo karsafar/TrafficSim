@@ -6,6 +6,7 @@ classdef Junction < handle
         vertCarsImageHandle = []
         collidingCarsIdx = NaN(1,2)
         collisionFlag = 0
+        crossOrder = []
     end
     
     methods
@@ -116,6 +117,11 @@ classdef Junction < handle
                     elseif hCar > 0 && vCar > 0
                         obj.collidingCarsIdx = [hCar; vCar];
                         obj.collisionFlag = 1;
+                        % count crossing orders
+                    elseif hCar > 0 && hCar ~=  obj.collidingCarsIdx(1)
+                        obj.crossOrder = [obj.crossOrder 0];
+                    elseif vCar > 0 && vCar ~=  obj.collidingCarsIdx(2)
+                        obj.crossOrder = [obj.crossOrder 1];
                     end
                 end
             if obj.collisionFlag

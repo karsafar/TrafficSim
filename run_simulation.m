@@ -90,7 +90,7 @@ for iIteration = 1:nIterations
 end
 sim.horizArm = HorizontalArm;
 sim.vertArm = VerticalArm;
-
+sim.crossOrder = junc.crossOrder;
 % sim.horizArm = cast_output(HorizontalArm);
 % sim.vertArm = cast_output(VerticalArm);
 end
