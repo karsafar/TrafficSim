@@ -3,7 +3,7 @@ classdef IdmModel < Car & matlab.mixin.Heterogeneous
         delta = 1
         minimumGap = 2
     end
-    properties (SetAccess = public)
+    properties (SetAccess = protected)
         idmAcceleration = NaN
         s = NaN
         a = 1;

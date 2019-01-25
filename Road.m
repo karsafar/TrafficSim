@@ -9,11 +9,10 @@ classdef Road < handle
         crossingBeginPosition = NaN
         crossingEndPosition = NaN
     end
-    properties (SetAccess = public)
+    properties (SetAccess = protected)
         numCars = 0
         allCars = []
         carHistory = []
-        CarsImageHandle = []
 %         carHistory = {}
         nCarHistory = 0
         averageVelocityHistory = []

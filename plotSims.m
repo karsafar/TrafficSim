@@ -4,20 +4,19 @@
 % 
 % % load porcessed data
 % load('processedData.mat');
-
-% find test number of interest
-% [lia, loc] = ismember([60,20,20],pointsCartesian,'rows');
+% 
+% % find test number of interest
+% [lia, loc] = ismember([100,0,0],pointsCartesian,'rows');
 % 
 % % load the test data
 % load(['test-' num2str(loc) '.mat']);
 
 
 %% run 
-figure(6)
-plot(sim.crossOrder+1,'-b','LineWidth',1.5)
+
+plot(sim.crossOrder+1,'-r')
 axis([0 numel(sim.crossOrder) 0 3])
 grid on 
-xlabel('Number of Junction Crosses')
 
 %%
 
@@ -40,7 +39,7 @@ end
 c = colorbar;
 c.Label.String = 'Velocity, m/s';
 c.Label.FontSize = 12;
-caxis([0 13])
+caxis([0 max(sim.horizArm.carHistory(iCar).velocityHistory)])
 colormap(flipud(jet));
 
                     %%%%%%%%%%%%%% South-North Arm %%%%%%%%%%%%%%
@@ -59,7 +58,7 @@ end
 c = colorbar;
 c.Label.String = 'Velocity, m/s';
 c.Label.FontSize = 12;
-caxis([0 13])
+caxis([0 max(sim.vertArm.carHistory(iCar).velocityHistory)])
 colormap(flipud(jet));
 %}%
 
