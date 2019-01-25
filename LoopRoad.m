@@ -1,5 +1,7 @@
 classdef LoopRoad < Road
     properties (SetAccess = protected)
+        storeSwappedIndices = []
+        diceDistGen = makedist('uniform','lower',0,'upper',1);
         %          initPoseProbDist = []
         %          allCarsNumArray = 0
     end
@@ -126,6 +128,12 @@ classdef LoopRoad < Road
         end
         function move_all_cars(obj,t,dt,iIteration,nIterations)
             aggregatedVelocities = 0;
+           
+            % swap two cars 
+            chance = random(obj.diceDistGen);
+            if mod(iIteration,100) == 0 && chance <= 0.5
+                convert_car_classes(obj)
+            end
             for iCar = 1:obj.numCars
                 currentCar = obj.allCars(iCar);
                 if currentCar.pose(1) > obj.endPoint
@@ -154,6 +162,99 @@ classdef LoopRoad < Road
             else
                 obj.variance(iIteration) = NaN;
             end
+        end
+        function convert_car_classes(obj)
+            if obj.numCars > 3
+                firstIndex = randi(obj.numCars,1);
+                car1 = obj.allCars(firstIndex);
+                selectedCarClass = class(car1);
+                breakIdx = 0;
+                secondIndex = 0;
+                while breakIdx == 0
+                    secondIndex = randi(obj.numCars);
+                    if isa(obj.allCars(secondIndex),selectedCarClass) == 0 && secondIndex ~= firstIndex
+                        car2 = obj.allCars(secondIndex);
+                        breakIdx = 1;
+                    end
+                end
+%                 while breakIdx == 0 && secondIndex < obj.numCars
+%                     secondIndex = secondIndex+1;
+%                     if isa(obj.allCars(secondIndex),selectedCarClass) == 0
+%                         car2 = obj.allCars(secondIndex);
+%                         breakIdx = 1;
+%                     end
+%                 end
+                
+                % store swapped pair
+                obj.storeSwappedIndices = [obj.storeSwappedIndices; firstIndex secondIndex];
+                
+                if car1.Prev.pose(1) ~= car2.pose(1)
+                    tempPreCar1 = car1.Prev;
+                else
+                    tempPreCar1 = car1.Prev.Prev;
+                end
+                if car2.Prev.pose(1) ~= car1.pose(1)
+                    tempPreCar2 = car2.Prev;
+                else
+                    tempPreCar2 = car2.Prev.Prev;
+                end
+                          
+                % detach both nodes from dlnode
+                removeNode(car1);
+                removeNode(car2);
+
+                % swap properties of two cars 
+                newCar2 = LoopRoad.swap_cars(car1,car2);
+                newCar1 = LoopRoad.swap_cars(car2,car1);
+                
+                % delete old objects
+                delete(car1);
+                delete(car2);
+                
+                insertAfter(newCar1,tempPreCar1)
+                obj.allCars(firstIndex) = newCar1;
+                
+                % update preCar2 in case if newCar1 is newpreCar2
+                if (firstIndex+1)==secondIndex || (firstIndex-obj.numCars+1)==secondIndex
+                    tempPreCar2 = newCar1;
+                end
+                
+                insertAfter(newCar2,tempPreCar2)
+                obj.allCars(secondIndex) = newCar2;
+                
+                delete(obj.CarsImageHandle);
+                obj.CarsImageHandle = [];
+            end
+        end
+    end
+    methods (Static)
+        function cloneCar = swap_cars(car1,car2)
+            
+            cloneCar = copy(car1);
+            
+            cloneCar.juncExitVelocity = car2.juncExitVelocity;
+            cloneCar.idmAcceleration =  car2.idmAcceleration;
+            cloneCar.s = car2.s;
+            cloneCar.a = car2.a;
+            cloneCar.b = car2.b;
+            cloneCar.timeGap = car2.timeGap ;
+            cloneCar.targetVelocity = car2.targetVelocity;
+            cloneCar.priority = car2.priority;
+            cloneCar.dt =  car2.dt;
+            cloneCar.pose =  car2.pose;
+            cloneCar.velocity =  car2.velocity;
+            cloneCar.maximumVelocity =  car2.maximumVelocity;
+            cloneCar.acceleration =  car2.acceleration;
+            cloneCar.a_max =  car2.a_max;
+            cloneCar.a_min =  car2.a_min;
+            cloneCar.a_feas_min =  car2.a_feas_min;
+            cloneCar.locationHistory =  car2.locationHistory;
+            cloneCar.velocityHistory =  car2.velocityHistory;
+            cloneCar.accelerationHistory = car2.accelerationHistory;
+            cloneCar.timeHistory =  car2.timeHistory;
+            cloneCar.historyIndex =  car2.historyIndex;
+            cloneCar.leaderFlag =  car2.leaderFlag;
+            cloneCar.stopIndex = car2.stopIndex;
         end
     end
 end
