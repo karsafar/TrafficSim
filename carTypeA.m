@@ -1,5 +1,5 @@
 classdef carTypeA < IdmModel
-    properties(SetAccess = private)
+    properties(SetAccess = public)
         bb
         it_accel
         it_a_follow
