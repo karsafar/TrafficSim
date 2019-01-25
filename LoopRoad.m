@@ -177,13 +177,6 @@ classdef LoopRoad < Road
                         breakIdx = 1;
                     end
                 end
-%                 while breakIdx == 0 && secondIndex < obj.numCars
-%                     secondIndex = secondIndex+1;
-%                     if isa(obj.allCars(secondIndex),selectedCarClass) == 0
-%                         car2 = obj.allCars(secondIndex);
-%                         breakIdx = 1;
-%                     end
-%                 end
                 
                 % store swapped pair
                 obj.storeSwappedIndices = [obj.storeSwappedIndices; firstIndex secondIndex];
