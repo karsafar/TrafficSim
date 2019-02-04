@@ -4,10 +4,10 @@ clc
 roadTypes = {@LoopRoad @FiniteRoad};
 carTypes = {@IdmModel, @HdmModel, @carTypeA, @carTypeB, @carTypeC};
 
-plotFlag = true;
-setappdata(0,'drawRAte',0);
+plotFlag = false;
+setappdata(0,'drawRAte',1);
 
-runTime = 3600;
+runTime = 360; % sec
 dt = 0.1;
 nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;
@@ -17,8 +17,8 @@ seedType = rng('shuffle', 'combRecursive');
 priority = false;
 
 % road dimensions
-road.Start = [-100; -100];
-road.End = [100; 100];
+road.Start = [-300; -300];
+road.End = [300; 300];
 road.Width = [4; 4];
 road.Length = road.End - road.Start;
 

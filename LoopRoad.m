@@ -2,6 +2,13 @@ classdef LoopRoad < Road
     properties (SetAccess = protected)
         storeSwappedIndices = []
         diceDistGen = makedist('uniform','lower',0,'upper',1);
+        carTypeRatios
+        swapPostionArray = [];
+        originalClassArray = [];
+        newClassArray = [];
+        flagAB = 1 % choose A type to swap
+        
+        
         %          initPoseProbDist = []
         %          allCarsNumArray = 0
     end
@@ -22,6 +29,7 @@ classdef LoopRoad < Road
                 obj.FixedSeed = loop_road_args{2};
                 obj.spawn_initial_cars(loop_road_args{3});
             end
+            obj.carTypeRatios = ones(2,loop_road_args.nIterations).*[round(obj.numCars/2);round(obj.numCars/2)];
         end
         function spawn_initial_cars(obj,dt)
             %%
@@ -109,9 +117,10 @@ classdef LoopRoad < Road
             end
         end
         function respawn_car(obj,leaderCar,t)
+            
             leaderCar.pose(1) = leaderCar.pose(1) - (obj.endPoint-obj.startPoint);
             
-            if t >= 500
+            if t >= 0 % transient cut
                 obj.collect_car_history(leaderCar);
             end
             
@@ -129,23 +138,51 @@ classdef LoopRoad < Road
         function move_all_cars(obj,t,dt,iIteration,nIterations)
             aggregatedVelocities = 0;
            
-            % swap two cars 
-            chance = random(obj.diceDistGen);
-            if mod(iIteration,100) == 0 && chance <= 0.5
-                convert_car_classes(obj)
-            end
+%             % swap two cars 
+%             chance = random(obj.diceDistGen);
+%             if mod(iIteration,100) == 0 && chance <= 0.5
+%                 convert_car_classes(obj)
+%             end
+            
+            
             for iCar = 1:obj.numCars
                 currentCar = obj.allCars(iCar);
                 if currentCar.pose(1) > obj.endPoint
                     obj.respawn_car(currentCar,t);
+                               
+                    % morph the car
+                    chance = random(obj.diceDistGen);
+%                     if chance < 0.01 && (numel(obj.swapPostionArray) <=1 ||...
+%                             sum(((strcmpi({class(obj.allCars(obj.swapPostionArray(end-1))),class(obj.allCars(obj.swapPostionArray(end)))},class(currentCar))))))>0 
+                    if chance < 0 && (isempty(obj.swapPostionArray) || (strcmpi(class(obj.allCars(obj.swapPostionArray(end))),class(currentCar))))
+  
+                        obj.swapPostionArray = [obj.swapPostionArray iCar];
+                        
+                        morphedCar = morph_car(obj,currentCar,dt);
+                        anchorCar = obj.allCars(iCar).Prev;
+                        obj.allCars(iCar) = morphedCar;
+                        removeNode(currentCar);
+                        insertAfter(morphedCar,anchorCar);
+                        
+                        % calculate change in ratio of A/B types every time
+                        % the swap happened
+                        if strcmpi(class(morphedCar),'carTypeA')
+                            obj.carTypeRatios(1,iIteration:end) = obj.carTypeRatios(1,iIteration:end)+1;
+                            obj.carTypeRatios(2,iIteration:end) = obj.carTypeRatios(2,iIteration:end)-1;
+                        else
+                            obj.carTypeRatios(1,iIteration:end) = obj.carTypeRatios(1,iIteration:end)-1;
+                            obj.carTypeRatios(2,iIteration:end) = obj.carTypeRatios(2,iIteration:end)+1;
+                        end
+                    end
                 end
+                
                 currentCar.store_state_data(currentCar.pose(1),currentCar.velocity,currentCar.acceleration,t)
                 currentCar.move_car(dt);
-                if t >= 500
+                if t >= 0 % transient cut
                     aggregatedVelocities = aggregatedVelocities + currentCar.velocity;
                 end
             end
-            if t >= 500
+            if t >= 0 % transient cut
                 avVel = aggregatedVelocities/obj.numCars;
                 obj.averageVelocityHistory(iIteration) = avVel;
                 deltaV = 0;
@@ -163,6 +200,8 @@ classdef LoopRoad < Road
                 obj.variance(iIteration) = NaN;
             end
         end
+        
+        % used for a couple of cars
         function convert_car_classes(obj)
             if obj.numCars > 3
                 firstIndex = randi(obj.numCars,1);
@@ -219,7 +258,37 @@ classdef LoopRoad < Road
                 obj.CarsImageHandle = [];
             end
         end
-    end
+    
+        
+        function morphedCar = morph_car(obj,carToMorph,dt)
+            
+            selectedCarClass = class(carToMorph);
+
+%             cloneCar = copy(carToMorph);
+            
+            if strcmpi(selectedCarClass,'carTypeA')
+                % convert to class B
+                newCar = add_car(obj,4,dt);
+%                 newCar = add_car(obj,3,dt);
+
+%                 newCar = add_car(obj,2,dt);
+                morphedCar = LoopRoad.swap_cars(newCar,carToMorph);
+                obj.originalClassArray = [obj.originalClassArray 1];
+                obj.newClassArray = [obj.newClassArray 2];
+            else
+                % convert to class A
+                newCar = add_car(obj,3,dt);
+%                 newCar = add_car(obj,6,dt);
+
+%                 newCar = add_car(obj,1,dt);
+                morphedCar = LoopRoad.swap_cars(newCar,carToMorph);
+                obj.originalClassArray = [obj.originalClassArray 2];
+                obj.newClassArray = [obj.newClassArray 1];
+            end
+            delete(obj.CarsImageHandle);
+            obj.CarsImageHandle = [];
+        end
+        end
     methods (Static)
         function cloneCar = swap_cars(car1,car2)
             
