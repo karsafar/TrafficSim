@@ -75,18 +75,7 @@ for iIteration = 1:nIterations
 %             return
 %         end
 %     end
-%     orderNums = [];
-%     for i = 1:numel(HorizontalArm.allCars)
-%         if isa(HorizontalArm.allCars(i),'carTypeA')
-%             orderNums(i) = 1;
-%         elseif isa(HorizontalArm.allCars(i),'carTypeB')
-%             orderNums(i) = 2;
-%         elseif isa(HorizontalArm.allCars(i),'carTypeC')
-%             orderNums(i) = 3;
-%         end
-%     end
-%     sim = orderNums;
-%     return 
+
 end
 sim.horizArm = HorizontalArm;
 sim.vertArm = VerticalArm;

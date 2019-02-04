@@ -153,7 +153,7 @@ if get(handles.checkbox_micro,'Value')
         c = colorbar;
         c.Label.String = 'Velocity, m/s';
         c.Label.FontSize = 12;
-        caxis([0 max(road.carHistory(iCar).velocityHistory)])
+        caxis([0 13])
         colormap(flipud(jet));
     end
 end

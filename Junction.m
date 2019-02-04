@@ -90,8 +90,11 @@ classdef Junction < handle
                     % count crossing orders
                 elseif hCar > 0 && hCar ~=  obj.collidingCarsIdx(1)
                     obj.crossOrder = [obj.crossOrder 0];
+                    obj.collidingCarsIdx(1) = hCar;
                 elseif vCar > 0 && vCar ~=  obj.collidingCarsIdx(2)
                     obj.crossOrder = [obj.crossOrder 1];
+%                     obj.collidingCarsIdx(1) = 0;
+                    obj.collidingCarsIdx(2) = vCar;
                 end
             end
             if obj.collisionFlag

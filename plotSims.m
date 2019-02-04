@@ -12,15 +12,6 @@
 % load(['test-' num2str(loc) '.mat']);
 
 
-%% run 
-figure(6)
-plot(sim.crossOrder+1,'-b','LineWidth',1.5)
-axis([0 numel(sim.crossOrder) 0 3])
-grid on 
-xlabel('Number of Junction Crosses')
-
-%%
-
 %{%
 %% Spatiotenporal Velocity Profiles
 
@@ -70,6 +61,8 @@ colormap(flipud(jet));
 
 
 %% Flow
+
+
 %{%
 % tf = isa(sim.horizArm,'LoopRoad');
 for i = 1:nIterations
@@ -101,6 +94,8 @@ legend(ax3,'West-East Arm Flow','South-North Arm Flow','Junction Flow')
 
 
 %% Speed variance
+
+
 figure(3)
 ax4 = axes;
 set(ax4,'FontSize',16)
@@ -147,6 +142,8 @@ axis(ax5,[0 t_rng(nIterations) sim.vertArm.startPoint sim.vertArm.endPoint] )
 %}%
 
 %% plot individual car profiles
+
+
 i = 2;
 if i == 1
     nCars = sim.horizArm.carHistory(226:235);
