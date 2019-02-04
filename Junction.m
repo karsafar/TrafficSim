@@ -1,11 +1,12 @@
 classdef Junction < handle
     properties (SetAccess = public)
-        allCarsImageHandle = []
+%         allCarsImageHandle = []
         junctionPlotHandle = []
-        horizCarsImageHandle = []
-        vertCarsImageHandle = []
+%         horizCarsImageHandle = []
+%         vertCarsImageHandle = []
         collidingCarsIdx = NaN(1,2)
         collisionFlag = 0
+        crossOrder = []
     end
     
     methods
@@ -40,39 +41,9 @@ classdef Junction < handle
             end
             
             if isempty(allAxesInFigure)
-                %                 rad = 30;
-                %                 x1=-rad;
-                %                 x2=rad;
-                %                 y1=-rad;
-                %                 y2=rad;
-                %                 x = [x1, x2, x2, x1, x1];
-                %                 y = [y1, y1, y2, y2, y1];
-                %                 plot(obj.junctionPlotHandle,x, y, 'k--', 'LineWidth', 1);
-                %
                 iDimension = [2.16 4.4 2.75];
                 carRectangle = [ 0 0; iDimension(2) 0; iDimension(2) iDimension(1); 0 iDimension(1)]-...
                     [(iDimension(2) - iDimension(3))/2*ones(4,1) iDimension(1)/2*ones(4,1) ];
-                
-%                 x = roadDimensions.End(2)-20;
-%                 x1 = x-5;
-%                 y = (roadDimensions.End(2)-5):-5:(roadDimensions.End(2)-30);
-%                 fill(obj.junctionPlotHandle,x1+[carRectangle(:,1); carRectangle(1,1)],y(1)+[carRectangle(:,2); carRectangle(1,2)],'g');
-%                 text(obj.junctionPlotHandle,x, y(1)+0.5, '- ManualCar');
-%                 
-%                 fill(obj.junctionPlotHandle,x1+[carRectangle(:,1); carRectangle(1,1)],y(2)+[carRectangle(:,2); carRectangle(1,2)],'r');
-%                 text(obj.junctionPlotHandle,x, y(2)+0.5, '- AggressiveCar');
-%                 
-%                 fill(obj.junctionPlotHandle,x1+[carRectangle(:,1); carRectangle(1,1)],y(3)+[carRectangle(:,2); carRectangle(1,2)],'b');
-%                 text(obj.junctionPlotHandle,x, y(3)+0.5, '- PassiveCar');
-%                 
-%                 fill(obj.junctionPlotHandle,x1+[carRectangle(:,1); carRectangle(1,1)],y(4)+[carRectangle(:,2); carRectangle(1,2)],'y');
-%                 text(obj.junctionPlotHandle,x, y(4)+0.5, '- HesitantCar');
-%                 
-%                 fill(obj.junctionPlotHandle,x1+[carRectangle(:,1); carRectangle(1,1)],y(5)+[carRectangle(:,2); carRectangle(1,2)],'m');
-%                 text(obj.junctionPlotHandle,x, y(5)+0.5, '- HdmCar');
-%                 
-%                 fill(obj.junctionPlotHandle,x1+[carRectangle(:,1); carRectangle(1,1)],y(6)+[carRectangle(:,2); carRectangle(1,2)],'k');
-%                 text(obj.junctionPlotHandle,x, y(6)+0.5, '- IdmCar');
             end
         end
         function draw_all_cars(obj,horizontalArm,vericalArm)
@@ -90,34 +61,42 @@ classdef Junction < handle
         end
         
         function collision_check(obj,allCarsHoriz,allCarsVert,nCars,mCars,plotFlag,t)
-                hCar = 0;
-                x1 = allCarsHoriz(1).s_in;
-                x2 = allCarsHoriz(1).s_out;
-                for iCar = 1:nCars
-                    x = allCarsHoriz(iCar).pose(1);
-                    alpha = (x-x1)/(x2-x1);
-                    if alpha >= 0 && alpha <= 1
-                        hCar = iCar;
-                        break;
-                    end
+            hCar = 0;
+            x1 = allCarsHoriz(1).s_in;
+            x2 = allCarsHoriz(1).s_out;
+            for iCar = 1:nCars
+                x = allCarsHoriz(iCar).pose(1);
+                alpha = (x-x1)/(x2-x1);
+                if alpha >= 0 && alpha <= 1
+                    hCar = iCar;
+                    break;
                 end
-                for jCar = 1:mCars
-                    vCar = 0;
-                    x = allCarsVert(jCar).pose(1);
-                    alpha = (x-x1)/(x2-x1);
-                    if alpha >= 0 && alpha <= 1
-                        vCar = jCar;
-                        break;
-                    end
+            end
+            for jCar = 1:mCars
+                vCar = 0;
+                x = allCarsVert(jCar).pose(1);
+                alpha = (x-x1)/(x2-x1);
+                if alpha >= 0 && alpha <= 1
+                    vCar = jCar;
+                    break;
                 end
-                if nCars > 0 && mCars > 0
-                    if hCar ==  obj.collidingCarsIdx(1) && vCar ==  obj.collidingCarsIdx(2)
-                        obj.collisionFlag = 0;
-                    elseif hCar > 0 && vCar > 0
-                        obj.collidingCarsIdx = [hCar; vCar];
-                        obj.collisionFlag = 1;
-                    end
+            end
+            if nCars > 0 && mCars > 0
+                if hCar ==  obj.collidingCarsIdx(1) && vCar ==  obj.collidingCarsIdx(2)
+                    obj.collisionFlag = 0;
+                elseif hCar > 0 && vCar > 0
+                    obj.collidingCarsIdx = [hCar; vCar];
+                    obj.collisionFlag = 1;
+                    % count crossing orders
+                elseif hCar > 0 && hCar ~=  obj.collidingCarsIdx(1)
+                    obj.crossOrder = [obj.crossOrder 0];
+                    obj.collidingCarsIdx(1) = hCar;
+                elseif vCar > 0 && vCar ~=  obj.collidingCarsIdx(2)
+                    obj.crossOrder = [obj.crossOrder 1];
+%                     obj.collidingCarsIdx(1) = 0;
+                    obj.collidingCarsIdx(2) = vCar;
                 end
+            end
             if obj.collisionFlag
                 msg = sprintf('Collision occured at time t = %f. collided cars = [%d %d] %i',t,hCar,vCar);
                 save(['coll_t-' num2str(t) '.mat'],'allCarsHoriz','allCarsVert');
@@ -129,15 +108,15 @@ classdef Junction < handle
                 else
                 end
                 
-%                 beep;
-%                 pause();
+                %                 beep;
+                %                 pause();
             end
         end
         
         function draw_car(obj,Arm,flag)
             plotVectorX = NaN(1,5);
             plotVectorY = NaN(1,5);
-            
+                        
             for iCar = 1:Arm.numCars
                 iDimension = Arm.allCars(iCar).dimension;
                 iPosition = Arm.allCars(iCar).pose;
@@ -159,57 +138,37 @@ classdef Junction < handle
                 plotVectorX(:) = [transformation(1,1:end-1) transformation(1,1)];
                 plotVectorY(:) = [transformation(2,1:end-1) transformation(2,1)];
                 
-                if strcmpi(Arm.orientation,'horizontal')
-                    if Arm.numCars < numel(obj.horizCarsImageHandle)
-                        delete(obj.horizCarsImageHandle(1));
-                        obj.horizCarsImageHandle(1)= [];
-                    end
-                    if flag == 0 || iCar > numel(obj.horizCarsImageHandle)
-                        if strcmpi(class(Arm.allCars(iCar)),'carTypeA')
-                            carColour = 'g';
-                        elseif strcmpi(class(Arm.allCars(iCar)),'carTypeB')
-                            carColour = 'r';
-                        elseif strcmpi(class(Arm.allCars(iCar)),'carTypeC')
-                            carColour = 'b';
-                        elseif strcmpi(class(Arm.allCars(iCar)),'HesitantCar')
-                            carColour = 'y';
-                        elseif strcmpi(class(Arm.allCars(iCar)),'HdmModel')
-                            carColour = 'm';
-                        else
-                            carColour = 'k';
-                        end
-                        obj.horizCarsImageHandle = [obj.horizCarsImageHandle; fill(obj.junctionPlotHandle,plotVectorX',plotVectorY',carColour)];
-                    else
-                        set(obj.horizCarsImageHandle(iCar),'XData',plotVectorX','YData',plotVectorY');
-                    end
-                else
-                    if Arm.numCars < numel(obj.vertCarsImageHandle)
-                        delete(obj.vertCarsImageHandle(1));
-                        obj.vertCarsImageHandle(1)= [];
-                    end
-                    if flag == 0 || iCar > numel(obj.vertCarsImageHandle)
-                        if strcmpi(class(Arm.allCars(iCar)),'carTypeA')
-                            carColour = 'g';
-                        elseif strcmpi(class(Arm.allCars(iCar)),'carTypeB')
-                            carColour = 'r';
-                        elseif strcmpi(class(Arm.allCars(iCar)),'carTypeC')
-                            carColour = 'b';
-                        elseif strcmpi(class(Arm.allCars(iCar)),'HesitantCar')
-                            carColour = 'y';
-                        elseif strcmpi(class(Arm.allCars(iCar)),'HdmModel')
-                            carColour = 'm';
-                        else
-                            carColour = 'k';
-                        end
-                        obj.vertCarsImageHandle = [obj.vertCarsImageHandle; fill(obj.junctionPlotHandle,plotVectorX',plotVectorY',carColour)];
-                    else
-                        set(obj.vertCarsImageHandle(iCar),'XData',plotVectorX','YData',plotVectorY');
-                    end
-
-                end
+                % update plots of all cars' positions along each road
+                
+                update_car_plots(obj,Arm,flag,iCar,plotVectorX,plotVectorY);
             end
         end
-        
+        function update_car_plots(obj,arm,flag,iCar,plotVectorX,plotVectorY)
+            if arm.numCars < numel(arm.CarsImageHandle)
+                delete(arm.CarsImageHandle(1));
+                arm.CarsImageHandle(1)= [];
+            end
+            if flag == 0 || iCar > numel(arm.CarsImageHandle)
+                switch class(arm.allCars(iCar))
+                    case 'carTypeA'
+                        carColour = 'g';
+                    case 'carTypeB'
+                        carColour = 'r';
+                    case 'carTypeC'
+                        carColour = 'b';
+                    case 'HesitantCar'
+                        carColour = 'y';
+                    case 'HdmModel'
+                        carColour = 'm';
+                    otherwise
+                        carColour = 'k';
+                end
+                arm.CarsImageHandle = [arm.CarsImageHandle; fill(obj.junctionPlotHandle,plotVectorX',plotVectorY',carColour)];
+            else
+                set(arm.CarsImageHandle(iCar),'XData',plotVectorX','YData',plotVectorY');
+            end
+        end
     end
 end
+
 

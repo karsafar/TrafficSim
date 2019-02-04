@@ -4,9 +4,9 @@
 % 
 % % load porcessed data
 % load('processedData.mat');
-% 
-% % find test number of interest
-% [lia, loc] = ismember([100,0,0],pointsCartesian,'rows');
+
+% find test number of interest
+% [lia, loc] = ismember([60,20,20],pointsCartesian,'rows');
 % 
 % % load the test data
 % load(['test-' num2str(loc) '.mat']);
@@ -31,7 +31,7 @@ end
 c = colorbar;
 c.Label.String = 'Velocity, m/s';
 c.Label.FontSize = 12;
-caxis([0 max(sim.horizArm.carHistory(iCar).velocityHistory)])
+caxis([0 13])
 colormap(flipud(jet));
 
                     %%%%%%%%%%%%%% South-North Arm %%%%%%%%%%%%%%
@@ -50,9 +50,9 @@ end
 c = colorbar;
 c.Label.String = 'Velocity, m/s';
 c.Label.FontSize = 12;
-caxis([0 max(sim.vertArm.carHistory(iCar).velocityHistory)])
+caxis([0 13])
 colormap(flipud(jet));
-%}
+%}%
 
 
 
@@ -61,6 +61,8 @@ colormap(flipud(jet));
 
 
 %% Flow
+
+
 %{%
 % tf = isa(sim.horizArm,'LoopRoad');
 for i = 1:nIterations
@@ -92,6 +94,8 @@ legend(ax3,'West-East Arm Flow','South-North Arm Flow','Junction Flow')
 
 
 %% Speed variance
+
+
 figure(3)
 ax4 = axes;
 set(ax4,'FontSize',16)
@@ -135,9 +139,11 @@ ylabel(ax5,'Vertical Position, m')
 set(ax5, 'Ydir', 'reverse')
 legend([h1,h2],'West-East Arm Flow','South-North Arm Flow')
 axis(ax5,[0 t_rng(nIterations) sim.vertArm.startPoint sim.vertArm.endPoint] )
-%}
+%}%
 
 %% plot individual car profiles
+
+
 i = 2;
 if i == 1
     nCars = sim.horizArm.carHistory(226:235);
@@ -206,4 +212,4 @@ axis(ax8,[min(nCars(1).timeHistory) max(iCar.timeHistory) min(iCar.a_feas_min,mi
 
 
 
-
+%}

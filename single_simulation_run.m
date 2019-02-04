@@ -5,9 +5,9 @@ roadTypes = {@LoopRoad @FiniteRoad};
 carTypes = {@IdmModel, @HdmModel, @carTypeA, @carTypeB, @carTypeC};
 
 plotFlag = false;
-setappdata(0,'drawRAte',0);
+setappdata(0,'drawRAte',1);
 
-runTime = 3600;
+runTime = 360; % sec
 dt = 0.1;
 nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;
@@ -26,7 +26,7 @@ noSpawnAreaLength = 24.4; % length of no spawn area around the junction + length
 max_density = 1/6.4;    % number of cars per metre (0.1562)
 
 %%
-density = 0.05;
+density = 0.03;
 nCars(1,1) = round(density * road.Length(1));
 nCars(2,1) = round(density * road.Length(2));
 % nCars(2,1) = 0;
