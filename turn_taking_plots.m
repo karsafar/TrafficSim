@@ -1,9 +1,9 @@
-% clc
-% clear
-% close all
-% 
-% %% load the test data
-% load(['test-' num2str(loc) '.mat']);
+clc
+clear
+close all
+
+%% load the test data
+load(['test-' num2str(7) '.mat']);
 
 
 %% junction crossing graph
@@ -22,14 +22,24 @@ horizRatios = sim.horizArm.carTypeRatios(1,:)./sim.horizArm.carTypeRatios(2,:);
 vertRatios = sim.vertArm.carTypeRatios(1,:)./sim.vertArm.carTypeRatios(2,:);
 
 figure(7)
-plot(t_rng,horizRatios)
+subplot(2,1,1)
+plot(t_rng,horizRatios,'r')
 hold on
 grid on 
-plot(t_rng,vertRatios)
 plot(t_rng,ones(1,numel(t_rng)),'-k','LineWidth',2);
 xlabel('Time, s','FontSize',16)
 ylabel('ratio of A/B cars','FontSize',16)
-lgd = legend('East Arm','North Arm','Base ratio');
+lgd = legend('East Arm','Base ratio');
+lgd.FontSize = 16;
+
+subplot(2,1,2)
+plot(t_rng,vertRatios,'b')
+hold on
+grid on 
+plot(t_rng,ones(1,numel(t_rng)),'-k','LineWidth',2);
+xlabel('Time, s','FontSize',16)
+ylabel('ratio of A/B cars','FontSize',16)
+lgd = legend('North Arm','Base ratio');
 lgd.FontSize = 16;
 
 %%

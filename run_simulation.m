@@ -75,7 +75,6 @@ for iIteration = 1:nIterations
 %             return
 %         end
 %     end
-
 end
 sim.horizArm = HorizontalArm;
 sim.vertArm = VerticalArm;

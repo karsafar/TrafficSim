@@ -6,7 +6,7 @@ roadTypes = {@LoopRoad @FiniteRoad};
 carTypes = {@carTypeA, @carTypeB, @carTypeC};
 
 plotFlag = false;
-runTime = 3600;
+runTime = 18000;
 dt = 0.1;
 nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;
@@ -15,8 +15,8 @@ fixedSeed = [1 1];
 priority = false;
 
 % road dimensions
-road.Start = [-300; -300];
-road.End = [300; 300];
+road.Start = [-500; -500];
+road.End = [500; 500];
 road.Width = [4; 4];
 road.Length = road.End - road.Start;
 

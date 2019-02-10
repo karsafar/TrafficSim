@@ -1,9 +1,9 @@
-clc
-clear
-close all
-
-%% 
-load(['test-' num2str(7) '.mat']);
+% clc
+% clear
+% close all
+% 
+% %% 
+% load(['test-' num2str(6) '.mat']);
 
 %%
 
@@ -103,7 +103,6 @@ for carIdx = 1:max(carsOrder)
                         noMatchFlag(1) = 1;
                     end
                     
-                    
                     if noMatchFlag(2) == 0
                         if (j-ii < 1 && carsOrder(end+(j-ii)) == carIdx) || (j-ii >= 1 && carsOrder(j-ii) == carIdx)
                             count = count + 1;
@@ -111,7 +110,7 @@ for carIdx = 1:max(carsOrder)
                             noMatchFlag(2) = 1;
                         end
                     end
-                    if sum(noMatchFlag) == 2 || endFlag == 1
+                    if sum(noMatchFlag) == 2 || (endFlag == 1 && count ~= i)
                         break;
                     end
                 end
