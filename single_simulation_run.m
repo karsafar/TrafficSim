@@ -7,7 +7,7 @@ carTypes = {@IdmModel, @HdmModel, @carTypeA, @carTypeB, @carTypeC};
 plotFlag = false;
 setappdata(0,'drawRAte',1);
 
-runTime = 360; % sec
+runTime = 3600; % sec
 dt = 0.1;
 nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;
@@ -17,8 +17,8 @@ seedType = rng('shuffle', 'combRecursive');
 priority = false;
 
 % road dimensions
-road.Start = [-300; -300];
-road.End = [300; 300];
+road.Start = [-500; -500];
+road.End = [500; 500];
 road.Width = [4; 4];
 road.Length = road.End - road.Start;
 
@@ -76,7 +76,7 @@ sim = run_simulation(...
 
 %% save the simulation results
 
-save(['test-' num2str(1) '.mat'],...
+save(['test-' num2str(2) '.mat'],...
     'carTypeRatios',...
     'carTypes',...
     'nCars',...
