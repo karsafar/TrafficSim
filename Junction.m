@@ -7,6 +7,7 @@ classdef Junction < handle
         collidingCarsIdx = NaN(1,2)
         collisionFlag = 0
         crossOrder = []
+        collisionMsgs = []
     end
     
     methods
@@ -97,20 +98,19 @@ classdef Junction < handle
                     obj.collidingCarsIdx(2) = vCar;
                 end
             end
-            if obj.collisionFlag
-                msg = sprintf('Collision occured at time t = %f. collided cars = [%d %d] %i',t,hCar,vCar);
-                save(['coll_t-' num2str(t) '.mat'],'allCarsHoriz','allCarsVert');
-                disp(msg);
-                
-                if plotFlag
-                    junctionAxesHandle = text(obj.junctionPlotHandle,3,-7,msg,'Color','red');
-                    delete(junctionAxesHandle);
-                else
-                end
-                
-                %                 beep;
-                %                 pause();
-            end
+            
+%             if obj.collisionFlag
+%                 msg = sprintf('Collision occured at time t = %f. collided cars = [%d %d] %i',t,hCar,vCar);
+%                 obj.collisionMsgs = [obj.collisionMsgs; msg];
+%                 %save(['coll_t-' num2str(t) '.mat'],'allCarsHoriz','allCarsVert');
+%                 disp(msg);
+%                 
+%                 if plotFlag
+%                     junctionAxesHandle = text(obj.junctionPlotHandle,3,-7,msg,'Color','red');
+%                     delete(junctionAxesHandle);
+%                 else
+%                 end
+%             end
         end
         
         function draw_car(obj,Arm,flag)
