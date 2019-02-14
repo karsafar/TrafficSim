@@ -1,9 +1,10 @@
-% clc
-% clear
-% close all
-% 
-% %% 
-% load(['test-' num2str(6) '.mat']);
+clc
+clear
+close all
+
+%% 
+load(['test-' num2str(30) '.mat']);
+
 
 %%
 
@@ -48,6 +49,41 @@ xticklabels(ax2,table2array(mytable(:,1)))
 xtickangle(ax2,45)
 grid on
 
+
+%%
+
+% East arm car count
+[rowA,colA] = find(horizBinCount(1,:));
+[rowB,colB] = find(horizBinCount(2,:));
+
+valsA = nonzeros(horizBinCount(1,:));
+valsB = nonzeros(horizBinCount(2,:));
+
+horizVeirfyNumCarsA = sum(colA.*valsA');
+horizVeirfyNumCarsB = sum(colB.*valsB');
+
+% North arm car count
+[rowA,colA] = find(vertBinCount(1,:));
+[rowB,colB] = find(vertBinCount(2,:));
+
+valsA = nonzeros(vertBinCount(1,:));
+valsB = nonzeros(vertBinCount(2,:));
+
+vertVeirfyNumCarsA = sum(colA.*valsA');
+vertVeirfyNumCarsB = sum(colB.*valsB');
+
+% check if the ratio of A and B types is 50/50
+eastA = sprintf('horizNumCarsA = %i',horizVeirfyNumCarsA);
+eastB = sprintf('horizNumCarsB = %i',horizVeirfyNumCarsB);
+northA = sprintf('vertNumCarsA = %i',vertVeirfyNumCarsA);
+northB = sprintf('vertNumCarsB = %i',vertVeirfyNumCarsB);
+disp(eastA) ; disp(eastB);
+disp(northA); disp(northB);
+if horizVeirfyNumCarsA == horizVeirfyNumCarsB && vertVeirfyNumCarsA == vertVeirfyNumCarsB
+    disp('correct swapping');
+else
+    disp('incorrect swapping');
+end
 
 
 %%
