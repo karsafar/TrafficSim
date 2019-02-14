@@ -26,12 +26,15 @@ noSpawnAreaLength = 24.4; % length of no spawn area around the junction + length
 max_density = 1/6.4;    % number of cars per metre (0.1562)
 
 %%
-density = 0.03;
+density = 0.0633;
 nCars(1,1) = round(density * road.Length(1));
 nCars(2,1) = round(density * road.Length(2));
 % nCars(2,1) = 0;
-RealDensity(1) = nCars(1)/road.Length(1);
-RealDensity(2) = nCars(2)/road.Length(2);
+if  mod(nCars(1),2) ~= 0
+    nCars = nCars - 1;
+end
+density = nCars(1)/road.Length(1);
+% RealDensity(2) = nCars(2)/road.Length(2);
 %%
 iIteration = 0;
 % if plotFlag == 0
@@ -52,13 +55,16 @@ for j = 1:numel(carTypes)
         allCarsNumArray_H(j) = nCars(1) - sum(allCarsNumArray_H(1:j-1));
         allCarsNumArray_V(j) = nCars(2) - sum(allCarsNumArray_V(1:j-1));
     else
-        allCarsNumArray_H(j) = round(nCars(1)*carTypeRatios(1,j));
-        allCarsNumArray_V(j) = round(nCars(2)*carTypeRatios(2,j));
+        allCarsNumArray_H(j) = floor(nCars(1)*carTypeRatios(1,j));
+        allCarsNumArray_V(j) = floor(nCars(2)*carTypeRatios(2,j));
     end
 end
 
 Arm.H = SpawnCars([{allCarsNumArray_H},fixedSeed(1),{carTypes}],'horizontal',road.Start(1),road.End(1),road.Width(1),dt,nIterations);
 Arm.V = SpawnCars([{allCarsNumArray_V},fixedSeed(2),{carTypes}],'vertical',road.Start(2),road.End(2),road.Width(2),dt,nIterations);
+
+rng('shuffle', 'combRecursive');
+
 % tic
 %% run the simuation
 sim = run_simulation(...

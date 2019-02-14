@@ -23,7 +23,7 @@ classdef LoopRoad < Road
                 obj.averageVelocityHistory = NaN(loop_road_args.nIterations,1);
                 obj.variance = NaN(loop_road_args.nIterations,1);
             else
-                %% I don't need this part
+                % I don't need this part
                 obj.allCarsNumArray = loop_road_args{1};
                 obj.numCars = sum(obj.allCarsNumArray);
                 obj.FixedSeed = loop_road_args{2};
@@ -120,7 +120,7 @@ classdef LoopRoad < Road
             
             leaderCar.pose(1) = leaderCar.pose(1) - (obj.endPoint-obj.startPoint);
             
-            if t >= 0 % transient cut
+            if t >= 500 % transient cut
                 obj.collect_car_history(leaderCar);
             end
             
@@ -151,38 +151,38 @@ classdef LoopRoad < Road
                     obj.respawn_car(currentCar,t);
                                
                     % morph the car
-                    chance = random(obj.diceDistGen);
+%                     chance = random(obj.diceDistGen);
 %                     if chance < 0.01 && (numel(obj.swapPostionArray) <=1 ||...
 %                             sum(((strcmpi({class(obj.allCars(obj.swapPostionArray(end-1))),class(obj.allCars(obj.swapPostionArray(end)))},class(currentCar))))))>0 
-                    if chance < 0 && (isempty(obj.swapPostionArray) || (strcmpi(class(obj.allCars(obj.swapPostionArray(end))),class(currentCar))))
-  
-                        obj.swapPostionArray = [obj.swapPostionArray iCar];
-                        
-                        morphedCar = morph_car(obj,currentCar,dt);
-                        anchorCar = obj.allCars(iCar).Prev;
-                        obj.allCars(iCar) = morphedCar;
-                        removeNode(currentCar);
-                        insertAfter(morphedCar,anchorCar);
-                        
-                        % calculate change in ratio of A/B types every time
-                        % the swap happened
-                        if strcmpi(class(morphedCar),'carTypeA')
-                            obj.carTypeRatios(1,iIteration:end) = obj.carTypeRatios(1,iIteration:end)+1;
-                            obj.carTypeRatios(2,iIteration:end) = obj.carTypeRatios(2,iIteration:end)-1;
-                        else
-                            obj.carTypeRatios(1,iIteration:end) = obj.carTypeRatios(1,iIteration:end)-1;
-                            obj.carTypeRatios(2,iIteration:end) = obj.carTypeRatios(2,iIteration:end)+1;
-                        end
-                    end
+%                     if chance < 0.5 && (isempty(obj.swapPostionArray) || (strcmpi(class(obj.allCars(obj.swapPostionArray(end))),class(currentCar))))
+%   
+%                         obj.swapPostionArray = [obj.swapPostionArray iCar];
+%                         
+%                         morphedCar = morph_car(obj,currentCar,dt);
+%                         anchorCar = obj.allCars(iCar).Prev;
+%                         obj.allCars(iCar) = morphedCar;
+%                         removeNode(currentCar);
+%                         insertAfter(morphedCar,anchorCar);
+%                         
+%                         % calculate change in ratio of A/B types every time
+%                         % the swap happened
+%                         if strcmpi(class(morphedCar),'carTypeA')
+%                             obj.carTypeRatios(1,iIteration:end) = obj.carTypeRatios(1,iIteration:end)+1;
+%                             obj.carTypeRatios(2,iIteration:end) = obj.carTypeRatios(2,iIteration:end)-1;
+%                         else
+%                             obj.carTypeRatios(1,iIteration:end) = obj.carTypeRatios(1,iIteration:end)-1;
+%                             obj.carTypeRatios(2,iIteration:end) = obj.carTypeRatios(2,iIteration:end)+1;
+%                         end
+%                     end
                 end
                 
                 currentCar.store_state_data(currentCar.pose(1),currentCar.velocity,currentCar.acceleration,t)
                 currentCar.move_car(dt);
-                if t >= 0 % transient cut
+                if t >= 500 % transient cut
                     aggregatedVelocities = aggregatedVelocities + currentCar.velocity;
                 end
             end
-            if t >= 0 % transient cut
+            if t >= 500 % transient cut
                 avVel = aggregatedVelocities/obj.numCars;
                 obj.averageVelocityHistory(iIteration) = avVel;
                 deltaV = 0;
@@ -268,19 +268,27 @@ classdef LoopRoad < Road
             
             if strcmpi(selectedCarClass,'carTypeA')
                 % convert to class B
-                newCar = add_car(obj,4,dt);
-%                 newCar = add_car(obj,3,dt);
-
-%                 newCar = add_car(obj,2,dt);
+                if length(obj.carTypes) == 3
+                    newCar = add_car(obj,2,dt);
+                elseif length(obj.carTypes) == 5
+                    newCar = add_car(obj,4,dt);
+                elseif length(obj.carTypes) == 6
+                    newCar = add_car(obj,3,dt);
+                end
+                
                 morphedCar = LoopRoad.swap_cars(newCar,carToMorph);
                 obj.originalClassArray = [obj.originalClassArray 1];
                 obj.newClassArray = [obj.newClassArray 2];
             else
                 % convert to class A
-                newCar = add_car(obj,3,dt);
-%                 newCar = add_car(obj,6,dt);
-
-%                 newCar = add_car(obj,1,dt);
+                newCar = add_car(obj,1,dt);
+                if length(obj.carTypes) == 3
+                    newCar = add_car(obj,1,dt);
+                elseif length(obj.carTypes) == 5
+                    newCar = add_car(obj,3,dt);
+                elseif length(obj.carTypes) == 6
+                    newCar = add_car(obj,6,dt);
+                end
                 morphedCar = LoopRoad.swap_cars(newCar,carToMorph);
                 obj.originalClassArray = [obj.originalClassArray 2];
                 obj.newClassArray = [obj.newClassArray 1];
