@@ -151,29 +151,29 @@ classdef LoopRoad < Road
                     obj.respawn_car(currentCar,t);
                                
                     % morph the car
-%                     chance = random(obj.diceDistGen);
+                    chance = random(obj.diceDistGen);
 %                     if chance < 0.01 && (numel(obj.swapPostionArray) <=1 ||...
 %                             sum(((strcmpi({class(obj.allCars(obj.swapPostionArray(end-1))),class(obj.allCars(obj.swapPostionArray(end)))},class(currentCar))))))>0 
-%                     if chance < 0.5 && (isempty(obj.swapPostionArray) || (strcmpi(class(obj.allCars(obj.swapPostionArray(end))),class(currentCar))))
-%   
-%                         obj.swapPostionArray = [obj.swapPostionArray iCar];
-%                         
-%                         morphedCar = morph_car(obj,currentCar,dt);
-%                         anchorCar = obj.allCars(iCar).Prev;
-%                         obj.allCars(iCar) = morphedCar;
-%                         removeNode(currentCar);
-%                         insertAfter(morphedCar,anchorCar);
-%                         
-%                         % calculate change in ratio of A/B types every time
-%                         % the swap happened
-%                         if strcmpi(class(morphedCar),'carTypeA')
-%                             obj.carTypeRatios(1,iIteration:end) = obj.carTypeRatios(1,iIteration:end)+1;
-%                             obj.carTypeRatios(2,iIteration:end) = obj.carTypeRatios(2,iIteration:end)-1;
-%                         else
-%                             obj.carTypeRatios(1,iIteration:end) = obj.carTypeRatios(1,iIteration:end)-1;
-%                             obj.carTypeRatios(2,iIteration:end) = obj.carTypeRatios(2,iIteration:end)+1;
-%                         end
-%                     end
+                    if chance < 0.3 && (isempty(obj.swapPostionArray) || (strcmpi(class(obj.allCars(obj.swapPostionArray(end))),class(currentCar))))
+  
+                        obj.swapPostionArray = [obj.swapPostionArray iCar];
+                        
+                        morphedCar = morph_car(obj,currentCar,dt);
+                        anchorCar = obj.allCars(iCar).Prev;
+                        obj.allCars(iCar) = morphedCar;
+                        removeNode(currentCar);
+                        insertAfter(morphedCar,anchorCar);
+                        
+                        % calculate change in ratio of A/B types every time
+                        % the swap happened
+                        if strcmpi(class(morphedCar),'carTypeA')
+                            obj.carTypeRatios(1,iIteration:end) = obj.carTypeRatios(1,iIteration:end)+1;
+                            obj.carTypeRatios(2,iIteration:end) = obj.carTypeRatios(2,iIteration:end)-1;
+                        else
+                            obj.carTypeRatios(1,iIteration:end) = obj.carTypeRatios(1,iIteration:end)-1;
+                            obj.carTypeRatios(2,iIteration:end) = obj.carTypeRatios(2,iIteration:end)+1;
+                        end
+                    end
                 end
                 
                 currentCar.store_state_data(currentCar.pose(1),currentCar.velocity,currentCar.acceleration,t)
