@@ -85,6 +85,7 @@ end
 sim.horizArm = HorizontalArm;
 sim.vertArm = VerticalArm;
 sim.crossOrder = junc.crossOrder;
+sim.swapRate = 0.1;
 % sim.horizArm = cast_output(HorizontalArm);
 % sim.vertArm = cast_output(VerticalArm);
 end

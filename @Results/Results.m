@@ -197,12 +197,21 @@ if get(handles.checkbox_macro,'Value')
     end
     if get(handles.checkbox_flow,'Value')
         tf = isa(road,'LoopRoad');
-        for i = 1:handles.iIteration
-            cumulativeAverage(i) = nanmean(road.averageVelocityHistory(1:i)); %#ok<*AGROW>
-        end
         if tf == 0
             density = road.numCarsHistory/road.Length;
         end
+        for i = 1:handles.iIteration
+            cumulativeAverage(i) = nanmean(road.averageVelocityHistory(1:i)); %#ok<*AGROW>
+            flowChange(i) = density(i)*road.averageVelocityHistory(i);
+            a = density(i)*handles.HorizontalArm.averageVelocityHistory(i);
+            b = density(i)*handles.VerticalArm.averageVelocityHistory(i);
+%             if isnan(a) && isnan(b)
+%                 JunctionFlow(i) = NaN;
+%             else
+                JunctionFlow(i) = mean([a,b]);
+%             end
+        end
+
         flow = density'.*cumulativeAverage;
         
         %cla(findall(handles.axes_flow,'type','axes'));
@@ -211,37 +220,49 @@ if get(handles.checkbox_macro,'Value')
         ylabel(handles.axes_flow,'Flow, veh/s','FontSize',12)
         hold(handles.axes_flow,'on');
         grid(handles.axes_flow,'on');
-        plot(handles.axes_flow,handles.t_rng(1:handles.iIteration),flow(1:handles.iIteration),'LineWidth',1)
-        axis(handles.axes_flow,[0 handles.t_rng(handles.iIteration) 0 max(flow)])
+%         plot(handles.axes_flow,handles.t_rng(1:handles.iIteration),flow(1:handles.iIteration),'LineWidth',1)
+%         axis(handles.axes_flow,[0 handles.t_rng(handles.iIteration) 0 max(flow)])
+%         
+%         plot(handles.axes_flow,handles.t_rng(1:handles.iIteration),flowChange(1:handles.iIteration),'LineWidth',1)
+        axis(handles.axes_flow,[0 handles.t_rng(handles.iIteration) 0 max(flowChange)])
+        plot(handles.axes_flow,handles.t_rng(1:handles.iIteration),JunctionFlow(1:handles.iIteration),'LineWidth',1)
+
     end
     if get(handles.checkbox_occupancy,'Value')
         
-        O_in = -10-cars(1).ownDistfromRearToFront;
-        O_out = -10+cars(1).ownDistfromRearToBack;
+        numNaN = sum(isnan(cumulativeAverage));
+
+        crossSection.in = -3-cars(1).ownDistfromRearToFront;
+        crossSection.out = -3+cars(1).ownDistfromRearToBack;
+        
         occupancy = zeros(length(handles.t_rng(1:handles.iIteration)),1);
         for iCar = 1:road.nCarHistory
             iCar_pos = road.carHistory(iCar).locationHistory;
             iCar_times = road.carHistory(iCar).timeHistory;
-            iCar_times = iCar_times(iCar_pos>=O_in & iCar_pos<=O_out);
-            iCar_pos = iCar_pos(iCar_pos>=O_in & iCar_pos<=O_out);
+            iCar_times = iCar_times(iCar_pos>=crossSection.in & iCar_pos<=crossSection.out);
+            iCar_pos = iCar_pos(iCar_pos>=crossSection.in & iCar_pos<=crossSection.out);
             [tf,loc]=ismember(iCar_times,handles.t_rng);
-            if ~isempty(iCar_pos)
+            if ~isempty(iCar_pos) && min(iCar_times) > (0.1*numNaN)
                 for i = loc(1):loc(end)
-                occupancy(i:end) = occupancy(i)+(handles.t_rng(2)-handles.t_rng(1));
+%                 occupancy(i) = occupancy(i)+(handles.t_rng(2)-handles.t_rng(1));
+                occupancy(i) = 1;
                 end
             end
         end
-        for i = 1:length(occupancy)
-            occupancy(i) = (occupancy(i)/handles.t_rng(i))* 100;
+        Occ = zeros(1,length(occupancy));
+        for i = max(numNaN,1):length(occupancy)
+%             occupancy(i) = (occupancy(i)/handles.t_rng(i))* 100;
+                Occ(i) = nansum(occupancy(1:i))/(i-numNaN);
         end
+        Occ = Occ*100;
         %cla(findall(handles.axes_occupancy,'type','axes'));
         title(handles.axes_occupancy,'Occupancy','FontSize',12)
         xlabel(handles.axes_occupancy,'Time, s','FontSize',12)
         ylabel(handles.axes_occupancy,' Occupancy, per cent','FontSize',12)
         hold(handles.axes_occupancy,'on');
         grid(handles.axes_occupancy,'on');
-        plot(handles.axes_occupancy,handles.t_rng(1:handles.iIteration),occupancy,'LineWidth',1)
-        axis(handles.axes_occupancy,[0 handles.t_rng(handles.iIteration) 0 100])
+        plot(handles.axes_occupancy,handles.t_rng(1:handles.iIteration),Occ,'LineWidth',1)
+%         axis(handles.axes_occupancy,[0 handles.t_rng(handles.iIteration) 0 100])
     end
     if get(handles.checkbox_density,'Value')
         tf = isa(road,'LoopRoad');

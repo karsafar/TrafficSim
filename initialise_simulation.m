@@ -6,7 +6,7 @@ roadTypes = {@LoopRoad @FiniteRoad};
 carTypes = {@carTypeA, @carTypeB, @carTypeC};
 
 plotFlag = false;
-runTime = 1800;
+runTime = 360;
 dt = 0.1;
 nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;
@@ -34,10 +34,10 @@ nCars = round(init_density * road.Length);
 density = nCars(1)/road.Length(1);
 
 %%
-for i = 1:nSeeds
+for i = 1:50
     
-    rng(fixedSeed(1,i));
-    ringType(i) = rng;
+%     rng(fixedSeed(1,i));
+%     ringType(i) = rng;
 
     alpha = 50; beta  = 50; gamma =  0;
     
@@ -45,23 +45,25 @@ for i = 1:nSeeds
     
     allCarsNumArray_H = zeros(1,numel(carTypes));
     allCarsNumArray_V = zeros(1,numel(carTypes));
-    for j = 1:numel(carTypes)
-        if j == numel(carTypes)
-            allCarsNumArray_H(j) = nCars(1) - sum(allCarsNumArray_H(1:j-1));
-            allCarsNumArray_V(j) = nCars(2) - sum(allCarsNumArray_V(1:j-1));
-        else
-            allCarsNumArray_H(j) = round(nCars(1)*carTypeRatios(1,j));
-            allCarsNumArray_V(j) = round(nCars(2)*carTypeRatios(2,j));
-        end
-    end
-
-    Arm_H(i) = SpawnCars([{allCarsNumArray_H},fixedSeed(1,i),{carTypes}],'horizontal',road.Start(1),road.End(1),road.Width(1),dt,nIterations);
-    Arm_V(i) = SpawnCars([{allCarsNumArray_V},fixedSeed(2,i),{carTypes}],'vertical',road.Start(2),road.End(2),road.Width(2),dt,nIterations);
+%     for j = 1:numel(carTypes)
+%         if j == numel(carTypes)
+%             allCarsNumArray_H(j) = nCars(1) - sum(allCarsNumArray_H(1:j-1));
+%             allCarsNumArray_V(j) = nCars(2) - sum(allCarsNumArray_V(1:j-1));
+%         else
+%             allCarsNumArray_H(j) = round(nCars(1)*carTypeRatios(1,j));
+%             allCarsNumArray_V(j) = round(nCars(2)*carTypeRatios(2,j));
+%         end
+%     end
+% 
+%     Arm_H(i) = SpawnCars([{allCarsNumArray_H},fixedSeed(1,i),{carTypes}],'horizontal',road.Start(1),road.End(1),road.Width(1),dt,nIterations);
+%     Arm_V(i) = SpawnCars([{allCarsNumArray_V},fixedSeed(2,i),{carTypes}],'vertical',road.Start(2),road.End(2),road.Width(2),dt,nIterations);
+%     
 end
-
+Arm_H = [];
+Arm_V = [];
 %%
 
-save('Initial_data.mat',...
+save('Initial_data_10min.mat',...
     'carTypeRatios',...
     'carTypes',...
     'nCars',...
@@ -83,5 +85,3 @@ save('Initial_data.mat',...
     'beta',...
     'gamma',...
     '-v7.3')
-
-
