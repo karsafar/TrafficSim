@@ -6,7 +6,7 @@ roadTypes = {@LoopRoad @FiniteRoad};
 carTypes = {@carTypeA, @carTypeB, @carTypeC};
 
 plotFlag = false;
-runTime = 18000;
+runTime = 3600;
 dt = 0.1;
 nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;

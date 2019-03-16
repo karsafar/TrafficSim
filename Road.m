@@ -53,7 +53,12 @@ classdef Road < handle
         end
         function collect_car_history(obj,iCar)
             i = obj.nCarHistory + 1;
+            flagCar = iCar.Prev;
+            removeNode(iCar);
             cloneCar = copy(iCar);
+            insertAfter(iCar,flagCar);
+            
+%             cloneCar = obj.clone_cars([],iCar);
             obj.carHistory = [obj.carHistory;cloneCar];
             obj.nCarHistory = i;
         end
@@ -71,6 +76,36 @@ classdef Road < handle
                 end
                 
             end
+        end
+    end
+    methods (Static)
+        function cloneCar = clone_cars(cloneCar,car2)
+            
+            %cloneCar = copy(car1);
+            
+            cloneCar.juncExitVelocity = car2.juncExitVelocity;
+            cloneCar.idmAcceleration =  car2.idmAcceleration;
+            cloneCar.s = car2.s;
+            cloneCar.a = car2.a;
+            cloneCar.b = car2.b;
+            cloneCar.timeGap = car2.timeGap ;
+            cloneCar.targetVelocity = car2.targetVelocity;
+            cloneCar.priority = car2.priority;
+            cloneCar.dt =  car2.dt;
+            cloneCar.pose =  car2.pose;
+            cloneCar.velocity =  car2.velocity;
+            cloneCar.maximumVelocity =  car2.maximumVelocity;
+            cloneCar.acceleration =  car2.acceleration;
+            cloneCar.a_max =  car2.a_max;
+            cloneCar.a_min =  car2.a_min;
+            cloneCar.a_feas_min =  car2.a_feas_min;
+            cloneCar.History =  [car2.timeHistory;car2.locationHistory;car2.velocityHistory;car2.accelerationHistory];
+%             cloneCar.velocityHistory =  car2.velocityHistory;
+%             cloneCar.accelerationHistory = car2.accelerationHistory;
+%             cloneCar.timeHistory =  car2.timeHistory;
+            cloneCar.historyIndex =  car2.historyIndex;
+            cloneCar.leaderFlag =  car2.leaderFlag;
+            cloneCar.stopIndex = car2.stopIndex;
         end
     end
 end

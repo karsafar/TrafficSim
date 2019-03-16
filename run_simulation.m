@@ -40,10 +40,10 @@ for iIteration = 1:nIterations
         plotFlag,t);
     
     % save whole simulation data if collision
-    if junc.collisionFlag
-        save(['coll_iter-' num2str(iIteration) '.mat']);
-        fprintf('Collision occured at time t = %f. collided cars = [%d %d] %i',t,junc.collidingCarsIdx(1),junc.collidingCarsIdx(2));
-    end
+%     if junc.collisionFlag
+%         save(['coll_iter-' num2str(iIteration) '.mat']);
+%         fprintf('Collision occured at time t = %f. collided cars = [%d %d] %i',t,junc.collidingCarsIdx(1),junc.collidingCarsIdx(2));
+%     end
     
     % calculate IDM acceleration
     for iCar = 1:HorizontalArm.numCars
@@ -85,6 +85,7 @@ end
 sim.horizArm = HorizontalArm;
 sim.vertArm = VerticalArm;
 sim.crossOrder = junc.crossOrder;
+sim.swapRate = 0.1;
 % sim.horizArm = cast_output(HorizontalArm);
 % sim.vertArm = cast_output(VerticalArm);
 end
