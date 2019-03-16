@@ -12,6 +12,95 @@
 % load(['test-' num2str(loc) '.mat']);
 
 
+%% 
+
+load(['test-' num2str(37) '.mat']);
+
+%% for results gui
+
+setappdata(0,'horiz',sim.horizArm);
+setappdata(0,'vert',sim.vertArm);
+setappdata(0,'iter',i);
+setappdata(0,'t_rng',t_rng);
+setappdata(0,'density_H',density);
+setappdata(0,'density_V',density);
+
+%% junction crossing graph
+figure(6)
+plot(sim.crossOrder,'-b','LineWidth',1.5)
+axis([0 numel(sim.crossOrder) 0 3])
+grid on 
+xlabel('Number of Junction Crosses','FontSize',16)
+text(numel(sim.crossOrder)/2,-0.1,'\uparrow East Arm Crosses','FontSize',16)
+text(numel(sim.crossOrder)/2,1.1,'\downarrow North Arm Crosses','FontSize',16)
+ylim([-0.5,1.5])
+
+%% flow change 
+for i = 1:nIterations
+    eastArm.flowChange(i) = density*sim.horizArm.averageVelocityHistory(i);
+    northArm.flowChange(i) = density*sim.vertArm.averageVelocityHistory(i);
+end
+figure
+% plot(eastArm.flowChange(1,:))
+hold on
+% plot(northArm.flowChange(1,:))
+hold on
+plot(mean([eastArm.flowChange(1,:);northArm.flowChange(1,:)]))
+xlabel('Iteration No','FontSize',16)
+ylabel('Flow, veh/s','FontSize',16) 
+grid on
+
+
+%% occupancy pre-junction
+numNaN = sum(isnan(sim.horizArm.averageVelocityHistory));
+
+crossSection.in = -3-sim.horizArm.allCars(1).ownDistfromRearToFront;
+crossSection.out = -3+sim.horizArm.allCars(1).ownDistfromRearToBack;
+
+East.count = zeros(nIterations,1);
+for iCar = 1:sim.horizArm.nCarHistory
+    iCar_pos = sim.horizArm.carHistory(iCar).locationHistory;
+    iCar_times = sim.horizArm.carHistory(iCar).timeHistory;
+    iCar_times = iCar_times(iCar_pos>=crossSection.in & iCar_pos<=crossSection.out);
+    iCar_pos = iCar_pos(iCar_pos>=crossSection.in & iCar_pos<=crossSection.out);
+    [tf,loc]=ismember(iCar_times,t_rng);
+    if ~isempty(iCar_pos) && min(iCar_times) > (0.1*numNaN)
+        for i = loc(1):loc(end)
+            East.count(i) = 1;
+        end
+    end
+end
+North.count = zeros(nIterations,1);
+for iCar = 1:sim.vertArm.nCarHistory
+    iCar_pos = sim.vertArm.carHistory(iCar).locationHistory;
+    iCar_times = sim.vertArm.carHistory(iCar).timeHistory;
+    iCar_times = iCar_times(iCar_pos>=crossSection.in & iCar_pos<=crossSection.out);
+    iCar_pos = iCar_pos(iCar_pos>=crossSection.in & iCar_pos<=crossSection.out);
+    [tf,loc]=ismember(iCar_times,t_rng);
+    if ~isempty(iCar_pos) && min(iCar_times) > (0.1*numNaN)
+        for i = loc(1):loc(end)
+            North.count(i) = 1;
+        end
+    end
+end
+
+East.Occupancy = zeros(1,length(East.count));
+North.Occupancy = zeros(1,length(East.count));
+
+for i = max(numNaN,1):nIterations
+    East.Occupancy(i) = nansum(East.count(1:i))/(i-numNaN);
+    North.Occupancy(i) = nansum(North.count(1:i))/(i-numNaN);
+end
+East.Occupancy = East.Occupancy*100;
+North.Occupancy = North.Occupancy*100;
+title('Occupancy','FontSize',14)
+xlabel('Time, s','FontSize',14)
+ylabel(' Occupancy, per cent','FontSize',14)
+hold('on');
+grid('on');
+plot(t_rng,East.Occupancy,'-r','LineWidth',1)
+plot(t_rng,North.Occupancy,'-b','LineWidth',1)
+
 %{%
 %% Spatiotenporal Velocity Profiles
 
