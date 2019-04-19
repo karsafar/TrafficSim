@@ -3,7 +3,7 @@ close all
 clc
 
 
-load('/Users/robot/OneDrive - University of Bristol/PhD/bulk simulations/Scenarios/scenario 5 - long simulations/Initial_data.mat')
+load('Initial_data_test_10min.mat')
 
 %% avoiding overhead
 nCars1 = nCars(1);
@@ -29,7 +29,9 @@ roadWidth2 = road.Width(2);
 allCarsNumArray_H = zeros(1,numel(carTypes));
 allCarsNumArray_V = zeros(1,numel(carTypes));
 
-p = parpool('local',4);
+% p = parpool('local',4);
+plotFlag = 1;
+
 for i = 1:1
     fixedSeed1 = fixedSeed(1,i);
     fixedSeed2 = fixedSeed(2,i);
@@ -42,14 +44,14 @@ for i = 1:1
             allCarsNumArray_V(k) = round(nCars2*carTypeRatios(2,k));
         end
     end
-    parfor j = 1:50
+    for j = 1:1
         
         ArmH = SpawnCars([{allCarsNumArray_H},fixedSeed1,{carTypes}],'horizontal',roadStart1,roadEnd1,roadWidth1,dt,nIterations);
         ArmV = SpawnCars([{allCarsNumArray_V},fixedSeed2,{carTypes}],'vertical',roadStart2,roadEnd2,roadWidth2,dt,nIterations);
         
         ringType = rng('shuffle','combRecursive');
         
-        sim = run_simulation({roadTypes1,roadTypes1},carTypes,ArmH,ArmV,t_rng,plotFlag,priority,road,nIterations,dt);
+        sim = run_simulation({roadTypes1,roadTypes1},carTypes,ArmH,ArmV,t_rng,plotFlag,priority,road,nIterations,transientCutOffLength,swapRate,dt);
         
         parsave(carTypeRatios,carTypes,[nCars1,nCars2],allCarsNumArray_H,allCarsNumArray_V,runTime,...
             dt,t_rng,plotFlag,priority,density,road,nIterations,sim,alpha,beta,gamma,j,i);

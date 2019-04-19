@@ -10,6 +10,10 @@ classdef FiniteRoad < Road
         spawningInterval
         tolerance = 0
         testFlag = 1
+        
+        flow = []
+        inflow = []
+        outflow = []
     end
     
     methods
@@ -28,8 +32,11 @@ classdef FiniteRoad < Road
                 obj.spawnTimeProbDist = makedist('Exponential','mu',finite_road_args{2});
                 obj.carTypePd = makedist('uniform',0,1);
                 obj.spawn_car(0,finite_road_args{4});
-                obj.numCarsHistory = NaN(int8(finite_road_args{5}),1);
-                obj.averageVelocityHistory = NaN(int8(finite_road_args{5}),1);
+                obj.numCarsHistory = NaN(finite_road_args{5},1);
+                obj.averageVelocityHistory = NaN(finite_road_args{5},1);
+                obj.flow = NaN(finite_road_args{5},1);
+                obj.inflow = NaN(finite_road_args{5},1);
+                obj.outflow = NaN(finite_road_args{5},1);
             end
         end
         function spawn_car(obj,time,dt)
@@ -40,8 +47,15 @@ classdef FiniteRoad < Road
             isVerticalQueueNotEmpty = (~isempty(obj.verticalQueue));
             if isempty(obj.allCars)
                 isEnoughSpace = true;
+            elseif isTimeForNewEntry
+                lastCar = obj.allCars(end);
+                
+                currentSpace = lastCar.pose(1) - obj.startPoint;
+                intelligentBreaking = lastCar.velocity*lastCar.timeGap;
+                s_star = (lastCar.minimumGap+lastCar.dimension(2)) + max(0,intelligentBreaking);
+                isEnoughSpace = (s_star<=currentSpace);
             else
-                isEnoughSpace = (obj.allCars(end).pose(1) - obj.startPoint) >= 4*obj.allCars(end).minimumGap;
+               isEnoughSpace = false; 
             end
             if isTimeForNewEntry
                 nTypeCarChance = random(obj.carTypePd);
@@ -60,8 +74,13 @@ classdef FiniteRoad < Road
                     obj.verticalQueue(1) = [];
                 end
                 new_car = obj.add_car(obj.carType,dt);
-                new_car.velocity = 6;
-                new_car.demand_tol = 15;
+                
+                if isempty(obj.allCars)
+                     new_car.velocity = new_car.targetVelocity;
+                else
+                    new_car.velocity = lastCar.velocity;
+                end
+%                 new_car.demand_tol = 15;
                 obj.allCars = [obj.allCars new_car];
                 obj.numCars = obj.numCars + 1;
                 
@@ -70,10 +89,14 @@ classdef FiniteRoad < Road
                     obj.allCars(end).leaderFlag = false;
                     if numel(obj.allCars) == 2
                         obj.allCars(1).Prev = obj.allCars(end);
-                        obj.allCars(end).Next = obj.allCars(1);
-                        %obj.allCars(1).Prev = Car([obj.endPoint,nanmean(obj.averageVelocityHistory)]);
+                        %% full doubly linked list
+%                         obj.allCars(end).Next = obj.allCars(1);
+                        
                     end
-                    
+                    % update pos and vel arrays for easy access
+                    obj.allCarsStates(1,end+1) = new_car.pose(1);
+                    obj.allCarsStates(2,end) = new_car.velocity;
+                    obj.allCarsStates(3,end) = new_car.acceleration;
                 end
             elseif isTimeForNewEntry && ~isEnoughSpace
                 obj.verticalQueue = [obj.verticalQueue  obj.carType];
@@ -83,7 +106,7 @@ classdef FiniteRoad < Road
             if obj.numCars > 1
                 obj.allCars(1).Next.leaderFlag = true;
             end
-            if t >= obj.tolerance && any(~isnan(obj.allCars(1).timeHistory))
+            if t >= obj.transientCutOffLength && any(~isnan(obj.allCars(1).History(1,:)))
                 obj.collect_car_history(obj.allCars(1));
             end
             obj.allCars(1).removeNode;
@@ -91,6 +114,7 @@ classdef FiniteRoad < Road
             if numel(obj.allCars) == 1
                 obj.allCars(1).removeNode;
             end
+%{
 %                 %obj.allCars(1).targetVelocity = nanmean(obj.averageVelocityHistory);
 %                 obj.allCars(1).Prev = obj.allCars(end);
 %                 obj.allCars(end).Next = obj.allCars(1);
@@ -99,46 +123,73 @@ classdef FiniteRoad < Road
 %                 obj.allCars(1).Prev = Car([obj.endPoint,nanmean(obj.averageVelocityHistory)]);
 %                 obj.allCars(1).targetVelocity = nanmean(obj.averageVelocityHistory);
 %             end
+%}
             obj.numCars = obj.numCars - 1;
+            
+            % update pos and vel arrays for easy access
+            obj.allCarsStates(:,1) = [];
         end
         function move_all_cars(obj,t,dt,iIteration,nIterations)
-            if obj.testFlag == 0
-                obj.spawn_car(t,dt);
+            if obj.testFlag == 0 % what does testFlag mean??? 
+                obj.spawn_car(t,dt); 
             end
-            for iCar = 1:obj.numCars
-                if obj.allCars(1).pose(1) > obj.endPoint
-                    obj.delete_car(t)
+%             for iCar = 1:obj.numCars
+%                 if obj.allCarsStates(1,iCar) > obj.endPoint
+%                     obj.delete_car(t)
+%                 end
+%             end
+%             aggregatedVelocities = 0;
+%             cutNumCars = 0;
+%             if t >= obj.transientCutOffLength % transient cut
+%                 for iCar = 1:obj.numCars
+%                     aggregatedVelocities = aggregatedVelocities + obj.allCarsStates(2,iCar);
+%                     cutNumCars = cutNumCars + 1;
+%                 end
+%             end
+%             for iCar = 1:obj.numCars
+                iCar = 1;
+           while iCar <= obj.numCars
+                if obj.allCarsStates(1,iCar) > obj.endPoint
+%                     currentCar.pose(1) = obj.allCarsStates(1,iCar) - (obj.endPoint-obj.startPoint);
+%                     obj.allCarsStates(1,iCar) = currentCar.pose(1);
+                    obj.delete_car(t);
+%                     iCar = iCar-1;
                 end
-            end
-            aggregatedVelocities = 0;
-            cutNumCars = 0;
-            for iCar = 1:obj.numCars
-                
-                if t >= obj.tolerance %&& obj.allCars(iCar).pose(1) >= (obj.startPoint+50) && obj.allCars(iCar).pose(1) <= (obj.endPoint-50)
-                    aggregatedVelocities = aggregatedVelocities + obj.allCars(iCar).velocity;
-                    cutNumCars = cutNumCars + 1;
-                end
-            end
-            for iCar = 1:obj.numCars
                 currentCar = obj.allCars(iCar);
-                currentCar.store_state_data(currentCar.pose(1),currentCar.velocity,currentCar.acceleration,t)
                 currentCar.move_car(dt)
+%                 
+%                 % update pos and vel arrays for easy access
+%                 obj.allCarsStates(1,iCar) = currentCar.pose(1);
+%                 obj.allCarsStates(2,iCar) = currentCar.velocity;
+%                 obj.allCarsStates(3,iCar) = currentCar.acceleration;
+%                 
+%                 currentCar.store_state_data(t,obj.allCarsStates(:,iCar))
+
+                iCar = iCar+1;
             end
-            if t >= obj.tolerance
-                avVel = aggregatedVelocities/cutNumCars;
+            if t >= obj.transientCutOffLength % transient cut
+                avVel = sum(obj.allCarsStates(2,:))/obj.numCars;
+                obj.flow(iIteration) = (obj.numCars/obj.Length)*avVel;
                 obj.averageVelocityHistory(iIteration) = avVel;
-                obj.numCarsHistory(iIteration) = cutNumCars;
+                obj.numCarsHistory(iIteration) = obj.numCars;
+                %% inflow
+                nCarsIn = sum(obj.allCarsStates(1,:) <= currentCar.s_in);
+                avVelIn = sum(obj.allCarsStates(2,(obj.allCarsStates(1,:) <= currentCar.s_in)))/nCarsIn;
+                obj.inflow(iIteration) = (nCarsIn/(currentCar.s_in-obj.startPoint))*avVelIn; 
+                %% outflow
+                nCarsOut = obj.numCars - nCarsIn;
+                avVelOut = sum(obj.allCarsStates(2,(obj.allCarsStates(1,:) > currentCar.s_in)))/nCarsOut;
+                obj.outflow(iIteration) = (nCarsOut/(obj.endPoint-currentCar.s_in))*avVelOut; 
+                
+                deltaV = 0;
+                for iCar = 1:obj.numCars
+                    deltaV = deltaV + (obj.allCarsStates(2,iCar) - avVel)^2;
+                end
+                obj.variance(iIteration) = deltaV/obj.numCars;
             end
-            
-            deltaV = 0;
-            for iCar = 1:obj.numCars
-                v = obj.allCars(iCar).velocity;
-                deltaV = deltaV + (v - avVel)^2;
-            end
-            obj.variance(iIteration) = deltaV/obj.numCars;
             if iIteration == nIterations
                 for iCar = 1:obj.numCars
-                    if obj.allCars(iCar).pose(1) >= (obj.startPoint) && obj.allCars(iCar).pose(1) <= (obj.endPoint)
+                    if obj.allCarsStates(1,iCar) >= (obj.startPoint) && obj.allCarsStates(1,iCar) <= (obj.endPoint)
                         obj.collect_car_history(obj.allCars(iCar));
                     end
                 end

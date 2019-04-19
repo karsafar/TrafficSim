@@ -12,6 +12,7 @@ classdef Road < handle
     properties (SetAccess = public)
         numCars = 0
         allCars = []
+        allCarsStates = []
         carHistory = []
         CarsImageHandle = []
 %         carHistory = {}
@@ -22,6 +23,7 @@ classdef Road < handle
         carTypes = {}
         FixedSeed = false
         numEmergBreaks = 0
+        transientCutOffLength = 0
     end
     methods
         function obj = Road(road_args)
@@ -53,13 +55,13 @@ classdef Road < handle
         end
         function collect_car_history(obj,iCar)
             i = obj.nCarHistory + 1;
-            flagCar = iCar.Prev;
-            removeNode(iCar);
-            cloneCar = copy(iCar);
-            insertAfter(iCar,flagCar);
+%             flagCar = iCar.Prev;
+%             removeNode(iCar);
+%             cloneCar = copy(iCar);
+%             insertAfter(iCar,flagCar);
             
-%             cloneCar = obj.clone_cars([],iCar);
-            obj.carHistory = [obj.carHistory;cloneCar];
+            obj.clone_cars(iCar);
+%             obj.carHistory = cloneCar;
             obj.nCarHistory = i;
         end
         function count_emegrency_breaks(obj)
@@ -77,35 +79,39 @@ classdef Road < handle
                 
             end
         end
-    end
-    methods (Static)
-        function cloneCar = clone_cars(cloneCar,car2)
+        function clone_cars(obj,car2)
             
             %cloneCar = copy(car1);
             
-            cloneCar.juncExitVelocity = car2.juncExitVelocity;
-            cloneCar.idmAcceleration =  car2.idmAcceleration;
-            cloneCar.s = car2.s;
-            cloneCar.a = car2.a;
-            cloneCar.b = car2.b;
-            cloneCar.timeGap = car2.timeGap ;
-            cloneCar.targetVelocity = car2.targetVelocity;
-            cloneCar.priority = car2.priority;
-            cloneCar.dt =  car2.dt;
-            cloneCar.pose =  car2.pose;
-            cloneCar.velocity =  car2.velocity;
-            cloneCar.maximumVelocity =  car2.maximumVelocity;
-            cloneCar.acceleration =  car2.acceleration;
-            cloneCar.a_max =  car2.a_max;
-            cloneCar.a_min =  car2.a_min;
-            cloneCar.a_feas_min =  car2.a_feas_min;
-            cloneCar.History =  [car2.timeHistory;car2.locationHistory;car2.velocityHistory;car2.accelerationHistory];
-%             cloneCar.velocityHistory =  car2.velocityHistory;
-%             cloneCar.accelerationHistory = car2.accelerationHistory;
-%             cloneCar.timeHistory =  car2.timeHistory;
-            cloneCar.historyIndex =  car2.historyIndex;
-            cloneCar.leaderFlag =  car2.leaderFlag;
-            cloneCar.stopIndex = car2.stopIndex;
+            obj.carHistory(end+1).juncExitVelocity = car2.juncExitVelocity;
+            obj.carHistory(end).idmAcceleration =  car2.idmAcceleration;
+            obj.carHistory(end).s = car2.s;
+            obj.carHistory(end).a = car2.a;
+            obj.carHistory(end).b = car2.b;
+            obj.carHistory(end).timeGap = car2.timeGap ;
+            obj.carHistory(end).targetVelocity = car2.targetVelocity;
+            obj.carHistory(end).priority = car2.priority;
+            obj.carHistory(end).dt =  car2.dt;
+            obj.carHistory(end).pose =  car2.pose;
+            obj.carHistory(end).velocity =  car2.velocity;
+            obj.carHistory(end).maximumVelocity =  car2.maximumVelocity;
+            obj.carHistory(end).acceleration =  car2.acceleration;
+            obj.carHistory(end).a_max =  car2.a_max;
+            obj.carHistory(end).a_min =  car2.a_min;
+            obj.carHistory(end).a_feas_min =  car2.a_feas_min;
+            obj.carHistory(end).History = car2.History(:,1:(car2.historyIndex-1));
+%             obj.History =  [car2.timeHistory;
+%                                  car2.locationHistory;
+%                                  car2.velocityHistory;
+%                                  car2.accelerationHistory];
+%             obj.velocityHistory = car2.velocityHistory(~isnan(car2.velocityHistory));
+%             obj.accelerationHistory = car2.accelerationHistory(~isnan(car2.accelerationHistory));
+%             obj.timeHistory = car2.timeHistory(~isnan(car2.timeHistory));
+%             obj.locationHistory = car2.locationHistory(~isnan(car2.locationHistory));
+            obj.carHistory(end).historyIndex =  car2.historyIndex;
+            obj.carHistory(end).leaderFlag =  car2.leaderFlag;
+            obj.carHistory(end).stopIndex = car2.stopIndex;
+            obj.carHistory(end).Type = class(car2);
         end
     end
 end

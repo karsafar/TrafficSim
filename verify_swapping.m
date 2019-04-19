@@ -6,9 +6,9 @@ close all
 % d = dir('*.mat');          
 % Number_mat = length(d);   
 % clear d
-for l = 2:10
+for l = 1:10
     dir_name = sprintf('seed-%s',num2str(l));
-    fnm = sprintf('%s percent',num2str(50));
+    fnm = sprintf('%s percent',num2str(10));
     d = dir([fullfile('/Users/robot/OneDrive - University of Bristol/PhD/bulk simulations/Scenarios/scenario 5 - long simulations/',dir_name,fnm), '/*.mat']);
     Number_mat = length(d);
     clear d
@@ -41,7 +41,7 @@ for l = 2:10
         %     end
         clear sim temp1 temp2 density
     end
-    file_name = sprintf('rate-%s.mat',num2str(50));
+    file_name = sprintf('rate-%s.mat',num2str(10));
     averageFlow = mean([eastArm(3,:);northArm(3,:)]);
     save(fullfile('/Users/robot/OneDrive - University of Bristol/PhD/bulk simulations/Scenarios/scenario 5 - long simulations/',dir_name,file_name),'eastArm','northArm','averageFlow')
     clear eastArm northArm averageFlow
