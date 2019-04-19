@@ -28,14 +28,14 @@ classdef AutonomousCar < IdmModel
             s_out = obj.s_out;
 %             T_safe = obj.T_safe;
 %             tol = obj.tol;
-            if competingCar.pose(1) > obj.s_out
+            if competingCar.pose(1) > s_out
                 s_comp = competingCar.pose(1)-OppositeLength;
             else
                 s_comp = competingCar.pose(1);
             end
             v_comp = competingCar.velocity;
-            a_comp = competingCar.acceleration;
-            
+%             a_comp = competingCar.acceleration;
+            a_comp = competingCar.History(4,competingCar.historyIndex-1);
             if s_comp <= s_in && obj.tol < v_comp
                 if obj.tol < a_comp
                     obj.t_in = (-v_comp+sqrt((v_comp)^2+2*a_comp*(s_in-s_comp)))/a_comp+t;
@@ -84,13 +84,14 @@ classdef AutonomousCar < IdmModel
             s_out = obj.s_out;
 %             T_safe = obj.T_safe; %#ok<*PROPLC>
 %             tol = obj.tol;
-            if competingCar.pose(1) > obj.s_out
+            if competingCar.pose(1) > s_out
                 s_comp = competingCar.pose(1)-OppositeLength;
             else
                 s_comp = competingCar.pose(1);
             end
             v_comp = competingCar.velocity;
-            a_comp = competingCar.acceleration;
+            %             a_comp = competingCar.acceleration;
+            a_comp = competingCar.History(4,competingCar.historyIndex-1);
             if s_comp <= s_out && obj.tol < v_comp
                 if obj.tol < a_comp
                     obj.t_out = (-v_comp+sqrt((v_comp)^2+2*a_comp*(s_out-s_comp)))/a_comp+t;
