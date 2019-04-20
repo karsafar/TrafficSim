@@ -6,7 +6,7 @@ roadTypes = {@LoopRoad @FiniteRoad};
 carTypes = {@carTypeA, @carTypeB, @carTypeC};
 
 plotFlag = false;
-runTime = 360;
+runTime = 720;
 dt = 0.1;
 nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;
@@ -19,17 +19,19 @@ fixedSeed = [1:nSeeds;
 priority = false;
 
 % road dimensions
-road.Start = [-500; -500];
-road.End = [500; 500];
+road.Start = [-200; -200];
+road.End = [200; 200];
 road.Width = [4; 4];
 road.Length = road.End - road.Start;
 
 noSpawnAreaLength = 24.4; % length of no spawn area around the junction + length of a car for safe re-spawn
 max_density = 1/6.4;    % number of cars per metre (0.1562)
 
+transientCutOffLength = 100;
+swapRate = 0.1;
 %%
 
-init_density = 0.03;
+init_density = 0.043;
 nCars = round(init_density * road.Length);
 density = nCars(1)/road.Length(1);
 
@@ -63,7 +65,7 @@ Arm_H = [];
 Arm_V = [];
 %%
 
-save('Initial_data_10min.mat',...
+save('Initial_data_test_10min.mat',...
     'carTypeRatios',...
     'carTypes',...
     'nCars',...
@@ -84,4 +86,6 @@ save('Initial_data_10min.mat',...
     'alpha',...
     'beta',...
     'gamma',...
+    'transientCutOffLength',...
+    'swapRate',...
     '-v7.3')

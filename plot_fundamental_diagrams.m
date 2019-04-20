@@ -88,7 +88,7 @@ grid on
 plot(ha10,k,q,'k')
 plot(ha10,density1,flow1,'-b');
 plot(ha10,density2,flow2,'-r');
-plot(ha10,density3,flow3,'-g*');
+plot(ha10,density3,flow3,'--g');
 legend(ha10,{'Analytical curve','East Arm','North Arm','Average'},'FontSize',18)
 end
 function plot_flow_speed(flow1,meanVelocity1,flow2,meanVelocity2,flow3,meanVelocity3)
@@ -103,6 +103,6 @@ grid on
 plot(ha11,q,v,'k')
 plot(ha11,flow1,meanVelocity1,'-b');
 plot(ha11,flow2,meanVelocity2,'-r');
-plot(ha11,flow3,meanVelocity3,'-g*');
+plot(ha11,flow3,meanVelocity3,'--g');
 legend(ha11,{'Analytical curve','East Arm','North Arm','Average'},'FontSize',18)
 end

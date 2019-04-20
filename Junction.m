@@ -1,13 +1,22 @@
 classdef Junction < handle
     properties (SetAccess = public)
-%         allCarsImageHandle = []
+        %         allCarsImageHandle = []
         junctionPlotHandle = []
-%         horizCarsImageHandle = []
-%         vertCarsImageHandle = []
+        %         horizCarsImageHandle = []
+        %         vertCarsImageHandle = []
         collidingCarsIdx = NaN(1,2)
         collisionFlag = 0
-        crossOrder = []
+        crossOrder = NaN
+        crossCount = []
         collisionMsgs = []
+        
+        flowHandle = []
+        flowAxHandle = []
+        
+        crossHandle = []
+        crossAxHandle = []
+        crossAxHandle2 = []
+        crossAxHandle3 = []
     end
     
     methods
@@ -19,11 +28,32 @@ classdef Junction < handle
         function plot_outline(obj,roadDimensions)
             allAxesInFigure = findall(0,'type','axes');
             if ~isempty(allAxesInFigure)
+                h1 = gcf;
                 obj.junctionPlotHandle = allAxesInFigure(1);
+                axis(obj.junctionPlotHandle,'off')
             else
-                figure('units', 'normalized', 'position', [0.4, 0, 0.6, 1]);
-                obj.junctionPlotHandle = axes;
+                h1 = figure('units', 'normalized', 'position', [0.4, 0, 0.6, 1]);
             end
+            obj.junctionPlotHandle = axes('Parent',h1,'Units','normalized','Position',[0.05 0.5 0.9 0.45]);
+%             obj.junctionPlotHandle = subplot(3,1,1);
+            obj.flowHandle = axes('Parent',h1,'Units','normalized','Position',[0.05 0.3 0.9 0.15]);
+%             obj.flowHandle = subplot(3,1,2);
+            hold(obj.flowHandle,'on')
+            grid(obj.flowHandle,'on')
+            obj.crossHandle = axes('Parent',h1,'Units','normalized','Position',[0.05 0.1 0.9 0.15]);
+%             obj.crossHandle = subplot(3,1,3);
+            hold(obj.crossHandle,'on')
+            grid(obj.crossHandle,'on')
+            
+            obj.flowAxHandle = plot(obj.flowHandle,NaN,NaN,'b-',NaN,NaN,'r-',NaN,NaN,'g-');
+            
+            lgd = legend(obj.flowAxHandle,{'East Arm','North Arm','Average'},'Location','southwest');
+            lgd.FontSize = 16;
+            obj.crossAxHandle = plot(obj.crossHandle,NaN,NaN,'-b','LineWidth',1.5);
+            obj.crossAxHandle2 = text(1/2,-0.05,'\uparrow East Arm Crosses','FontSize',16);
+            obj.crossAxHandle3 = text(1/2,1.05,'\downarrow North Arm Crosses','FontSize',16);
+            
+            
             axis(obj.junctionPlotHandle,'equal',[roadDimensions.Start(1) roadDimensions.End(1)...
                 roadDimensions.Start(2) roadDimensions.End(2)], 'off')
             hold(obj.junctionPlotHandle,'on')
@@ -47,7 +77,7 @@ classdef Junction < handle
                     [(iDimension(2) - iDimension(3))/2*ones(4,1) iDimension(1)/2*ones(4,1) ];
             end
         end
-        function draw_all_cars(obj,horizontalArm,vericalArm)
+        function draw_all_cars(obj,horizontalArm,vericalArm,iIteration,transientCutOffLength)
             if numel(obj.junctionPlotHandle.Children) == 2
                 flag = 0;
             else
@@ -59,64 +89,34 @@ classdef Junction < handle
             if vericalArm.numCars > 0
                 obj.draw_car(vericalArm,flag)
             end
+            if transientCutOffLength*10 <= iIteration && mod(iIteration,1) == 0
+                %% plot flow and crossings
+                set(obj.flowAxHandle(1),'XData',1:iIteration,'YData',horizontalArm.flow(1:iIteration));
+                set(obj.flowAxHandle(2),'XData',1:iIteration,'YData',vericalArm.flow(1:iIteration));
+                set(obj.flowAxHandle(3),'XData',1:iIteration,'YData',mean([horizontalArm.flow(1:iIteration)';vericalArm.flow(1:iIteration)']));
+                
+                set(obj.crossAxHandle,'XData',1:iIteration,'YData',obj.crossOrder);
+                
+                if (iIteration-1000 <= 0)
+                    startSpot = 1;
+                    set(obj.crossAxHandle2,'Position',[iIteration/2,-0.05,0]);
+                    set(obj.crossAxHandle3,'Position',[iIteration/2,1.05,0]);
+                else
+                    startSpot = iIteration-1000;
+                    set(obj.crossAxHandle2,'Position',[(iIteration+startSpot)/2,-0.05,0]);
+                    set(obj.crossAxHandle3,'Position',[(iIteration+startSpot)/2,1.05,0]);
+                end
+                axis(obj.flowHandle,[startSpot, (iIteration+50) 0, 0.35]);
+                axis(obj.crossHandle,[startSpot, (iIteration+50), -0.1, 1.1]);
+                
+            end
         end
         
-        function collision_check(obj,allCarsHoriz,allCarsVert,nCars,mCars,plotFlag,t)
-            hCar = 0;
-            x1 = allCarsHoriz(1).s_in;
-            x2 = allCarsHoriz(1).s_out;
-            for iCar = 1:nCars
-                x = allCarsHoriz(iCar).pose(1);
-                alpha = (x-x1)/(x2-x1);
-                if alpha >= 0 && alpha <= 1
-                    hCar = iCar;
-                    break;
-                end
-            end
-            for jCar = 1:mCars
-                vCar = 0;
-                x = allCarsVert(jCar).pose(1);
-                alpha = (x-x1)/(x2-x1);
-                if alpha >= 0 && alpha <= 1
-                    vCar = jCar;
-                    break;
-                end
-            end
-            if nCars > 0 && mCars > 0
-                if hCar ==  obj.collidingCarsIdx(1) && vCar ==  obj.collidingCarsIdx(2)
-                    obj.collisionFlag = 0;
-                elseif hCar > 0 && vCar > 0
-                    obj.collidingCarsIdx = [hCar; vCar];
-                    obj.collisionFlag = 1;
-                    % count crossing orders
-                elseif hCar > 0 && hCar ~=  obj.collidingCarsIdx(1)
-                    obj.crossOrder = [obj.crossOrder 0];
-                    obj.collidingCarsIdx(1) = hCar;
-                elseif vCar > 0 && vCar ~=  obj.collidingCarsIdx(2)
-                    obj.crossOrder = [obj.crossOrder 1];
-%                     obj.collidingCarsIdx(1) = 0;
-                    obj.collidingCarsIdx(2) = vCar;
-                end
-            end
-            
-%             if obj.collisionFlag
-%                 msg = sprintf('Collision occured at time t = %f. collided cars = [%d %d] %i',t,hCar,vCar);
-%                 obj.collisionMsgs = [obj.collisionMsgs; msg];
-%                 %save(['coll_t-' num2str(t) '.mat'],'allCarsHoriz','allCarsVert');
-%                 disp(msg);
-%                 
-%                 if plotFlag
-%                     junctionAxesHandle = text(obj.junctionPlotHandle,3,-7,msg,'Color','red');
-%                     delete(junctionAxesHandle);
-%                 else
-%                 end
-%             end
-        end
         
         function draw_car(obj,Arm,flag)
             plotVectorX = NaN(1,5);
             plotVectorY = NaN(1,5);
-                        
+            
             for iCar = 1:Arm.numCars
                 iDimension = Arm.allCars(iCar).dimension;
                 iPosition = Arm.allCars(iCar).pose;
@@ -142,6 +142,7 @@ classdef Junction < handle
                 
                 update_car_plots(obj,Arm,flag,iCar,plotVectorX,plotVectorY);
             end
+            
         end
         function update_car_plots(obj,arm,flag,iCar,plotVectorX,plotVectorY)
             if arm.numCars < numel(arm.CarsImageHandle)
@@ -164,10 +165,97 @@ classdef Junction < handle
                         carColour = 'k';
                 end
                 arm.CarsImageHandle = [arm.CarsImageHandle; fill(obj.junctionPlotHandle,plotVectorX',plotVectorY',carColour)];
+                
             else
                 set(arm.CarsImageHandle(iCar),'XData',plotVectorX','YData',plotVectorY');
             end
         end
+        
+        
+        function collision_check(obj,allCarsHoriz,allCarsVert,nCars,mCars,plotFlag,t)
+            hCar = 0;
+            if isempty(allCarsHoriz) && isempty(allCarsVert) 
+                return
+            elseif isempty(allCarsHoriz)
+                x1 = allCarsVert(1).s_in;
+                x2 = allCarsVert(1).s_out;
+            else 
+                x1 = allCarsHoriz(1).s_in;
+                x2 = allCarsHoriz(1).s_out;
+                vCar = 0;
+            end
+            if  ~isempty(allCarsHoriz)
+                for iCar = 1:nCars
+                    x = allCarsHoriz(iCar).pose(1);
+                    alpha = (x-x1)/(x2-x1);
+                    if alpha >= 0 && alpha <= 1
+                        hCar = iCar;
+                        break;
+                    end
+                end
+            end
+            if ~isempty(allCarsVert)
+                for jCar = 1:mCars
+                    vCar = 0;
+                    x = allCarsVert(jCar).pose(1);
+                    alpha = (x-x1)/(x2-x1);
+                    if alpha >= 0 && alpha <= 1
+                        vCar = jCar;
+                        break;
+                    end
+                end
+            end
+            if nCars > 0 && mCars > 0
+                if hCar ==  obj.collidingCarsIdx(1) && vCar ==  obj.collidingCarsIdx(2)
+                    obj.collisionFlag = 0;
+                    if isempty(obj.crossOrder)
+                        obj.crossOrder = NaN;
+                    else
+                        obj.crossOrder = [obj.crossOrder obj.crossOrder(end)];
+                    end
+                elseif hCar > 0 && vCar > 0
+                    obj.collidingCarsIdx = [hCar; vCar];
+                    obj.collisionFlag = 1;
+                    if isempty(obj.crossOrder)
+                        obj.crossOrder = NaN;
+                    else
+                        obj.crossOrder = [obj.crossOrder obj.crossOrder(end)];
+                    end
+                    % count crossing orders
+                elseif hCar > 0 && hCar ~=  obj.collidingCarsIdx(1)
+                    obj.crossOrder = [obj.crossOrder 0];
+                    obj.crossCount = [obj.crossCount 0];
+                    obj.collidingCarsIdx(1) = hCar;
+                elseif vCar > 0 && vCar ~=  obj.collidingCarsIdx(2)
+                    obj.crossOrder = [obj.crossOrder 1];
+                    obj.crossCount = [obj.crossCount 1];
+                    %                     obj.collidingCarsIdx(1) = 0;
+                    obj.collidingCarsIdx(2) = vCar;
+                else
+                    if isempty(obj.crossOrder)
+                        obj.crossOrder = NaN;
+                    else
+                        obj.crossOrder = [obj.crossOrder obj.crossOrder(end)];
+                    end
+                end
+            else
+                obj.crossOrder = [obj.crossOrder obj.crossOrder(end)];
+            end
+            
+            %             if obj.collisionFlag
+            %                 msg = sprintf('Collision occured at time t = %f. collided cars = [%d %d] %i',t,hCar,vCar);
+            %                 obj.collisionMsgs = [obj.collisionMsgs; msg];
+            %                 %save(['coll_t-' num2str(t) '.mat'],'allCarsHoriz','allCarsVert');
+            %                 disp(msg);
+            %
+            %                 if plotFlag
+            %                     junctionAxesHandle = text(obj.junctionPlotHandle,3,-7,msg,'Color','red');
+            %                     delete(junctionAxesHandle);
+            %                 else
+            %                 end
+            %             end
+        end
+        
     end
 end
 

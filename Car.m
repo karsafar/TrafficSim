@@ -11,10 +11,11 @@ classdef Car < dlnode & matlab.mixin.Copyable
         a_max = 3.5
         a_min = -3.5
         a_feas_min = -9
-        locationHistory = NaN(1,100000)
-        velocityHistory = NaN(1,100000)
-        accelerationHistory = NaN(1,100000)
-        timeHistory = NaN(1,100000)
+        History = []
+%         locationHistory = NaN(1,100000)
+%         velocityHistory = NaN(1,100000)
+%         accelerationHistory = NaN(1,100000)
+%         timeHistory = NaN(1,100000)
         historyIndex = 1.0
         leaderFlag = true
         stopIndex = 0
@@ -61,13 +62,15 @@ classdef Car < dlnode & matlab.mixin.Copyable
             end
         end
 
-        function store_state_data(obj,s,v,a,t)
+        function store_state_data(obj,t,currentStates)
 
             i = obj.historyIndex;
-            obj.locationHistory(i) = s;
-            obj.velocityHistory(i) = v;
-            obj.accelerationHistory(i) = a;
-            obj.timeHistory(i) = t;
+%             obj.locationHistory(i) = s;
+%             obj.velocityHistory(i) = v;
+%             obj.accelerationHistory(i) = a;
+%             obj.timeHistory(i) = t;
+%             obj.History = [obj.History, dynArgs];
+            obj.History(:,i) = [t;currentStates];
             obj.historyIndex = i + 1;
             
             % unit test the constraints

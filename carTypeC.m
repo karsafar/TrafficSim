@@ -128,8 +128,8 @@ classdef carTypeC < AutonomousCar
 %                     s_op = oppositeCars(jCar).pose(1);
 %                     oppositeDistToJunc(jCar) = crossingEnd - s_op;
 %                 end
-                s_op = [ oppositeCars(:).pose];
-                s_op(:,2:2:end) = [];
+                s_op = oppositeRoad.allCarsStates(1,:);
+%                 s_op(:,2:2:end) = [];
                 oppositeDistToJunc = crossingEnd - s_op;
                 % 0 - all competing cars passed junction 1 - not all passed
                 notAllCarsPassedJunction = any(oppositeDistToJunc > 0);

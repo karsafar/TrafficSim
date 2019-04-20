@@ -1,5 +1,5 @@
 classdef LoopRoad < Road
-    properties (SetAccess = protected)
+    properties (SetAccess = public)
         storeSwappedIndices = []
         diceDistGen = makedist('uniform','lower',0,'upper',1);
         carTypeRatios
@@ -7,8 +7,11 @@ classdef LoopRoad < Road
         originalClassArray = [];
         newClassArray = [];
         flagAB = 1 % choose A type to swap
+        swapRate = []
+        flow = []
         
-        
+        inflow = []
+        outflow = []
         %          initPoseProbDist = []
         %          allCarsNumArray = 0
     end
@@ -21,6 +24,11 @@ classdef LoopRoad < Road
                 obj.numCars = loop_road_args.numCars;
                 obj.allCars = loop_road_args.allCars;
                 obj.averageVelocityHistory = NaN(loop_road_args.nIterations,1);
+                
+                obj.flow = NaN(loop_road_args.nIterations,1);
+                obj.inflow = NaN(loop_road_args.nIterations,1);
+                obj.outflow = NaN(loop_road_args.nIterations,1);
+                
                 obj.variance = NaN(loop_road_args.nIterations,1);
             else
                 % I don't need this part
@@ -117,18 +125,15 @@ classdef LoopRoad < Road
             end
         end
         function respawn_car(obj,leaderCar,t)
+            %%
             
-            leaderCar.pose(1) = leaderCar.pose(1) - (obj.endPoint-obj.startPoint);
-            
-            if t >= 500 % transient cut
+            if t >= obj.transientCutOffLength % transient cut
                 obj.collect_car_history(leaderCar);
             end
             
             leaderCar.historyIndex = 1;
-            leaderCar.locationHistory = leaderCar.locationHistory*NaN;
-            leaderCar.velocityHistory = leaderCar.velocityHistory*NaN;
-            leaderCar.accelerationHistory = leaderCar.accelerationHistory*NaN;
-            leaderCar.timeHistory = leaderCar.timeHistory*NaN;
+            
+            leaderCar.History = [];
             
             if obj.numCars > 1
                 leaderCar.leaderFlag = false;
@@ -136,25 +141,21 @@ classdef LoopRoad < Road
             end
         end
         function move_all_cars(obj,t,dt,iIteration,nIterations)
-            aggregatedVelocities = 0;
-           
-%             % swap two cars 
-%             chance = random(obj.diceDistGen);
-%             if mod(iIteration,100) == 0 && chance <= 0.5
-%                 convert_car_classes(obj)
-%             end
-            
+            %%
+%             aggregatedVelocities = 0;
             
             for iCar = 1:obj.numCars
                 currentCar = obj.allCars(iCar);
-                if currentCar.pose(1) > obj.endPoint
+                if obj.allCarsStates(1,iCar) > obj.endPoint
+                    currentCar.pose(1) = obj.allCarsStates(1,iCar) - (obj.endPoint-obj.startPoint);
+                    obj.allCarsStates(1,iCar) = currentCar.pose(1);
+                    
                     obj.respawn_car(currentCar,t);
     
                     % morph the car
                     chance = random(obj.diceDistGen);
-%                     if chance < 0.01 && (numel(obj.swapPostionArray) <=1 ||...
-%                             sum(((strcmpi({class(obj.allCars(obj.swapPostionArray(end-1))),class(obj.allCars(obj.swapPostionArray(end)))},class(currentCar))))))>0 
-                    if chance < 0.1 && (isempty(obj.swapPostionArray) || (strcmpi(class(obj.allCars(obj.swapPostionArray(end))),class(currentCar))))
+                    
+                    if chance < obj.swapRate && (isempty(obj.swapPostionArray) || (strcmpi(class(obj.allCars(obj.swapPostionArray(end))),class(currentCar))))
   
                         obj.swapPostionArray = [obj.swapPostionArray iCar];
                         
@@ -166,7 +167,9 @@ classdef LoopRoad < Road
                         removeNode(currentCar);
                         obj.allCars(iCar) = morphedCar;
                         clear currentCar;
-                        insertAfter(morphedCar,anchorCar);
+                        if obj.numCars > 1
+                            insertAfter(morphedCar,anchorCar);
+                        end
                         currentCar = morphedCar;
                         % calculate change in ratio of A/B types every time
                         % the swap happened
@@ -181,19 +184,27 @@ classdef LoopRoad < Road
                                         
                 end
                 
-                currentCar.store_state_data(currentCar.pose(1),currentCar.velocity,currentCar.acceleration,t)
                 currentCar.move_car(dt);
-                if t >= 500 % transient cut
-                    aggregatedVelocities = aggregatedVelocities + currentCar.velocity;
-                end
+
             end
-            if t >= 500 % transient cut
-                avVel = aggregatedVelocities/obj.numCars;
+            if t >= obj.transientCutOffLength % transient cut
+                avVel = sum(obj.allCarsStates(2,:))/obj.numCars;
+                obj.flow(iIteration) = (obj.numCars/obj.Length)*avVel;
+                                
+                %% inflow
+                nCarsIn = sum(obj.allCarsStates(1,:) <= currentCar.s_in);
+                avVelIn = sum(obj.allCarsStates(2,(obj.allCarsStates(1,:) <= currentCar.s_in)))/nCarsIn;
+                obj.inflow(iIteration) = (nCarsIn/(currentCar.s_in-obj.startPoint))*avVelIn; 
+                %% outflow
+                nCarsOut = obj.numCars - nCarsIn;
+                avVelOut = sum(obj.allCarsStates(2,(obj.allCarsStates(1,:) > currentCar.s_in)))/nCarsOut;
+                obj.outflow(iIteration) = (nCarsOut/(obj.endPoint-currentCar.s_in))*avVelOut; 
+                
+                %%
                 obj.averageVelocityHistory(iIteration) = avVel;
                 deltaV = 0;
                 for iCar = 1:obj.numCars
-                    v = obj.allCars(iCar).velocity;
-                    deltaV = deltaV + (v - avVel)^2;
+                    deltaV = deltaV + (obj.allCarsStates(2,iCar) - avVel)^2;
                 end
                 obj.variance(iIteration) = deltaV/obj.numCars;
                 if iIteration == nIterations
@@ -205,67 +216,66 @@ classdef LoopRoad < Road
                 obj.variance(iIteration) = NaN;
             end
         end
-        
+%{
         % used for a couple of cars
-%         function convert_car_classes(obj)
-%             if obj.numCars > 3
-%                 firstIndex = randi(obj.numCars,1);
-%                 car1 = obj.allCars(firstIndex);
-%                 selectedCarClass = class(car1);
-%                 breakIdx = 0;
-%                 secondIndex = 0;
-%                 while breakIdx == 0
-%                     secondIndex = randi(obj.numCars);
-%                     if isa(obj.allCars(secondIndex),selectedCarClass) == 0 && secondIndex ~= firstIndex
-%                         car2 = obj.allCars(secondIndex);
-%                         breakIdx = 1;
-%                     end
-%                 end
-%                 
-%                 % store swapped pair
-%                 obj.storeSwappedIndices = [obj.storeSwappedIndices; firstIndex secondIndex];
-%                 
-%                 if car1.Prev.pose(1) ~= car2.pose(1)
-%                     tempPreCar1 = car1.Prev;
-%                 else
-%                     tempPreCar1 = car1.Prev.Prev;
-%                 end
-%                 if car2.Prev.pose(1) ~= car1.pose(1)
-%                     tempPreCar2 = car2.Prev;
-%                 else
-%                     tempPreCar2 = car2.Prev.Prev;
-%                 end
-%                           
-%                 % detach both nodes from dlnode
-%                 removeNode(car1);
-%                 removeNode(car2);
-% 
-%                 % swap properties of two cars 
-%                 newCar2 = LoopRoad.swap_cars(car1,car2);
-%                 newCar1 = LoopRoad.swap_cars(car2,car1);
-%                 
-%                 % delete old objects
-%                 delete(car1);
-%                 delete(car2);
-%               
-%                 
-%                 insertAfter(newCar1,tempPreCar1)
-%                 obj.allCars(firstIndex) = newCar1;
-%                 
-%                 % update preCar2 in case if newCar1 is newpreCar2
-%                 if (firstIndex+1)==secondIndex || (firstIndex-obj.numCars+1)==secondIndex
-%                     tempPreCar2 = newCar1;
-%                 end
-%                 
-%                 insertAfter(newCar2,tempPreCar2)
-%                 obj.allCars(secondIndex) = newCar2;
-%                 
-%                 delete(obj.CarsImageHandle);
-%                 obj.CarsImageHandle = [];
-%             end
-%         end
-    
-        
+        function convert_car_classes(obj)
+            if obj.numCars > 3
+                firstIndex = randi(obj.numCars,1);
+                car1 = obj.allCars(firstIndex);
+                selectedCarClass = class(car1);
+                breakIdx = 0;
+                secondIndex = 0;
+                while breakIdx == 0
+                    secondIndex = randi(obj.numCars);
+                    if isa(obj.allCars(secondIndex),selectedCarClass) == 0 && secondIndex ~= firstIndex
+                        car2 = obj.allCars(secondIndex);
+                        breakIdx = 1;
+                    end
+                end
+                
+                % store swapped pair
+                obj.storeSwappedIndices = [obj.storeSwappedIndices; firstIndex secondIndex];
+                
+                if car1.Prev.pose(1) ~= car2.pose(1)
+                    tempPreCar1 = car1.Prev;
+                else
+                    tempPreCar1 = car1.Prev.Prev;
+                end
+                if car2.Prev.pose(1) ~= car1.pose(1)
+                    tempPreCar2 = car2.Prev;
+                else
+                    tempPreCar2 = car2.Prev.Prev;
+                end
+                          
+                % detach both nodes from dlnode
+                removeNode(car1);
+                removeNode(car2);
+
+                % swap properties of two cars 
+                newCar2 = LoopRoad.swap_cars(car1,car2);
+                newCar1 = LoopRoad.swap_cars(car2,car1);
+                
+                % delete old objects
+                delete(car1);
+                delete(car2);
+              
+                
+                insertAfter(newCar1,tempPreCar1)
+                obj.allCars(firstIndex) = newCar1;
+                
+                % update preCar2 in case if newCar1 is newpreCar2
+                if (firstIndex+1)==secondIndex || (firstIndex-obj.numCars+1)==secondIndex
+                    tempPreCar2 = newCar1;
+                end
+                
+                insertAfter(newCar2,tempPreCar2)
+                obj.allCars(secondIndex) = newCar2;
+                
+                delete(obj.CarsImageHandle);
+                obj.CarsImageHandle = [];
+            end
+        end
+%}    
         function morphedCar = morph_car(obj,carToMorph,dt)
             
             selectedCarClass = class(carToMorph);
@@ -325,10 +335,11 @@ classdef LoopRoad < Road
             cloneCar.a_max =  car2.a_max;
             cloneCar.a_min =  car2.a_min;
             cloneCar.a_feas_min =  car2.a_feas_min;
-            cloneCar.locationHistory =  car2.locationHistory;
-            cloneCar.velocityHistory =  car2.velocityHistory;
-            cloneCar.accelerationHistory = car2.accelerationHistory;
-            cloneCar.timeHistory =  car2.timeHistory;
+            cloneCar.History = car2.History;
+%             cloneCar.locationHistory =  car2.locationHistory;
+%             cloneCar.velocityHistory =  car2.velocityHistory;
+%             cloneCar.accelerationHistory = car2.accelerationHistory;
+%             cloneCar.timeHistory =  car2.timeHistory;
             cloneCar.historyIndex =  car2.historyIndex;
             cloneCar.leaderFlag =  car2.leaderFlag;
             cloneCar.stopIndex = car2.stopIndex;

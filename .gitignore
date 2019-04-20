@@ -30,3 +30,7 @@ test-2\.mat
 box_plot\.m
 
 *.mat
+
+plot data/test_real_time_plot\.m
+
+test_env\.m

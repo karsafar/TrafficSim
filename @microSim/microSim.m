@@ -465,13 +465,50 @@ end
 % controlled break of the simulation
 % finishup = onCleanup(@() myCleanupFun(HorizontalArm, VerticalArm));
 set(handles.pushbutton3,'userdata',0);
+
+% define the length of storage data for all cars
+for iCar = 1:HorizontalArm.numCars
+    HorizontalArm.allCars(iCar).History = NaN(4,nIterations);
+end
+for jCar = 1:VerticalArm.numCars
+    VerticalArm.allCars(jCar).History = NaN(4,nIterations);
+end
+
+transientCutOffLength = 500;
+swapRate = 0.0;
+% define transient length
+HorizontalArm.transientCutOffLength = transientCutOffLength;
+VerticalArm.transientCutOffLength = transientCutOffLength;
+
+% define swap rate
+if isa(HorizontalArm,'LoopRoad')
+    HorizontalArm.swapRate = swapRate;
+end
+if isa(VerticalArm,'LoopRoad')
+    VerticalArm.swapRate = swapRate;
+end
+
 for iIteration = handles.iIteration:nIterations
     % update time
     t = handles.t_rng(iIteration);
-
+    
+    % define the length of storage data for all cars
+    for iCar = 1:HorizontalArm.numCars
+        HorizontalArm.allCarsStates(1,iCar) = HorizontalArm.allCars(iCar).pose(1);
+        HorizontalArm.allCarsStates(2,iCar) = HorizontalArm.allCars(iCar).velocity;
+        HorizontalArm.allCarsStates(3,iCar) = HorizontalArm.allCars(iCar).acceleration;
+        HorizontalArm.allCars(iCar).store_state_data(t,HorizontalArm.allCarsStates(:,iCar));
+    end
+    for jCar = 1:VerticalArm.numCars
+        VerticalArm.allCarsStates(1,jCar) = VerticalArm.allCars(jCar).pose(1);
+        VerticalArm.allCarsStates(2,jCar) = VerticalArm.allCars(jCar).velocity;
+        VerticalArm.allCarsStates(3,jCar) = VerticalArm.allCars(jCar).acceleration;
+        VerticalArm.allCars(jCar).store_state_data(t,VerticalArm.allCarsStates(:,jCar));
+    end
+    
     % draw cars
     if plotFlag
-        junc.draw_all_cars(HorizontalArm,VerticalArm)
+        junc.draw_all_cars(HorizontalArm,VerticalArm,iIteration,transientCutOffLength)
         if get(handles.fastRate,'Value')
             drawnow limitrate
         else
@@ -497,10 +534,23 @@ for iIteration = handles.iIteration:nIterations
     
     % Itersection Collision Avoidance (ICA)
     for iCar = 1:HorizontalArm.numCars
-        HorizontalArm.allCars(iCar).decide_acceleration(VerticalArm,roadDims.Length(1),t,dt);
+        if t >= transientCutOffLength*0.8
+            HorizontalArm.allCars(iCar).decide_acceleration(VerticalArm,roadDims.Length(1),t,dt);
+        else
+            HorizontalArm.allCars(iCar).acceleration = HorizontalArm.allCars(iCar).idmAcceleration;
+            check_for_negative_velocity( HorizontalArm.allCars(iCar),dt);
+        end
+%         HorizontalArm.allCarsStates(3,iCar) = HorizontalArm.allCars(iCar).acceleration;
+        
     end
     for jCar = 1:VerticalArm.numCars
-        VerticalArm.allCars(jCar).decide_acceleration(HorizontalArm,roadDims.Length(2),t,dt);
+        if t >= transientCutOffLength*0.8
+            VerticalArm.allCars(jCar).decide_acceleration(HorizontalArm,roadDims.Length(2),t,dt);
+        else
+            VerticalArm.allCars(jCar).acceleration = VerticalArm.allCars(jCar).idmAcceleration;
+            check_for_negative_velocity( VerticalArm.allCars(jCar),dt);
+        end
+%         VerticalArm.allCarsStates(3,jCar) = VerticalArm.allCars(jCar).acceleration;
     end
     
     count_emegrency_breaks(HorizontalArm);
@@ -1396,12 +1446,13 @@ roadStart = str2num(get(handles.edit18,'String'));
 roadEnd = str2num(get(handles.edit19,'String'));
 roadWidth = str2num(get(handles.edit20,'String'));
 dt = str2num(get(handles.edit17,'String'));
+nIterations = str2double(get(handles.edit23,'String'));
 if get(handles.radiobutton11,'Value')
     sz = [str2num(get(handles.edit4,'String')) 7];
     varTypes = {'double','double','double','double','function_handle','double','double'};
     varNames = {'position','velocity','target_velocity','acceleration','carType','priority','max_vel'};
     
-    T = table('Size',sz,'VariableTypes',varTypes,'VariableNames',varNames);
+    T = table;
     T.position = (str2num(get(handles.edit5,'String'))');
     T.velocity = (str2num(get(handles.edit6,'String'))');
     T.target_velocity = (str2num(get(handles.edit30,'String'))'); %#ok<*ST2NM>
@@ -1409,10 +1460,8 @@ if get(handles.radiobutton11,'Value')
     T.carType = {handles.carTypes{str2num(get(handles.edit8,'String'))'}}';
     T.priority = (str2num(get(handles.edit32,'String'))');
     T.max_vel = (str2num(get(handles.edit34,'String'))');
-    
-    handles.Arm.H = SpawnCars(T,'horizontal',roadStart,roadEnd,roadWidth,dt);
+    handles.Arm.H = SpawnCars(T,'horizontal',roadStart,roadEnd,roadWidth,dt,nIterations);
 else
-    nIterations = str2double(get(handles.edit23,'String'));
     fixedSeed = get(handles.checkbox2,'Value');
     if get(handles.radiobutton14,'Value')
         handles.Arm.H = SpawnCars([{handles.allCarsNumArray_H},fixedSeed,{handles.carTypes}],'horizontal',roadStart,roadEnd,roadWidth,dt,nIterations);
@@ -1440,12 +1489,13 @@ roadStart = str2num(get(handles.edit24,'String'));
 roadEnd = str2num(get(handles.edit25,'String'));
 roadWidth = str2num(get(handles.edit26,'String'));
 dt = str2num(get(handles.edit17,'String'));
+nIterations = str2double(get(handles.edit23,'String'));
 if get(handles.radiobutton18,'Value')
     sz = [str2num(get(handles.edit15,'String')) 7];
     varTypes = {'double','double','double','double','function_handle','double','double'};
     varNames = {'position','velocity','target_velocity','acceleration','carType','priority','max_vel'};
     
-    T = table('Size',sz,'VariableTypes',varTypes,'VariableNames',varNames);
+    T = table;
     T.position = (str2num(get(handles.edit14,'String'))');
     T.velocity = (str2num(get(handles.edit13,'String'))');
     T.target_velocity = (str2num(get(handles.edit31,'String'))');
@@ -1454,9 +1504,8 @@ if get(handles.radiobutton18,'Value')
     T.priority = (str2num(get(handles.edit33,'String'))');
     T.max_vel = (str2num(get(handles.edit35,'String'))');
     
-    handles.Arm.V = SpawnCars(T,'vertical',roadStart,roadEnd,roadWidth,dt);
+    handles.Arm.V = SpawnCars(T,'vertical',roadStart,roadEnd,roadWidth,dt,nIterations);
 else
-    nIterations = str2double(get(handles.edit23,'String'));
     fixedSeed = get(handles.checkbox3,'Value');
     if get(handles.radiobutton17,'Value')
         handles.Arm.V = SpawnCars([{handles.allCarsNumArray_V},fixedSeed,{handles.carTypes}],'vertical',roadStart,roadEnd,roadWidth,dt,nIterations);
