@@ -134,6 +134,8 @@ sim.horizArm = HorizontalArm;
 sim.vertArm = VerticalArm;
 sim.crossOrder = junc.crossOrder;
 sim.crossCount = junc.crossCount;
+sim.crossCarTypeCount = junc.crossCarTypeCount;
+sim.crossCarTypeOrder = junc.crossCarTypeOrder;
 
 % sim.horizArm = cast_output(HorizontalArm);
 % sim.vertArm = cast_output(VerticalArm);
