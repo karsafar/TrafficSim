@@ -15,6 +15,7 @@ classdef SpawnCarsOrdered < handle
             obj.roadStart = startPoint;
             obj.roadEnd = endPoint;
             obj.roadWidth = Width;
+            obj.nIterations = nIterations;
             if isa(SpawnData,'table')
                 obj.controlled_spawn(SpawnData,dt)
             else
@@ -23,7 +24,6 @@ classdef SpawnCarsOrdered < handle
                 FixedSeed = SpawnData{2};
                 carTypes = SpawnData{3};
                 obj.randomSpawn(everyCarNum,carTypes,FixedSeed,dt)
-                obj.nIterations = nIterations;
             end
         end
         

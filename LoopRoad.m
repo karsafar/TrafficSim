@@ -185,10 +185,11 @@ classdef LoopRoad < Road
 
             end
             if t >= obj.transientCutOffLength % transient cut
+                if obj.numCars > 0
                 avVel = sum(obj.allCarsStates(2,:))/obj.numCars;
                 obj.flow(iIteration) = (obj.numCars/obj.Length)*avVel;
                                 
-                %% inflow & outflow
+                % inflow
                 nCarsIn = sum(obj.allCarsStates(1,:) <= currentCar.s_in);
                 avVelIn = sum(obj.allCarsStates(2,(obj.allCarsStates(1,:) <= currentCar.s_in)))/nCarsIn;
                 obj.inflow(iIteration) = (nCarsIn/(currentCar.s_in-obj.startPoint))*avVelIn; 
@@ -197,8 +198,12 @@ classdef LoopRoad < Road
                 nCarsOut = obj.numCars - nCarsIn;
                 avVelOut = sum(obj.allCarsStates(2,(obj.allCarsStates(1,:) > currentCar.s_in)))/nCarsOut;
                 obj.outflow(iIteration) = (nCarsOut/(obj.endPoint-currentCar.s_in))*avVelOut; 
-                
-                %%
+                else
+                    avVel = 0;
+                    obj.flow(iIteration)    = 0;
+                    obj.inflow(iIteration)  = 0;
+                    obj.outflow(iIteration) = 0;                
+                end
                 obj.averageVelocityHistory(iIteration) = avVel;
                 deltaV = 0;
                 for iCar = 1:obj.numCars

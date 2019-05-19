@@ -474,7 +474,7 @@ for jCar = 1:VerticalArm.numCars
     VerticalArm.allCars(jCar).History = NaN(4,nIterations);
 end
 
-transientCutOffLength = 500;
+transientCutOffLength = 50;
 swapRate = 0.0;
 % define transient length
 HorizontalArm.transientCutOffLength = transientCutOffLength;

@@ -19,10 +19,14 @@ for i = 1:Number_mat
     filename = sprintf('test-%s.mat',num2str(i));
     load(fullfile(filename),'sim')
     data(i).crossCount = sim.crossCount;
+    data(i).crossCarTypeCount = sim.crossCarTypeCount;
+    data(i).crossCarTypeOrder = sim.crossCarTypeOrder;
+    averageVelocity(i).east = nanmean(sim.horizArm.averageVelocityHistory);
+    averageVelocity(i).north = nanmean(sim.vertArm.averageVelocityHistory);
     i
 end
 
-save('aggregatedCrossingData.mat','data','numCars');
+save('aggregatedCrossingData.mat','data','numCars','averageVelocity');
 
 return
 %%
@@ -30,36 +34,86 @@ return
 load('aggregatedCrossingData.mat');
 
 %% junction crossing graph
-%}
-% idx = 17;
-%{
+
+idx = 26;
+
 figure('units', 'normalized', 'position', [0.4, 0, 0.6, 1]);
 for idx = 1:numel(data)
     numCars(1,idx)
     ax1 = subplot(2,1,1);
     plot(ax1,data(idx).crossOrder,'-b','LineWidth',1.5)
     axis(ax1,[0 numel(data(idx).crossOrder) 0 3])
-    grid(ax1,'on');
-    xlabel(ax1,'Number of Junction Crosses','FontSize',16)
+%     axis(ax1,'off')
+%     grid(ax1,'on');
+    xlabel(ax1,'Iteration Number','FontSize',16)
     text(ax1,numel(data(idx).crossOrder)/2,-0.1,'\uparrow East Arm Crosses','FontSize',16)
     text(ax1,numel(data(idx).crossOrder)/2,1.1,'\downarrow North Arm Crosses','FontSize',16)
     ylim(ax1,[-0.5,1.5])
-
+    
     ax2 = subplot(2,1,2);
     plot(ax2,data(idx).crossCount,'-b','LineWidth',1.5)
     axis(ax2,[0 numel(data(idx).crossCount) 0 3])
-    grid(ax2,'on');
+%     axis(ax2,'off')
+%     grid(ax2,'on');
     xlabel(ax2,'Number of Junction Crosses','FontSize',16)
     text(ax2,numel(data(idx).crossCount)/2,-0.1,'\uparrow East Arm Crosses','FontSize',16)
     text(ax2,numel(data(idx).crossCount)/2,1.1,'\downarrow North Arm Crosses','FontSize',16)
     ylim(ax2,[-0.5,1.5])
     pause(1)
 end
+%}
+%% junction crossing with car types info
+figure('units', 'normalized', 'position', [0.4, 0, 0.6, 1]);
+for idx = 1:numel(data)
+    numCars(1,idx)
+    sz = 25;
+    ax1 = subplot(2,1,1);
+    x = 1:numel(data(idx).crossOrder);
+    y = data(idx).crossOrder;
+    c = NaN(length(x),3);
+    idx1 = find(data(idx).crossCarTypeOrder == 1);
+    idx2 = find(data(idx).crossCarTypeOrder == 2);
+    
+    c(idx1,:) = ones(numel(idx1),3).*[0 1 0];
+    c(idx2,:) = ones(numel(idx2),3).*[1 0 0];
+    line(ax1,x,y,'Color','black');
+    hold(ax1,'on');
+    scatter(ax1,x,y,sz,c,'filled')
+%     hold(ax1,'off');
+    xlabel(ax1,'Iteration Number','FontSize',16)
+    text(ax1,numel(data(idx).crossOrder)/2,-0.1,'\uparrow East Arm Crosses','FontSize',16)
+    text(ax1,numel(data(idx).crossOrder)/2,1.1,'\downarrow North Arm Crosses','FontSize',16)
+    ylim(ax1,[-0.5,1.5])
+    ax2 = subplot(2,1,2);
+%     cla(ax2)
+    x = 1:numel(data(idx).crossCount);
+    y = data(idx).crossCount;
+    c = NaN(length(x),3);
+    idx1 = find(data(idx).crossCarTypeCount == 1);
+    idx2 = find(data(idx).crossCarTypeCount == 2);
+    
+    c(idx1,:) = ones(numel(idx1),3).*[0 1 0];
+    c(idx2,:) = ones(numel(idx2),3).*[1 0 0];
+    line(ax2,x,y,'Color','black');
+    hold(ax2,'on');
+    scatter(ax2,x,y,sz,c,'filled')
+%     hold(ax2,'off');
+    xlabel(ax2,'Number of Junction Crosses','FontSize',16)
+    text(ax2,numel(data(idx).crossCount)/2,-0.1,'\uparrow East Arm Crosses','FontSize',16)
+    text(ax2,numel(data(idx).crossCount)/2,1.1,'\downarrow North Arm Crosses','FontSize',16)
+    ylim(ax2,[-0.5,1.5])
+%     pause(1)
+    cla(ax1)
+    cla(ax2)
+
+end
+
+
 %% conditional probabilities
 
 m = length(data);
 
-n = 150; % max bit size
+n = 200; % max bit size
 p_E = zeros(m,n);
 p_N = zeros(m,n);
 bitSize = zeros(n,1);
@@ -168,7 +222,7 @@ xtickangle(45)
 
 
 %%
-%{
+% %{
 p_E_given_N  = p_E(1);
 
 counts = get_kernel_counts(bitSize(2), data(1).crossOrder);
@@ -191,14 +245,14 @@ ylim([0 1])
 xticks([2 3])
 xticklabels({'N','EN'})
 
-%}
+
 
 %% Platoon sizes and frequencies
-%}
+
 % idx = 17;
 
 platoons = NaN(length(data),50);
-orderedPlatoons = NaN(length(data),850);
+orderedPlatoons = NaN(length(data),900);
 for idx = 1:length(data)
 %     figure(6)
 %     plot(data(idx).crossOrder,'-b','LineWidth',1.5)
@@ -227,7 +281,8 @@ for idx = 1:length(data)
             temp = [temp count];
         end
     end
-    orderedPlatoons(idx,1:length(temp)) = sort(temp,'ascend');
+%     orderedPlatoons(idx,1:length(temp)) = sort(temp,'ascend');
+    orderedPlatoons(idx,1:length(temp)) = temp;
     [row,platoonSizes] = find(freq_counter);
     % figure
     % bar(freq_counter)
@@ -253,9 +308,48 @@ for idx = 1:length(data)
 %     bar(prices','stacked')
     
 end
+%}
+%}
+%%
 figure
 ax3 = axes;
-bar(ax3,numCars(1,:)',orderedPlatoons,'stacked')
+% orderedPlatoons(:,253:end)=[];
+
+
+for ii = 1:size(orderedPlatoons,1)
+    temp = orderedPlatoons(ii,:);
+    temp(isnan(temp)) = [];
+    temp1 = NaN(2,numel(temp));
+    temp1(:,1) = [0; temp(1)];
+    if numel(temp) >= 2
+        for i = 2:numel(temp)
+            temp1(:,i) = [temp1(2,i-1); temp1(2,i-1)+temp(i)];
+        end
+    end
+    line(ax3,[numCars(1,ii)*ones(1,numel(temp)); numCars(1,ii)*ones(1,numel(temp))],temp1,'LineWidth',20)
+%     plot(ax3,[numCars(1,ii)*ones(1,numel(temp)); numCars(1,ii)*ones(1,numel(temp))],temp1,'LineWidth',20)
+    hold on
+end
+% c = colorbar;
+% c.Label.String = 'Platoon Size';
+% c.Label.FontSize = 12;
+% caxis(ax3,[1 max(max(orderedPlatoons))])
+
+% h = bar(ax3,orderedPlatoons,'stacked');
+
+
+% h(49).FaceColor
+% h(49).CData= orderedPlatoons;
+
+% caxis(ax3,[1 max(max(orderedPlatoons))])
+
+% set(bar_child,'CData',max(max(orderedPlatoons)));
+% colormap(flipud(jet));
+
+% c = colorbar;
+% c.Label.String = 'Platoon Size';
+% c.Label.FontSize = 12;
+% caxis(ax3,[1 max(max(orderedPlatoons))])
 
 for i = 1:numel(data)
     dataNums(1,i) = numel(data(i).crossCount(:));
@@ -266,8 +360,15 @@ ylabel('Crossing Platoon Sizes','FontSize',14)
 xlabel('Numer of cars per arm','FontSize',14)
 % xlim([0 1])
 % ylim([2 n+1])
+% axis(ax3,'off')
 xticks(numCars(1,1):2:numCars(1,end))
+xlim([numCars(1,1)-2 numCars(1,end)+2])
 view([90 -90])
+
+% c = colorbar;
+% c.Label.String = 'Platoon Size';
+% c.Label.FontSize = 12;
+% caxis(ax3,[1 max(max(orderedPlatoons))])
 %
 % A loop that does num2str conversion only if value is >0
 % for i=1:size(platoons,1)
@@ -282,7 +383,7 @@ view([90 -90])
 %     end
 %     break
 % end
-return
+%%
 figure
 plot(numCars(1,:),maxPlatoons)
 ylabel('Largest platoon','FontSize',14)

@@ -39,13 +39,11 @@ classdef Junction < handle
                 h1 = figure('units', 'normalized', 'position', [0.4, 0, 0.6, 1]);
             end
             obj.junctionPlotHandle = axes('Parent',h1,'Units','normalized','Position',[0.05 0.5 0.9 0.45]);
-            %             obj.junctionPlotHandle = subplot(3,1,1);
+            %{
             obj.flowHandle = axes('Parent',h1,'Units','normalized','Position',[0.05 0.3 0.9 0.15]);
-            %             obj.flowHandle = subplot(3,1,2);
             hold(obj.flowHandle,'on')
             grid(obj.flowHandle,'on')
             obj.crossHandle = axes('Parent',h1,'Units','normalized','Position',[0.05 0.1 0.9 0.15]);
-            %             obj.crossHandle = subplot(3,1,3);
             hold(obj.crossHandle,'on')
             grid(obj.crossHandle,'on')
             
@@ -57,7 +55,7 @@ classdef Junction < handle
             obj.crossAxHandle2 = text(1/2,-0.05,'\uparrow East Arm Crosses','FontSize',16);
             obj.crossAxHandle3 = text(1/2,1.05,'\downarrow North Arm Crosses','FontSize',16);
             
-            
+            %}
             axis(obj.junctionPlotHandle,'equal',[roadDimensions.Start(1) roadDimensions.End(1)...
                 roadDimensions.Start(2) roadDimensions.End(2)], 'off')
             hold(obj.junctionPlotHandle,'on')
@@ -93,6 +91,7 @@ classdef Junction < handle
             if vericalArm.numCars > 0
                 obj.draw_car(vericalArm,flag)
             end
+%{
             if transientCutOffLength*10 <= iIteration && mod(iIteration,1) == 0
                 %% plot flow and crossings
                 set(obj.flowAxHandle(1),'XData',1:iIteration,'YData',horizontalArm.flow(1:iIteration));
@@ -114,6 +113,7 @@ classdef Junction < handle
                 axis(obj.crossHandle,[startSpot, (iIteration+50), -0.1, 1.1]);
                 
             end
+%}
         end
         
         
@@ -304,7 +304,6 @@ classdef Junction < handle
                             end
                         end
             %}
-            obj.crossCarTypeOrder(end)
         end
         
     end

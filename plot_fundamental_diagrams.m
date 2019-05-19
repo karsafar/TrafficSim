@@ -30,6 +30,13 @@ save('processedData.mat','eastArm','northArm','junction')
 %%
 
 load('processedData.mat')
+%%
+plot_density_speed(eastArm.density,eastArm.meanVelocity,northArm.density,northArm.meanVelocity, junction.density,junction.meanVelocity);
+
+plot_density_flow(eastArm.flow,eastArm.density, northArm.flow,northArm.density,junction.flow,junction.density);
+
+plot_flow_speed(eastArm.flow,eastArm.meanVelocity,northArm.flow,northArm.meanVelocity,junction.flow,junction.meanVelocity)
+
 
 %% plot density-speed diagrams
 
@@ -61,8 +68,8 @@ plot_flow_speed(eastArm.flow,eastArm.meanVelocity,northArm.flow,northArm.meanVel
 %% ploting funcitons
 %
 function plot_density_speed(density1,meanVelocity1,density2,meanVelocity2,density3,meanVelocity3)
-figure;
-ha9 = axes;
+% figure;
+ha9 = subplot(2,2,1);
 title(ha9,'Speed-Density Diagram','FontSize',20)
 xlabel(ha9,' Density K, veh/m','FontSize',18)
 ylabel(ha9,' Velocity <V>, m/s','FontSize',18)
@@ -77,8 +84,8 @@ legend(ha9,{'Analytical curve','East Arm','North Arm','Average'},'FontSize',18)
 end
 %
 function plot_density_flow(flow1,density1,flow2,density2,flow3,density3)
-figure;
-ha10 = axes;
+% figure;
+ha10 = subplot(2,2,3);
 title(ha10,'Flow-Density Diagram','FontSize',20)
 xlabel(ha10,' Density K, veh/m','FontSize',18)
 ylabel(ha10,' Flow Q, veh/s','FontSize',18)
@@ -92,8 +99,8 @@ plot(ha10,density3,flow3,'--g');
 legend(ha10,{'Analytical curve','East Arm','North Arm','Average'},'FontSize',18)
 end
 function plot_flow_speed(flow1,meanVelocity1,flow2,meanVelocity2,flow3,meanVelocity3)
-figure;
-ha11 = axes;
+% figure;
+ha11 = subplot(2,2,2);
 title(ha11,'Speed-Flow Diagram','FontSize',20)
 xlabel(ha11,' Flow Q, veh/s','FontSize',18)
 ylabel(ha11,' Velocity <V>, m/s','FontSize',18)
