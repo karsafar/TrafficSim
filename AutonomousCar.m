@@ -42,7 +42,7 @@ classdef AutonomousCar < IdmModel
                 else
                     obj.t_in = (s_in - s_comp)/v_comp+t;
                 end
-                if t < (obj.t_in+0.1) && (s+0.01) >= (s_out-v_max*(obj.t_in-t))
+                if t < obj.t_in && s >= (s_out-v_max*(obj.t_in-t))
                     
                     aheadWithPositive_A = (s_out - 0.5*obj.a_max*(obj.t_in-(t+dt))^2 - v*(obj.t_in-t) - s)/ (dt*(obj.t_in-(t+dt/2)));
                     juncExitVel  = (v + aheadWithPositive_A*dt) + obj.a_max*(obj.t_in-(t+dt));
@@ -80,7 +80,7 @@ classdef AutonomousCar < IdmModel
             %%
             v = obj.velocity;
             s = obj.pose(1);
-            s_in = obj.s_in-0.2; % !!!!!!!!!! explain it or delete !!!!!!!
+            s_in = obj.s_in; 
             s_out = obj.s_out;
 %             T_safe = obj.T_safe; %#ok<*PROPLC>
 %             tol = obj.tol;
@@ -97,6 +97,12 @@ classdef AutonomousCar < IdmModel
                     obj.t_out = (-v_comp+sqrt((v_comp)^2+2*a_comp*(s_out-s_comp)))/a_comp+t;
                 else
                     obj.t_out = (s_out - s_comp)/v_comp+t;
+                end
+                
+                
+                if obj.t_out < (t + dt)
+                    %% if t_out is less than t+dt then the equation gives a negative time which is impossible
+                    obj.t_out = t + dt;
                 end
                 
                 if  s <= obj.s_in

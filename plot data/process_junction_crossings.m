@@ -83,7 +83,7 @@ close(f1)
 %% Platoon sizes and frequencies
 
 platoons = NaN(length(data),50);
-orderedPlatoons = NaN(length(data),1000);
+orderedPlatoons = NaN(length(data),2000);
 for idx = 1:length(data)
     temp = [];
 %     selectedTestData = data(idx).crossOrder;

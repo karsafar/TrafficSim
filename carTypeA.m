@@ -224,7 +224,6 @@ classdef carTypeA < IdmModel
                 v_comp = oppositeRoad.allCarsStates(2,ind);
                 a_comp = oppositeRoad.allCarsStates(3,ind);
                 
-%                 tol_op = 0.4;
                 tol_op = 0.0;
                 [t_in_op, t_out_op] = calculate_t_in_and_out(obj,a_comp,v_comp,s_comp,t,oppositeRoad.Length,tol_op);
                 
@@ -278,14 +277,7 @@ classdef carTypeA < IdmModel
                 plot(obj.full_tree,tempGraph)
                 obj.bb
             end
-            
-            %% print decision data
-            
-            
-            
-            
-            
-            
+            %%
             check_for_negative_velocity(obj,dt);
         end
         function [t_in, t_out] = calculate_t_in_and_out(obj,a,v,s,t,roadLength,varargin)
