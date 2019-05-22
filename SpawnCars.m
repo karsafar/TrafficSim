@@ -23,7 +23,9 @@ classdef SpawnCars < handle
                 obj.numCars = sum(everyCarNum);
                 FixedSeed = SpawnData{2};
                 carTypes = SpawnData{3};
-                obj.randomSpawn(everyCarNum,carTypes,FixedSeed,dt)
+%                 obj.randomSpawn(everyCarNum,carTypes,FixedSeed,dt)
+                %%
+                obj.controlled_spacing_spawn(everyCarNum,carTypes,FixedSeed,dt)
             end
         end
         
@@ -97,6 +99,50 @@ classdef SpawnCars < handle
                         for j = 1:everyCarNum(i)
                              new_car = carTypes{i}(obj.roadOrientation, obj.roadStart,obj.roadWidth,dt);
                             allCarsArray = [allCarsArray new_car];
+                        end
+                    end
+                end                    
+                    
+                obj.allCars = allCarsArray(randperm(length(allCarsArray)));      
+                allCarsPoseArray = flip(allCarsPoseArray);
+                for iCar = 1:obj.numCars
+                    obj.allCars(iCar).pose(1) = allCarsPoseArray(iCar);
+                    if iCar > 1
+                        insertAfter(obj.allCars(iCar),obj.allCars(iCar-1));
+                        obj.allCars(iCar).leaderFlag = false;
+                    end
+                end
+                leaderCar = obj.allCars(1);
+                if obj.numCars > 1
+                    leaderCar.Prev = obj.allCars(iCar);
+                    obj.allCars(iCar).Next = leaderCar;
+                end
+            end
+        end
+        function controlled_spacing_spawn(obj,everyCarNum,carTypes,FixedSeed,dt)
+            %%
+            
+            if obj.numCars ~= 0
+                allCarsPoseArray = NaN(obj.numCars,1);
+                for iCar = 1:obj.numCars
+                    if iCar == 1
+                        allCarsPoseArray(iCar) = obj.roadStart;
+                    else
+                        allCarsPoseArray(iCar) = allCarsPoseArray(iCar-1) + (obj.roadEnd-obj.roadStart)/obj.numCars;
+                    end
+                end
+                
+                if strcmpi(obj.roadOrientation,'vertical')
+                    allCarsPoseArray = allCarsPoseArray + (obj.roadEnd-obj.roadStart)/(2*obj.numCars);
+                end
+                
+                allCarsArray = [];
+                for i = 1:numel(everyCarNum)
+                    if everyCarNum(i) > 0
+                        for j = 1:everyCarNum(i)
+                            new_car = carTypes{i}(obj.roadOrientation, obj.roadStart,obj.roadWidth,dt);
+                            allCarsArray = [allCarsArray new_car];
+                            allCarsArray(end).velocity = 4.841;
                         end
                     end
                 end                    

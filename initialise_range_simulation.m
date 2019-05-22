@@ -6,7 +6,7 @@ roadTypes = {@LoopRoad @FiniteRoad};
 carTypes = {@carTypeA, @carTypeB, @carTypeC};
 
 plotFlag = false;
-runTime = 3600;
+runTime = 14400;
 dt = 0.1;
 nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;
@@ -36,8 +36,8 @@ swapRate = 0.2;
 % density = nCars(1)/road.Length(1);
 
 %%
-allCarsNumArray_H = zeros(34,numel(carTypes));
-allCarsNumArray_V = zeros(34,numel(carTypes));
+allCarsNumArray_H = zeros(32,numel(carTypes));
+allCarsNumArray_V = zeros(32,numel(carTypes));
 for i = 1:32
     init_density = 0.02+(i-1)*0.004;
     nCars(1) = round(init_density * road.Length(1));
@@ -47,7 +47,7 @@ for i = 1:32
     alpha = 50; beta  = 50; gamma =  0;
     
 %     carTypeRatios = [alpha/100 beta/100 gamma/100; alpha/100 beta/100 gamma/100];
-    carTypeRatios = [0 1 0; 0 1 0];
+    carTypeRatios = [1 0 0; 1 0 0];
 
 
     for j = 1:numel(carTypes)
@@ -69,7 +69,7 @@ end
 Arm_H = [];
 Arm_V = [];
 
-save('E-B-N-B.mat',...
+save('E-A-N-A.mat',...
     'carTypeRatios',...
     'carTypes',...
     'nCars',...

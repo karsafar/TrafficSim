@@ -5,7 +5,7 @@ roadTypes = {@LoopRoad @FiniteRoad};
 carTypes = {@IdmModel, @HdmModel, @carTypeA, @carTypeB, @carTypeC};
 
 plotFlag = true;
-setappdata(0,'drawRAte',1);
+setappdata(0,'drawRAte',0);
 
 runTime = 3600; % sec
 dt = 0.1;
@@ -17,8 +17,9 @@ fixedSeed = [1 1];
 priority = false;
 
 % road dimensions
-road.Start = [-250; -250];
-road.End = [250; 250];
+val = 50;
+road.Start = [-val; -val];
+road.End = [val; val];
 road.Width = [4; 4];
 road.Length = road.End - road.Start;
 
@@ -26,12 +27,12 @@ noSpawnAreaLength = 24.4; % length of no spawn area around the junction + length
 max_density = 1/6.4;    % number of cars per metre (0.1562)
 
 
-transientCutOffLength = 150;
-swapRate = 0.8;
+transientCutOffLength = 0;
+swapRate = 0;
 %%
-density = 0.084;
+density = 0.13;
 nCars(1,1) = round(density * road.Length(1));
-nCars(2,1) = round(density * road.Length(2));
+nCars(2,1) = round(0.04 * road.Length(2));
 % nCars(2,1) = 0;
 if  mod(nCars(1),2) ~= 0
     nCars = nCars - 1;
@@ -49,7 +50,7 @@ end
 %single simulation flag 
 setappdata(0,'simType',0);
 
-carTypeRatios = [0 0 0.5 0.5 0; 0 0 0.5 0.5 0];
+carTypeRatios = [0 0 0 1 0; 0 0 0 1 0];
 
 allCarsNumArray_H = zeros(1,numel(carTypes));
 allCarsNumArray_V = zeros(1,numel(carTypes));
@@ -99,7 +100,7 @@ sim = run_simulation(...
 
 %% save the simulation results
 
-save(['test-' num2str(5) '.mat'],...
+save(['test-' num2str(1) '.mat'],...
     'carTypeRatios',...
     'carTypes',...
     'nCars',...

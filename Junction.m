@@ -7,7 +7,11 @@ classdef Junction < handle
         collidingCarsIdx = NaN(1,2)
         collisionFlag = 0
         crossOrder = NaN
+        crossCarTypeOrder = NaN
         crossCount = []
+        crossCarTypeCount = []
+
+        
         collisionMsgs = []
         
         flowHandle = []
@@ -35,13 +39,11 @@ classdef Junction < handle
                 h1 = figure('units', 'normalized', 'position', [0.4, 0, 0.6, 1]);
             end
             obj.junctionPlotHandle = axes('Parent',h1,'Units','normalized','Position',[0.05 0.5 0.9 0.45]);
-%             obj.junctionPlotHandle = subplot(3,1,1);
+            %{
             obj.flowHandle = axes('Parent',h1,'Units','normalized','Position',[0.05 0.3 0.9 0.15]);
-%             obj.flowHandle = subplot(3,1,2);
             hold(obj.flowHandle,'on')
             grid(obj.flowHandle,'on')
             obj.crossHandle = axes('Parent',h1,'Units','normalized','Position',[0.05 0.1 0.9 0.15]);
-%             obj.crossHandle = subplot(3,1,3);
             hold(obj.crossHandle,'on')
             grid(obj.crossHandle,'on')
             
@@ -53,7 +55,7 @@ classdef Junction < handle
             obj.crossAxHandle2 = text(1/2,-0.05,'\uparrow East Arm Crosses','FontSize',16);
             obj.crossAxHandle3 = text(1/2,1.05,'\downarrow North Arm Crosses','FontSize',16);
             
-            
+            %}
             axis(obj.junctionPlotHandle,'equal',[roadDimensions.Start(1) roadDimensions.End(1)...
                 roadDimensions.Start(2) roadDimensions.End(2)], 'off')
             hold(obj.junctionPlotHandle,'on')
@@ -89,6 +91,7 @@ classdef Junction < handle
             if vericalArm.numCars > 0
                 obj.draw_car(vericalArm,flag)
             end
+%{
             if transientCutOffLength*10 <= iIteration && mod(iIteration,1) == 0
                 %% plot flow and crossings
                 set(obj.flowAxHandle(1),'XData',1:iIteration,'YData',horizontalArm.flow(1:iIteration));
@@ -110,6 +113,7 @@ classdef Junction < handle
                 axis(obj.crossHandle,[startSpot, (iIteration+50), -0.1, 1.1]);
                 
             end
+%}
         end
         
         
@@ -174,12 +178,12 @@ classdef Junction < handle
         
         function collision_check(obj,allCarsHoriz,allCarsVert,nCars,mCars,plotFlag,t)
             hCar = 0;
-            if isempty(allCarsHoriz) && isempty(allCarsVert) 
+            if isempty(allCarsHoriz) && isempty(allCarsVert)
                 return
             elseif isempty(allCarsHoriz)
                 x1 = allCarsVert(1).s_in;
                 x2 = allCarsVert(1).s_out;
-            else 
+            else
                 x1 = allCarsHoriz(1).s_in;
                 x2 = allCarsHoriz(1).s_out;
                 vCar = 0;
@@ -210,50 +214,96 @@ classdef Junction < handle
                     obj.collisionFlag = 0;
                     if isempty(obj.crossOrder)
                         obj.crossOrder = NaN;
+                        obj.crossCarTypeOrder = NaN;
                     else
                         obj.crossOrder = [obj.crossOrder obj.crossOrder(end)];
+                        obj.crossCarTypeOrder = [obj.crossCarTypeOrder obj.crossCarTypeOrder(end)];
                     end
                 elseif hCar > 0 && vCar > 0
                     obj.collidingCarsIdx = [hCar; vCar];
                     obj.collisionFlag = 1;
                     if isempty(obj.crossOrder)
                         obj.crossOrder = NaN;
+                        obj.crossCarTypeOrder = NaN;
                     else
                         obj.crossOrder = [obj.crossOrder obj.crossOrder(end)];
+                        obj.crossCarTypeOrder = [obj.crossCarTypeOrder obj.crossCarTypeOrder(end)];
                     end
                     % count crossing orders
                 elseif hCar > 0 && hCar ~=  obj.collidingCarsIdx(1)
+                    
                     obj.crossOrder = [obj.crossOrder 0];
                     obj.crossCount = [obj.crossCount 0];
+                    
                     obj.collidingCarsIdx(1) = hCar;
+                    switch class(allCarsHoriz(hCar))
+                        case 'carTypeA'
+                            obj.crossCarTypeCount = [obj.crossCarTypeCount 1];
+                            obj.crossCarTypeOrder = [obj.crossCarTypeOrder 1];
+
+                        case 'carTypeB'
+                            obj.crossCarTypeCount = [obj.crossCarTypeCount 2];
+                            obj.crossCarTypeOrder = [obj.crossCarTypeOrder 2];
+
+                        case 'carTypeC'
+                            obj.crossCarTypeCount = [obj.crossCarTypeCount 3];
+                            obj.crossCarTypeOrder = [obj.crossCarTypeOrder 3];
+
+                        otherwise
+                            obj.crossCarTypeCount = [obj.crossCarTypeCount NaN];
+                            obj.crossCarTypeOrder = [obj.crossCarTypeOrder NaN];
+                    end
                 elseif vCar > 0 && vCar ~=  obj.collidingCarsIdx(2)
+                    
                     obj.crossOrder = [obj.crossOrder 1];
                     obj.crossCount = [obj.crossCount 1];
+                    
                     %                     obj.collidingCarsIdx(1) = 0;
                     obj.collidingCarsIdx(2) = vCar;
+                    switch class(allCarsVert(vCar))
+                        case 'carTypeA'
+                            obj.crossCarTypeCount = [obj.crossCarTypeCount 1];
+                            obj.crossCarTypeOrder = [obj.crossCarTypeOrder 1];
+
+                        case 'carTypeB'
+                            obj.crossCarTypeCount = [obj.crossCarTypeCount 2];
+                            obj.crossCarTypeOrder = [obj.crossCarTypeOrder 2];
+
+                        case 'carTypeC'
+                            obj.crossCarTypeCount = [obj.crossCarTypeCount 3];
+                            obj.crossCarTypeOrder = [obj.crossCarTypeOrder 3];
+
+                        otherwise
+                            obj.crossCarTypeCount = [obj.crossCarTypeCount NaN];
+                            obj.crossCarTypeOrder = [obj.crossCarTypeOrder NaN];
+                    end
                 else
                     if isempty(obj.crossOrder)
                         obj.crossOrder = NaN;
+                        obj.crossCarTypeOrder = NaN;
                     else
                         obj.crossOrder = [obj.crossOrder obj.crossOrder(end)];
+                        obj.crossCarTypeOrder = [obj.crossCarTypeOrder obj.crossCarTypeOrder(end)];
                     end
                 end
             else
                 obj.crossOrder = [obj.crossOrder obj.crossOrder(end)];
+                obj.crossCarTypeOrder = [obj.crossCarTypeOrder obj.crossCarTypeOrder(end)];
             end
+            %{
+                        if obj.collisionFlag
+                            msg = sprintf('Collision occured at time t = %f. collided cars = [%d %d] %i',t,hCar,vCar);
+                            obj.collisionMsgs = [obj.collisionMsgs; msg];
+                            %save(['coll_t-' num2str(t) '.mat'],'allCarsHoriz','allCarsVert');
+                            disp(msg);
             
-            %             if obj.collisionFlag
-            %                 msg = sprintf('Collision occured at time t = %f. collided cars = [%d %d] %i',t,hCar,vCar);
-            %                 obj.collisionMsgs = [obj.collisionMsgs; msg];
-            %                 %save(['coll_t-' num2str(t) '.mat'],'allCarsHoriz','allCarsVert');
-            %                 disp(msg);
-            %
-            %                 if plotFlag
-            %                     junctionAxesHandle = text(obj.junctionPlotHandle,3,-7,msg,'Color','red');
-            %                     delete(junctionAxesHandle);
-            %                 else
-            %                 end
-            %             end
+                            if plotFlag
+                                junctionAxesHandle = text(obj.junctionPlotHandle,3,-7,msg,'Color','red');
+                                delete(junctionAxesHandle);
+                            else
+                            end
+                        end
+            %}
         end
         
     end
