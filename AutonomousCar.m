@@ -37,11 +37,12 @@ classdef AutonomousCar < IdmModel
 %             a_comp = competingCar.acceleration;
             a_comp = competingCar.History(4,competingCar.historyIndex-1);
             if s_comp <= s_in && obj.tol < v_comp
-                if obj.tol < a_comp
-                    obj.t_in = (-v_comp+sqrt((v_comp)^2+2*a_comp*(s_in-s_comp)))/a_comp+t;
-                else
-                    obj.t_in = (s_in - s_comp)/v_comp+t;
-                end
+%                 if obj.tol < a_comp
+%                     obj.t_in = (-v_comp+sqrt((v_comp)^2+2*a_comp*(s_in-s_comp)))/a_comp+t;
+%                 else
+%                     obj.t_in = (s_in - s_comp)/v_comp+t;
+%                 end
+                obj.t_in = (s_in - s_comp)/v_comp+t;
                 if t < obj.t_in && s >= (s_out-v_max*(obj.t_in-t))
                     
                     aheadWithPositive_A = (s_out - 0.5*obj.a_max*(obj.t_in-(t+dt))^2 - v*(obj.t_in-t) - s)/ (dt*(obj.t_in-(t+dt/2)));

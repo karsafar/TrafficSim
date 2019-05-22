@@ -105,7 +105,7 @@ classdef carTypeB < AutonomousCar
             assignZero = BtAssign(obj.it_accel, 0);
             backOff = BtSequence(obj.it_backOffTime > obj.it_currentTime,assignZero);
             %% Full Behaviour Tree
-%             obj.full_tree = BtSelector(DoCruise,keepJunctionClear,backOff,doJunction,assignStop);
+            obj.full_tree = BtSelector(DoCruise,keepJunctionClear,backOff,doJunction,assignStop);
 %             obj.full_tree = BtSelector(DoCruise,backOff,Crossing,assignStop);
 % 
 %             Crossing_lazy = BtSelector(aheadWithIdm,behindWithIdm,aheadCar,behindCar);
