@@ -12,13 +12,10 @@ classdef Car < dlnode & matlab.mixin.Copyable
         a_min = -3.5
         a_feas_min = -9
         History = []
-%         locationHistory = NaN(1,100000)
-%         velocityHistory = NaN(1,100000)
-%         accelerationHistory = NaN(1,100000)
-%         timeHistory = NaN(1,100000)
         historyIndex = 1.0
         leaderFlag = true
         stopIndex = 0
+        downStreamEndTime = 1
     end
     properties (SetAccess = immutable)
         ownDistfromRearToBack = NaN
@@ -51,6 +48,8 @@ classdef Car < dlnode & matlab.mixin.Copyable
                 obj.dt = car_args{4};
                 obj.s_in = -roadWidth/2-obj.ownDistfromRearToFront;
                 obj.s_out = roadWidth/2+obj.ownDistfromRearToBack;
+                obj.Prev = obj;
+                obj.Next = obj;
             end
         end
         
@@ -65,11 +64,6 @@ classdef Car < dlnode & matlab.mixin.Copyable
         function store_state_data(obj,t,currentStates)
 
             i = obj.historyIndex;
-%             obj.locationHistory(i) = s;
-%             obj.velocityHistory(i) = v;
-%             obj.accelerationHistory(i) = a;
-%             obj.timeHistory(i) = t;
-%             obj.History = [obj.History, dynArgs];
             obj.History(:,i) = [t;currentStates];
             obj.historyIndex = i + 1;
             

@@ -38,12 +38,7 @@ end
 if isa(VerticalArm,'LoopRoad')
     VerticalArm.swapRate = swapRate;
 end
-% create our clean up object
-cleanupObj = onCleanup(@cleanMeUp);
 
-if plotFlag
-    drawRate = getappdata(0,'drawRAte');
-end
 for iIteration = 1:nIterations
     % update time
     t = t_rng(iIteration);
@@ -62,15 +57,14 @@ for iIteration = 1:nIterations
         VerticalArm.allCars(jCar).store_state_data(t,VerticalArm.allCarsStates(:,jCar));
     end
     % draw cars
-    if plotFlag && t >= transientCutOffLength
+    if plotFlag
         junc.draw_all_cars(HorizontalArm,VerticalArm,iIteration,transientCutOffLength)
-        if drawRate
+        if getappdata(0,'drawRAte')
             drawnow limitrate
         else
             drawnow
         end
     end
-
     % check for collision
     junc.collision_check(...
         HorizontalArm.allCars,...
@@ -95,7 +89,7 @@ for iIteration = 1:nIterations
     
     % Itersection Collision Avoidance (ICA)
     for iCar = 1:HorizontalArm.numCars
-        if t > transientCutOffLength
+        if t > transientCutOffLength*0.8
             HorizontalArm.allCars(iCar).decide_acceleration(VerticalArm,roadDims.Length(1),t,dt);
         else
             HorizontalArm.allCars(iCar).acceleration = HorizontalArm.allCars(iCar).idmAcceleration;
@@ -103,7 +97,7 @@ for iIteration = 1:nIterations
         end        
     end
     for jCar = 1:VerticalArm.numCars
-        if t > transientCutOffLength
+        if t > transientCutOffLength*0.8
             VerticalArm.allCars(jCar).decide_acceleration(HorizontalArm,roadDims.Length(2),t,dt);
         else
             VerticalArm.allCars(jCar).acceleration = VerticalArm.allCars(jCar).idmAcceleration;
@@ -112,31 +106,12 @@ for iIteration = 1:nIterations
     end
     
     % Move all the cars along the road
-    count_emegrency_breaks(HorizontalArm);
-    count_emegrency_breaks(VerticalArm);
+%     count_emegrency_breaks(HorizontalArm);
+%     count_emegrency_breaks(VerticalArm);
     
     % Move all the cars along the road
     HorizontalArm.move_all_cars(t,dt,iIteration,nIterations)
     VerticalArm.move_all_cars(t,dt,iIteration,nIterations)
-    
-%     if iIteration == 50
-%         HorizontalArm.allCars(2).velocity = HorizontalArm.allCars(2).velocity + 2;
-%     end
-
-
-    if plotFlag == 0 && mod(iIteration,36) == 0
-        % Update waitbar and message
-        f = findall(0,'type','figure','tag','TMWWaitbar');
-        if getappdata(0,'simType') == 0
-            waitbar(iIteration/nIterations,f,sprintf('%d percent out of %d iterations',round(iIteration*100/nIterations),nIterations))
-        end
-        if getappdata(f,'canceling')
-            sim.horizArm = HorizontalArm;
-            sim.vertArm = VerticalArm;
-            sim.crossOrder = junc.crossOrder;
-            return
-        end
-    end
 end
 sim.horizArm = HorizontalArm;
 sim.vertArm = VerticalArm;
@@ -145,13 +120,5 @@ sim.crossCount = junc.crossCount;
 sim.crossCarTypeCount = junc.crossCarTypeCount;
 sim.crossCarTypeOrder = junc.crossCarTypeOrder;
 end
-
-% fires when main function terminates
-function cleanMeUp()
-% close waitbar
-f = findall(0,'type','figure','tag','TMWWaitbar');
-delete(f)
-end
-
 
 

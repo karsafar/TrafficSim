@@ -108,66 +108,90 @@ plot(t_rng,North.Occupancy,'-b','LineWidth',1)
 %% Spatiotenporal Velocity Profiles
 
 %%%%%%%%%%%%%% West-East Arm %%%%%%%%%%%%%%
-tic
-X = [];
-Y = [];
-Z = [];
-d = 5; % density on points in scatter plot 
-maxVelocity = 13;
-for iCar = 1:sim.horizArm.nCarHistory
-    X = [X sim.horizArm.carHistory(iCar).History(1,1:d:end)];
-    Y = [Y sim.horizArm.carHistory(iCar).History(2,1:d:end)];
-    Z = [Z sim.horizArm.carHistory(iCar).History(3,1:d:end)];
+for i = 1:48
+    tic
+    clf
+    figure(1)
+    load(['test-' num2str(i) '.mat']);
+    X = [];
+    Y = [];
+    Z = [];
+    d = 4; % density on points in scatter plot
+    maxVelocity = 13;
+    for iCar = 1:sim.horizArm.numCars
+        %     X = [X sim.horizArm.carHistory(iCar).History(1,1:d:end)];
+        %     Y = [Y sim.horizArm.carHistory(iCar).History(2,1:d:end)];
+        %     Z = [Z sim.horizArm.carHistory(iCar).History(3,1:d:end)];
+        %
+        X = [X sim.horizArm.allCars(iCar).History(1,1:d:end)];
+        Y = [Y sim.horizArm.allCars(iCar).History(2,1:d:end)];
+        Z = [Z sim.horizArm.allCars(iCar).History(3,1:d:end)];
+    end
+    
+    X1 = [];
+    Y1 = [];
+    Z1 = [];
+    for iCar = 1:sim.vertArm.numCars
+        %     X1 = [X1 sim.vertArm.carHistory(iCar).History(1,1:d:end)];
+        %     Y1 = [Y1 sim.vertArm.carHistory(iCar).History(2,1:d:end)];
+        %     Z1 = [Z1 sim.vertArm.carHistory(iCar).History(3,1:d:end)];
+        %
+        X1 = [X1 sim.vertArm.allCars(iCar).History(1,1:d:end)];
+        Y1 = [Y1 sim.vertArm.allCars(iCar).History(2,1:d:end)];
+        Z1 = [Z1 sim.vertArm.allCars(iCar).History(3,1:d:end)];
+    end
+    
+    ax1 = subplot(2,1,1);
+    
+    
+    
+    set(ax1,'FontSize',16)
+    title(ax1,'West-East Arm Velocity Profiles')
+    xlabel(ax1,'Time, s')
+    ylabel(ax1,'Position, m')
+    hold(ax1,'on');
+    grid(ax1,'on');
+    
+    axis(ax1,[0 t_rng(nIterations) sim.horizArm.startPoint sim.horizArm.endPoint] )
+    xlim(ax1,[transientCutOffLength t_rng(nIterations)])
+    
+    caxis manual
+    caxis([0 maxVelocity]);
+    x1 = 0;
+    x2 = t_rng(nIterations);
+    y1 = sim.horizArm.allCars(1).s_in;
+    y2 = -sim.horizArm.allCars(1).s_in;
+    x = [x1, x2, x2, x1, x1];
+    y = [y1, y1, y2, y2, y1];
+    % axis(ax1,[0 t_rng(nIterations) sim.horizArm.startPoint sim.horizArm.endPoint] )
+    patch(ax1,x,y,[0.5 0.5 0.5],'EdgeColor','None');
+    
+    %%%%%%%%%%%%%% South-North Arm %%%%%%%%%%%%%%
+    ax2 = subplot(2,1,2);
+    set(ax2,'FontSize',16)
+    title(ax2,'South-North Arm Velocity Profiles')
+    xlabel(ax2,'Time, s')
+    ylabel(ax2,'Position, m')
+    hold(ax2,'on');
+    grid(ax2,'on');
+    axis(ax2,[0 t_rng(nIterations) sim.vertArm.startPoint sim.vertArm.endPoint] )
+    
+    caxis manual
+    caxis([0 maxVelocity]);
+    c = colorbar('location','Manual', 'position', [0.93 0.11 0.02 0.82]);
+    set(c,'YTick',(0:1:maxVelocity))
+    c.Label.String = 'Velocity, m/s';
+    c.Label.FontSize = 12;
+    colormap(flipud(jet));
+    
+    % plot the trajectories
+    sz = 10;
+    scatter(ax1,X,Y,sz,Z,'filled');
+    scatter(ax2,X1,Y1,sz,Z1,'filled');
+    xlim(ax2,[transientCutOffLength t_rng(nIterations)])
+    pause(1)
+    toc
 end
-
-X1 = [];
-Y1 = [];
-Z1 = [];
-for iCar = 1:sim.vertArm.nCarHistory
-    X1 = [X1 sim.vertArm.carHistory(iCar).History(1,1:d:end)];
-    Y1 = [Y1 sim.vertArm.carHistory(iCar).History(2,1:d:end)];
-    Z1 = [Z1 sim.vertArm.carHistory(iCar).History(3,1:d:end)];
-end
-
-ax1 = subplot(2,1,1);
-set(ax1,'FontSize',16)
-title(ax1,'West-East Arm Velocity Profiles')
-xlabel(ax1,'Time, s')
-ylabel(ax1,'Position, m')
-hold(ax1,'on');
-grid(ax1,'on');
-
-axis(ax1,[0 t_rng(nIterations) sim.horizArm.startPoint sim.horizArm.endPoint] )
-xlim(ax1,[transientCutOffLength t_rng(nIterations)])
-
-caxis manual
-caxis([0 maxVelocity]);
-
-%%%%%%%%%%%%%% South-North Arm %%%%%%%%%%%%%%
-ax2 = subplot(2,1,2);
-set(ax2,'FontSize',16)
-title(ax2,'South-North Arm Velocity Profiles')
-xlabel(ax2,'Time, s')
-ylabel(ax2,'Position, m')
-hold(ax2,'on');
-grid(ax2,'on');
-axis(ax2,[0 t_rng(nIterations) sim.vertArm.startPoint sim.vertArm.endPoint] )
-
-caxis manual
-caxis([0 maxVelocity]);
-c = colorbar('location','Manual', 'position', [0.93 0.11 0.02 0.82]);
-set(c,'YTick',(0:1:maxVelocity))
-c.Label.String = 'Velocity, m/s';
-c.Label.FontSize = 12;
-colormap(flipud(jet));
-
-% plot the trajectories
-sz = 10;
-scatter(ax1,X,Y,sz,Z,'filled');
-scatter(ax2,X1,Y1,sz,Z1,'filled');
-xlim(ax2,[transientCutOffLength t_rng(nIterations)])
-
-toc
 
 return
 
@@ -177,10 +201,23 @@ return
 
 %{%
 % tf = isa(sim.horizArm,'LoopRoad');
+% for i = 1:nIterations
+%     cumulativeAverage(1,i) = nanmean(sim.horizArm.averageVelocityHistory(1:i));
+%     cumulativeAverage(2,i) = nanmean(sim.vertArm.averageVelocityHistory(1:i));
+% end
+velArrayEast = NaN(sim.horizArm.numCars,nIterations);
+velArrayNorth = NaN(sim.vertArm.numCars,nIterations);
+for iCar = 1:sim.horizArm.numCars
+    velArrayEast(iCar,:) = sim.horizArm.allCars(iCar).History(3,:);
+end
+for iCar = 1:sim.vertArm.numCars
+    velArrayNorth(iCar,:) = sim.vertArm.allCars(iCar).History(3,:);
+end
 for i = 1:nIterations
     cumulativeAverage(1,i) = nanmean(sim.horizArm.averageVelocityHistory(1:i));
-    cumulativeAverage(2,i) = nanmean(sim.vertArm.averageVelocityHistory(1:i));
+    cumulativeAverage(2,i) = nanmean(sim.vertArm.allCars(:).History(3,:));
 end
+
 % if tf == 0
 %     density = sim.horizArm.numCarsHistory/sim.horizArm.Length;
 % end
@@ -202,8 +239,7 @@ plot(ax3,t_rng,flow.WestEast,'LineWidth',1)
 plot(ax3,t_rng,flow.SouthNorth,'LineWidth',1)
 plot(ax3,t_rng,flowDifference,'-k','LineWidth',1)
 axis(ax3,[0 t_rng(nIterations) 0 max(max(flow.WestEast),max(flow.SouthNorth))])
-legend(ax3,'West-East Arm Flow','South-North Arm Flow','Junction Flow')
-
+legend(ax3,'West-East Arm Flow','South-North Arm Flow','Junction Flow','Location','southwest')
 
 %% Speed variance
 

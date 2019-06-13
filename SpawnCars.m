@@ -23,9 +23,9 @@ classdef SpawnCars < handle
                 obj.numCars = sum(everyCarNum);
                 FixedSeed = SpawnData{2};
                 carTypes = SpawnData{3};
-%                 obj.randomSpawn(everyCarNum,carTypes,FixedSeed,dt)
+                 obj.randomSpawn(everyCarNum,carTypes,FixedSeed,dt)
                 %%
-                obj.controlled_spacing_spawn(everyCarNum,carTypes,FixedSeed,dt)
+%                 obj.controlled_spacing_spawn(everyCarNum,carTypes,FixedSeed,dt)
             end
         end
         
@@ -57,6 +57,7 @@ classdef SpawnCars < handle
         function randomSpawn(obj,everyCarNum,carTypes,FixedSeed,dt)
             %%
             minimumSpacing = IdmModel.minimumGap+Car.dimension(2);
+%             minimumSpacing = 2+Car.dimension(2);
             if obj.numCars ~= 0
                 allCarsPoseArray = NaN(obj.numCars,1);
                 for iCar = 1:obj.numCars
@@ -66,7 +67,7 @@ classdef SpawnCars < handle
                         allCarsPoseArray(iCar) = allCarsPoseArray(iCar-1) + minimumSpacing;
                     end
                 end
-                unoccupiedSpace =  obj.roadEnd - allCarsPoseArray(end) - 24.4;
+                unoccupiedSpace =  obj.roadEnd - allCarsPoseArray(end) - minimumSpacing;
                 if FixedSeed > 0
                     rng(FixedSeed);
                 end
@@ -141,7 +142,7 @@ classdef SpawnCars < handle
                     if everyCarNum(i) > 0
                         for j = 1:everyCarNum(i)
                             new_car = carTypes{i}(obj.roadOrientation, obj.roadStart,obj.roadWidth,dt);
-                            allCarsArray = [allCarsArray new_car];
+                            allCarsArray = [allCarsArray; new_car];
                             allCarsArray(end).velocity = 4.841;
                         end
                     end

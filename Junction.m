@@ -115,8 +115,6 @@ classdef Junction < handle
             end
 %}
         end
-        
-        
         function draw_car(obj,Arm,flag)
             plotVectorX = NaN(1,5);
             plotVectorY = NaN(1,5);
@@ -174,8 +172,6 @@ classdef Junction < handle
                 set(arm.CarsImageHandle(iCar),'XData',plotVectorX','YData',plotVectorY');
             end
         end
-        
-        
         function collision_check(obj,allCarsHoriz,allCarsVert,nCars,mCars,plotFlag,t)
             hCar = 0;
             if isempty(allCarsHoriz) && isempty(allCarsVert)

@@ -468,13 +468,16 @@ set(handles.pushbutton3,'userdata',0);
 
 % define the length of storage data for all cars
 for iCar = 1:HorizontalArm.numCars
-    HorizontalArm.allCars(iCar).History = NaN(4,nIterations);
+%     HorizontalArm.allCars(iCar).History = NaN(4,nIterations);
+    HorizontalArm.allCars(iCar).History = single(NaN(4,nIterations));
+
 end
 for jCar = 1:VerticalArm.numCars
-    VerticalArm.allCars(jCar).History = NaN(4,nIterations);
+%     VerticalArm.allCars(jCar).History = NaN(4,nIterations);
+    VerticalArm.allCars(jCar).History = single(NaN(4,nIterations));
 end
 
-transientCutOffLength = 100;
+transientCutOffLength = 0;
 swapRate = 0.0;
 % define transient length
 HorizontalArm.transientCutOffLength = transientCutOffLength;
@@ -487,7 +490,9 @@ end
 if isa(VerticalArm,'LoopRoad')
     VerticalArm.swapRate = swapRate;
 end
-
+tic
+% create our clean up object
+cleanupObj = onCleanup(@cleanMeUp);
 for iIteration = handles.iIteration:nIterations
     % update time
     t = handles.t_rng(iIteration);
@@ -584,8 +589,9 @@ if plotFlag == 0
     f = findall(0,'type','figure','tag','TMWWaitbar');
     delete(f)
 end
-set(handles.pushbutton_plot_resutls, 'enable', 'on')
 
+set(handles.pushbutton_plot_resutls, 'enable', 'on')
+toc
 handles.HorizontalArm = HorizontalArm;
 handles.VerticalArm = VerticalArm;
 handles.iIteration = iIteration;

@@ -5,21 +5,23 @@ roadTypes = {@LoopRoad @FiniteRoad};
 carTypes = {@IdmModel, @HdmModel, @carTypeA, @carTypeB, @carTypeC};
 
 plotFlag = true;
-setappdata(0,'drawRAte',0);
+setappdata(0,'drawRAte',1);
 
-runTime = 3600; % sec
+runTime = 360; % sec
 dt = 0.1;
 nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;
 t_rng = 0:dt:runTime;
-fixedSeed = [1 1];
+
+fixedSeed = [ 1 1];
 % seedType = rng('shuffle', 'combRecursive');
 priority = false;
 
 % road dimensions
-val = 50;
-road.Start = [-val; -val];
-road.End = [val; val];
+val = 250;
+val2 = 250;
+road.Start = [-val; -val2];
+road.End = [val; val2];
 road.Width = [4; 4];
 road.Length = road.End - road.Start;
 
@@ -30,13 +32,14 @@ max_density = 1/6.4;    % number of cars per metre (0.1562)
 transientCutOffLength = 0;
 swapRate = 0;
 %%
-density = 0.13;
+density = 0.03;
 nCars(1,1) = round(density * road.Length(1));
-nCars(2,1) = round(0.04 * road.Length(2));
-% nCars(2,1) = 0;
-if  mod(nCars(1),2) ~= 0
-    nCars = nCars - 1;
-end
+nCars(2,1) = round(density * road.Length(2));
+% for i = 1:2
+%     if  mod(nCars(i),2) ~= 0
+%         nCars(i) = nCars(i) - 1;
+%     end
+% end
 density = nCars(1)/road.Length(1);
 % RealDensity(2) = nCars(2)/road.Length(2);
 %%
@@ -50,7 +53,7 @@ end
 %single simulation flag 
 setappdata(0,'simType',0);
 
-carTypeRatios = [0 0 0 1 0; 0 0 0 1 0];
+carTypeRatios = [0 0 1 0 0; 0 0 1 0 0];
 
 allCarsNumArray_H = zeros(1,numel(carTypes));
 allCarsNumArray_V = zeros(1,numel(carTypes));
@@ -64,23 +67,27 @@ for j = 1:numel(carTypes)
     end
 end
 
-
+% 1-loopToad; 2-finiteRoad
 selectRoadTypes = [1 1];
-spawnRate = 3; % 1/q, larger the rate lower the flow
 
 if selectRoadTypes(1) == 1
     Arm.H = SpawnCars([{allCarsNumArray_H},fixedSeed(1),{carTypes}],'horizontal',road.Start(1),road.End(1),road.Width(1),dt,nIterations);
 else
-    
+    spawnRate = 3; % 1/q, larger the rate lower the flow
     Arm.H = [{carTypeRatios(1,:)},spawnRate,fixedSeed(1),dt,nIterations];
 end
 if selectRoadTypes(2) == 1
     Arm.V = SpawnCars([{allCarsNumArray_V},fixedSeed(2),{carTypes}],'vertical',road.Start(2),road.End(2),road.Width(2),dt,nIterations);
 else
+    spawnRate = 3; % 1/q, larger the rate lower the flow
     Arm.V = [{carTypeRatios(2,:)},spawnRate,fixedSeed(2),dt,nIterations];
 end
 
+
+% control random process
 rng('shuffle', 'combRecursive');
+
+
 % tic
 %% run the simuation
 sim = run_simulation(...
@@ -100,7 +107,8 @@ sim = run_simulation(...
 
 %% save the simulation results
 
-save(['test-' num2str(1) '.mat'],...
+% save(['test-' num2str(19) '.mat'],...
+save('transientCutOff200.mat',...
     'carTypeRatios',...
     'carTypes',...
     'nCars',...

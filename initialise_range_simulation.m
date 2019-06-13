@@ -6,7 +6,7 @@ roadTypes = {@LoopRoad @FiniteRoad};
 carTypes = {@carTypeA, @carTypeB, @carTypeC};
 
 plotFlag = false;
-runTime = 14400;
+runTime = 360;
 dt = 0.1;
 nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;
@@ -27,8 +27,8 @@ road.Length = road.End - road.Start;
 noSpawnAreaLength = 24.4; % length of no spawn area around the junction + length of a car for safe re-spawn
 max_density = 1/6.4;    % number of cars per metre (0.1562)
 
-transientCutOffLength = 500;
-swapRate = 0.2;
+transientCutOffLength = 50;
+swapRate = 0;
 %%
 
 % init_density = 0.01;

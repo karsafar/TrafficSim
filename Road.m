@@ -1,5 +1,4 @@
 classdef Road < handle
-    
     properties (SetAccess = immutable)
         startPoint = 0
         endPoint = 0
@@ -15,7 +14,6 @@ classdef Road < handle
         allCarsStates = []
         carHistory = []
         CarsImageHandle = []
-%         carHistory = {}
         nCarHistory = 0
         averageVelocityHistory = []
         variance
@@ -54,14 +52,9 @@ classdef Road < handle
             end
         end
         function collect_car_history(obj,iCar)
+            % not used
             i = obj.nCarHistory + 1;
-%             flagCar = iCar.Prev;
-%             removeNode(iCar);
-%             cloneCar = copy(iCar);
-%             insertAfter(iCar,flagCar);
-            
             obj.clone_cars(iCar);
-%             obj.carHistory = cloneCar;
             obj.nCarHistory = i;
         end
         function count_emegrency_breaks(obj)
@@ -80,9 +73,7 @@ classdef Road < handle
             end
         end
         function clone_cars(obj,car2)
-            
-            %cloneCar = copy(car1);
-            
+            % not used
             obj.carHistory(end+1).juncExitVelocity = car2.juncExitVelocity;
             obj.carHistory(end).idmAcceleration =  car2.idmAcceleration;
             obj.carHistory(end).s = car2.s;
@@ -100,14 +91,6 @@ classdef Road < handle
             obj.carHistory(end).a_min =  car2.a_min;
             obj.carHistory(end).a_feas_min =  car2.a_feas_min;
             obj.carHistory(end).History = car2.History(:,1:(car2.historyIndex-1));
-%             obj.History =  [car2.timeHistory;
-%                                  car2.locationHistory;
-%                                  car2.velocityHistory;
-%                                  car2.accelerationHistory];
-%             obj.velocityHistory = car2.velocityHistory(~isnan(car2.velocityHistory));
-%             obj.accelerationHistory = car2.accelerationHistory(~isnan(car2.accelerationHistory));
-%             obj.timeHistory = car2.timeHistory(~isnan(car2.timeHistory));
-%             obj.locationHistory = car2.locationHistory(~isnan(car2.locationHistory));
             obj.carHistory(end).historyIndex =  car2.historyIndex;
             obj.carHistory(end).leaderFlag =  car2.leaderFlag;
             obj.carHistory(end).stopIndex = car2.stopIndex;

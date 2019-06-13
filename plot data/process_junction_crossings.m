@@ -149,7 +149,6 @@ saveas(f2,'Platoon-sizes.png')
 close(f2)
 
 
-
 %%
 f3 = figure('visible', 'off','units','normalized','outerposition',[0 0 1 1]);
 plot(numCars(1,:),maxPlatoons)
