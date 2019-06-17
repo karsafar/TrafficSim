@@ -13,7 +13,7 @@
 
 % %{
 %%
-%{
+
 load(['test-' num2str(21) '.mat']);
 
 %
@@ -37,9 +37,20 @@ text(numel(sim.crossOrder)/2,1.1,'\downarrow North Arm Crosses','FontSize',16)
 ylim([-0.5,1.5])
 
 %% flow change
+velArrayEast = NaN(sim.horizArm.numCars,nIterations);
+velArrayNorth = NaN(sim.vertArm.numCars,nIterations);
+for iCar = 1:sim.horizArm.numCars
+    velArrayEast(iCar,:) = sim.horizArm.allCars(iCar).History(3,:);
+end
+for iCar = 1:sim.vertArm.numCars
+    velArrayNorth(iCar,:) = sim.vertArm.allCars(iCar).History(3,:);
+end
+meanVelArrayEast = mean(velArrayEast,1);
+meanVelArrayNorth = mean(velArrayNorth,1);
+
 for i = 1:nIterations
-    eastArm.flowChange(i) = density*sim.horizArm.averageVelocityHistory(i);
-    northArm.flowChange(i) = density*sim.vertArm.averageVelocityHistory(i);
+    eastArm.flowChange(i) = density*meanVelArrayEast(i);
+    northArm.flowChange(i) = density*meanVelArrayNorth(i);
 end
 figure
 % plot(eastArm.flowChange(1,:))
@@ -53,7 +64,7 @@ xlabel('Iteration No','FontSize',16)
 ylabel('Flow, veh/s','FontSize',16)
 grid on
 
-
+%{
 %% occupancy pre-junction
 numNaN = sum(isnan(sim.horizArm.averageVelocityHistory));
 
@@ -106,7 +117,7 @@ plot(t_rng,North.Occupancy,'-b','LineWidth',1)
 %}
 %{%
 %% Spatiotenporal Velocity Profiles
-
+%{
 %%%%%%%%%%%%%% West-East Arm %%%%%%%%%%%%%%
 for i = 1:48
     tic
@@ -195,7 +206,7 @@ end
 
 return
 
-
+%}
 %% Flow
 
 
@@ -213,10 +224,18 @@ end
 for iCar = 1:sim.vertArm.numCars
     velArrayNorth(iCar,:) = sim.vertArm.allCars(iCar).History(3,:);
 end
-for i = 1:nIterations
-    cumulativeAverage(1,i) = nanmean(sim.horizArm.averageVelocityHistory(1:i));
-    cumulativeAverage(2,i) = nanmean(sim.vertArm.allCars(:).History(3,:));
-end
+meanVelArrayEast = mean(velArrayEast,1);
+meanVelArrayNorth = mean(velArrayNorth,1);
+
+cumsumVelEast = cumsum(meanVelArrayEast);
+cumsumVelNorth = cumsum(meanVelArrayNorth);
+
+cumulativeAverage= cumsumVelEast./[1:nIterations];
+cumulativeAverage(2,:) = cumsumVelNorth./[1:nIterations];
+% for i = 1:nIterations
+%     cumulativeAverage(1,i) = mean(meanVelArrayEast,2);
+%     cumulativeAverage(2,i) = mean(meanVelArrayEast,1);
+% end
 
 % if tf == 0
 %     density = sim.horizArm.numCarsHistory/sim.horizArm.Length;
@@ -242,7 +261,8 @@ axis(ax3,[0 t_rng(nIterations) 0 max(max(flow.WestEast),max(flow.SouthNorth))])
 legend(ax3,'West-East Arm Flow','South-North Arm Flow','Junction Flow','Location','southwest')
 
 %% Speed variance
-
+varianceEast = sum((velArrayEast-meanVelArrayEast).^2,1)/sim.horizArm.numCars;
+varianceNorth = sum((velArrayNorth-meanVelArrayNorth).^2,1)/sim.vertArm.numCars;
 
 figure(3)
 ax4 = axes;
@@ -252,9 +272,9 @@ xlabel(ax4,'Time, s')
 ylabel(ax4,' \sigma^{2}, m^{2}/s^{2}')
 hold(ax4,'on');
 grid(ax4,'on');
-plot(ax4,t_rng,sim.horizArm.variance,'LineWidth',1)
-plot(ax4,t_rng,sim.vertArm.variance,'LineWidth',1)
-axis(ax4,[0 t_rng(nIterations) 0 max(max(sim.horizArm.variance),max(sim.vertArm.variance))])
+plot(ax4,t_rng,varianceEast,'LineWidth',1)
+plot(ax4,t_rng,varianceNorth,'LineWidth',1)
+axis(ax4,[0 t_rng(nIterations) 0 max(max(varianceEast),max(varianceNorth))])
 legend(ax4,'West-East Arm Flow','South-North Arm Flow')
 
 %}
