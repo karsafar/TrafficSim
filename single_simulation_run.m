@@ -4,10 +4,10 @@ clc
 roadTypes = {@LoopRoad @FiniteRoad};
 carTypes = {@IdmModel, @HdmModel, @carTypeA, @carTypeB, @carTypeC};
 
-plotFlag = true;
+plotFlag = false;
 setappdata(0,'drawRAte',1);
 
-runTime = 360; % sec
+runTime = 1800; % sec
 dt = 0.1;
 nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;
@@ -18,8 +18,8 @@ fixedSeed = [ 1 1];
 priority = false;
 
 % road dimensions
-val = 250;
-val2 = 250;
+val = 100;
+val2 = 100;
 road.Start = [-val; -val2];
 road.End = [val; val2];
 road.Width = [4; 4];
@@ -32,9 +32,9 @@ max_density = 1/6.4;    % number of cars per metre (0.1562)
 transientCutOffLength = 0;
 swapRate = 0;
 %%
-density = 0.03;
+density = 0.04;
 nCars(1,1) = round(density * road.Length(1));
-nCars(2,1) = round(density * road.Length(2));
+nCars(2,1) = round(0 * road.Length(2));
 % for i = 1:2
 %     if  mod(nCars(i),2) ~= 0
 %         nCars(i) = nCars(i) - 1;
@@ -108,7 +108,7 @@ sim = run_simulation(...
 %% save the simulation results
 
 % save(['test-' num2str(19) '.mat'],...
-save('transientCutOff200.mat',...
+save('test_idm_correct.mat',...
     'carTypeRatios',...
     'carTypes',...
     'nCars',...
