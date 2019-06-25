@@ -29,7 +29,7 @@ classdef IdmModel < Car & matlab.mixin.Heterogeneous
             
             
             intelligentBreaking = obj.velocity*obj.timeGap + (obj.velocity*dV)/(2*sqrt(obj.a*obj.b));
-            % correct one
+
             s_star = obj.minimumGap + max(0,intelligentBreaking);
            
             velDif = obj.velocity/obj.targetVelocity;
@@ -37,7 +37,6 @@ classdef IdmModel < Car & matlab.mixin.Heterogeneous
                 velDif = 1;
             end
             
-            % correct one
             a_idm = obj.a*(1 - (velDif)^obj.delta - (s_star/(obj.s-obj.dimension(2)))^2);
            
             if a_idm < obj.a_feas_min

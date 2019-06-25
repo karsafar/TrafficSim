@@ -3,7 +3,7 @@ clear
 close all
 
 %%
-a = 1.5;
+
 s0 = 2;
 v0 = 13;
 s1 = 0;
@@ -12,42 +12,110 @@ b = 1.5;
 delta = 4;
 l = 4.4;
 
-% syms a s0 v0 T b delta s dv v l
-syms f(s,dv,v) f_s f_dv f_v
+%% get numerical values of density range, velocity and gap
+n = 100;
+vel = linspace(0,v0,n);
+s = gappoints(vel,s0,l,v0,T,delta);
+k = densitypoints(vel,s0,l,v0,T,delta);
 
-f(s,dv,v) = a*(1 - (v/v0)^delta - ((s0  +...
-    T*v-(v*dv)/(2*sqrt(a*b)))/(s-l))^2 );
+instabVec = [];
+i = 0.1:0.025:1.1;
+for a = i
+    % syms a s0 v0 T b delta s dv v l
+    syms f(h,dv,v)
+    
+    f(h,dv,v) = a*(1 - (v/v0)^delta - ((s0+T*v-(v*dv)/(2*sqrt(a*b)))/(h-l))^2);
+    
+    
+    f_h = diff(f,h);
+    
+    f_dv = diff(f,dv);
+    
+    f_v = diff(f,v);
+    
+    
+    lambda_2 = (f_h/(f_v)^3)*((f_v^2)/2 - f_dv*f_v - f_h);
+    
+    %
+    % lambdaSign = -((f_v^2)/2 - f_dv*f_v - f_h);
+    
+    % lambdaSign = 1/2 - f_dv/f_v - f_h/(f_v.^2);
+    % lambdaSign = f_v^2 - 2*f_h - 2*f_dv*f_v;
+    
+    % f_h(h,0,v)
+    % f_v(h,0,v)
+    % f_dv(h,0,v)
+    % lambda_2(h,0,v)
+    % lambdaSign(s,0,v)
+    
+
+    
+    %% calculate numerically eigenvalue lambda_2
+    % algebraic equations of Taylor expansions f_h,f_v and f_dv as well as the
+    % eigenvalue lambda_2 at equilibrium state
+    
+    dv = zeros(1,n);
+    h = s+l;
+    temp = double(lambda_2(h,dv,vel));
+    % temp1 = double(lambdaSign(h,dv,v));
+    
+    % plot(k,temp,'r', 'LineWidth',2)
+    % hold on
+    % grid on
+    % plot(k,temp1,'g', 'LineWidth',2)
+    % plot(k,zeros(1,n),'k--')
+    % xlabel('\rho, veh/m','FontSize',16)
+    % ylabel('\lambda_2','FontSize',16)
+    
+    
+    P = InterX([k;temp],[k;zeros(1,n)]);
+    idxZero = (P(1,:)+P(2,:) ~= 0);
+    P(:,(idxZero == 0)) = []
+    
+    % plot(P(1,:),P(2,:),'b*');
+    % axis([0 max(k) min(temp) max(0.1,max(temp))]);
+    % axis equal
+    
+    if isempty(P)
+        instabVec = [instabVec;NaN];
+    else
+        instabVec = [instabVec; P(1,1)];
+    end
+end
+plot(i,instabVec, 'LineWidth',2)
+xlabel('a, m/s^2','FontSize',16)
+ylabel('\rho, veh/m','FontSize',16)
+return
 
 
-f_s = diff(f,s);
-
-f_dv = diff(f,dv);
-
-f_v = diff(f,v);
-
-% a = 1.2;
-% s0 = 2;
-% v0 = 13;
-% s1 = 0;
-% T = 1.6;
-% b = 1.5;
-% delta = 4;
-% l = 4.4;
-
-lambda_2 = (f_s/(f_v)^3)*((f_v^2)/2 - f_dv*f_v - f_s);
-
-
-eqn = -((f_v^2)/2 - f_dv*f_v - f_s);
 
 
 
-% theta = [eps:pi];
 
-%
-v = linspace(0,v0,10000);
 
-s = gappoints(v,s0,s1,v0,T,delta);
-k = densitypoints(v,s0,s1,v0,T,delta);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 %%
 load('test-19.mat')
@@ -82,10 +150,10 @@ i = 1;
 n = 1;
 m = 5+1;
 % for i = 1:numel(ind)
-    temp1 = double(lambda_2(ss(i,ind(i).Cars(n):ind(i).Cars(m)),dvv(i,ind(i).Cars(n):ind(i).Cars(m)),vv(i,ind(i).Cars(n):ind(i).Cars(m))));
-    %     plot(temp1+(28-i))
-    plot([ind(i).Cars(n):ind(i).Cars(m)],temp1)
-    hold on
+temp1 = double(lambda_2(ss(i,ind(i).Cars(n):ind(i).Cars(m)),dvv(i,ind(i).Cars(n):ind(i).Cars(m)),vv(i,ind(i).Cars(n):ind(i).Cars(m))));
+%     plot(temp1+(28-i))
+plot([ind(i).Cars(n):ind(i).Cars(m)],temp1)
+hold on
 %     xlim([ind(i).Cars(n) ind(i).Cars(m)])
 %     pause(0.1)
 % end
@@ -109,7 +177,7 @@ ff1(fs,fdv,fv) = solx(2);
 i = 1;
 n = 1;
 m = 5+1;
-fs = double(f_s(ss(i,ind(i).Cars(n):ind(i).Cars(m)),dvv(i,ind(i).Cars(n):ind(i).Cars(m)),vv(i,ind(i).Cars(n):ind(i).Cars(m))));
+fs = double(f_h(ss(i,ind(i).Cars(n):ind(i).Cars(m)),dvv(i,ind(i).Cars(n):ind(i).Cars(m)),vv(i,ind(i).Cars(n):ind(i).Cars(m))));
 fv = double(f_v(ss(i,ind(i).Cars(n):ind(i).Cars(m)),dvv(i,ind(i).Cars(n):ind(i).Cars(m)),vv(i,ind(i).Cars(n):ind(i).Cars(m))));
 fdv = double(f_dv(ss(i,ind(i).Cars(n):ind(i).Cars(m)),dvv(i,ind(i).Cars(n):ind(i).Cars(m)),vv(i,ind(i).Cars(n):ind(i).Cars(m))));
 
