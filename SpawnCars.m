@@ -67,7 +67,7 @@ classdef SpawnCars < handle
                         allCarsPoseArray(iCar) = allCarsPoseArray(iCar-1) + minimumSpacing;
                     end
                 end
-                unoccupiedSpace =  obj.roadEnd - allCarsPoseArray(end) - minimumSpacing;
+                unoccupiedSpace =  obj.roadEnd - allCarsPoseArray(end) - 24.4;
                 if FixedSeed > 0
                     rng(FixedSeed);
                 end

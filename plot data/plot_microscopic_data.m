@@ -117,13 +117,12 @@ plot(t_rng,North.Occupancy,'-b','LineWidth',1)
 %}
 %{%
 %% Spatiotenporal Velocity Profiles
-%{
 %%%%%%%%%%%%%% West-East Arm %%%%%%%%%%%%%%
-for i = 1:48
+% for i = 1:48
     tic
-    clf
-    figure(1)
-    load(['test-' num2str(i) '.mat']);
+%     clf
+%     figure(1)
+%     load(['test-' num2str(i) '.mat']);
     X = [];
     Y = [];
     Z = [];
@@ -202,7 +201,7 @@ for i = 1:48
     xlim(ax2,[transientCutOffLength t_rng(nIterations)])
     pause(1)
     toc
-end
+% end
 
 return
 

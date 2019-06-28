@@ -3,7 +3,7 @@ classdef SelectorNode < CompositeNode
     % Detailed explanation goes here
     
     properties
-        output = NaN
+        output = -1
         bb_copy
     end
     
@@ -16,41 +16,56 @@ classdef SelectorNode < CompositeNode
                 obj.numChildren = numel(obj.Children);
                 obj.bb_copy = varargin{2};
                 obj.str = {' ? '};
-                % then write a function in the RootNode (plot) to plot
-                % everything based on the sucess or failure. Potentially
-                % add output of [0 1 2] to choose between those states.
-                % then colour each box around them.
             end
-
+            
         end
-        
-        function outputArg = tick(obj)
+        function outputArg = tick(obj,varargin)
             %tick Summary of this method goes here
             %   Detailed explanation goes here
-            outputArg = 0;
-            for i = 1:obj.numChildren
-                NodeState = obj.Children(i).tick;
-                if NodeState
-                    outputArg = 1;
-                    obj.output = outputArg;
-                    return
+            %             returnFlag = 1;
+            outputArg = varargin{1};
+            %             NodeState = [];
+            if outputArg == 1
+                Children = obj.Children;
+                for i = 1:obj.numChildren
+                    %                 NodeState = [NodeState,Children(i).tick(outputArg)];
+                    NodeState = Children(i).tick(outputArg);
+                    if NodeState(end) == 1
+                        %                     obj.output = NodeState(i);
+                        %                     outputArg = NodeState;
+                        outputArg = 1;
+                        obj.output = outputArg;
+                        %                     outputArg = [outputArg,NodeState];
+                        return
+                    end
                 end
-                obj.output = outputArg;
+                outputArg = 0;
+            else
+                outputArg = -1;
             end
+            %             if any(NodeState) == 0
+            %                 outputArg = 0;
+            %             else
+            %                outputArg = -1;
+            %             end
+            obj.output = outputArg;
+            %               outputArg = [outputArg,NodeState];
         end
-        function plot_tree(obj,ha,rank)
-            obj.axesHandle = ha;
-            obj.plotRankArray = [obj.plotRankArray, rank];
+        function plot_tree(obj,rank)
+            obj.str = {' ? '};
+            obj.plotRankArray = rank;
+            obj.outputArg = obj.output;
             for i = 1:obj.numChildren
-                obj.Children(i).plot_tree(obj.axesHandle,rank+1)
+                obj.Children(i).plot_tree(rank+1)
                 if obj.plotRankArray(end)>=obj.Children(i).plotRankArray(1)
                     obj.Children(i).plotRankArray(2:end) = (numel(obj.plotRankArray)+1)+obj.plotRankArray(1)+(obj.Children(i).plotRankArray(2:end)-min(obj.Children(i).plotRankArray(2:end)));
                 end
                 obj.plotRankArray = [obj.plotRankArray, obj.Children(i).plotRankArray];
                 obj.str =  cat(2,obj.str,obj.Children(i).str);
-                obj.output = cat(2,obj.output,obj.Children(i).output);
+                obj.outputArg = cat(2,obj.outputArg,obj.Children(i).outputArg);
             end
         end
+        
     end
 end
 

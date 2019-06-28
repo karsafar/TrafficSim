@@ -153,7 +153,7 @@ classdef Junction < handle
             end
             if flag == 0 || iCar > numel(arm.CarsImageHandle)
                 switch class(arm.allCars(iCar))
-                    case 'carTypeA'
+                    case 'carTypeA_TEST'
                         carColour = 'g';
                     case 'carTypeB'
                         carColour = 'r';

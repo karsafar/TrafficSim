@@ -2,18 +2,18 @@ clear
 close all
 clc
 roadTypes = {@LoopRoad @FiniteRoad};
-carTypes = {@IdmModel, @HdmModel, @carTypeA, @carTypeB, @carTypeC};
+carTypes = {@IdmModel, @HdmModel, @carTypeA, @carTypeB, @carTypeC, @carTypeA_TEST};
 
-plotFlag = true;
-setappdata(0,'drawRAte',1);
+plotFlag = false;
+setappdata(0,'drawRAte',0);
 
-runTime = 360; % sec
+runTime = 50; % sec
 dt = 0.1;
 nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;
 t_rng = 0:dt:runTime;
 
-fixedSeed = [ 1 1];
+fixedSeed = [1 1];
 % seedType = rng('shuffle', 'combRecursive');
 priority = false;
 
@@ -32,7 +32,7 @@ max_density = 1/6.4;    % number of cars per metre (0.1562)
 transientCutOffLength = 0;
 swapRate = 0;
 %%
-density = 0.03;
+density = 0.06;
 nCars(1,1) = round(density * road.Length(1));
 nCars(2,1) = round(density * road.Length(2));
 % for i = 1:2
@@ -53,7 +53,7 @@ end
 %single simulation flag 
 setappdata(0,'simType',0);
 
-carTypeRatios = [0 0 1 0 0; 0 0 1 0 0];
+carTypeRatios = [0 0 0 0 0 1; 0 0 0 0 0 1];
 
 allCarsNumArray_H = zeros(1,numel(carTypes));
 allCarsNumArray_V = zeros(1,numel(carTypes));
@@ -87,7 +87,6 @@ end
 % control random process
 rng('shuffle', 'combRecursive');
 
-
 % tic
 %% run the simuation
 sim = run_simulation(...
@@ -108,7 +107,7 @@ sim = run_simulation(...
 %% save the simulation results
 
 % save(['test-' num2str(19) '.mat'],...
-save('transientCutOff200.mat',...
+save('test-BT_2.mat',...
     'carTypeRatios',...
     'carTypes',...
     'nCars',...

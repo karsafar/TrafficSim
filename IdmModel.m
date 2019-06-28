@@ -1,6 +1,6 @@
 classdef IdmModel < Car & matlab.mixin.Heterogeneous
     properties (Constant)
-        delta = 1
+        delta = 4
         minimumGap = 2
     end
     properties (SetAccess = public)
@@ -29,7 +29,7 @@ classdef IdmModel < Car & matlab.mixin.Heterogeneous
             
             
             intelligentBreaking = obj.velocity*obj.timeGap + (obj.velocity*dV)/(2*sqrt(obj.a*obj.b));
-            s_star = (obj.minimumGap+obj.dimension(2)) + max(0,intelligentBreaking);
+            s_star = obj.minimumGap + max(0,intelligentBreaking);
             
             velDif = obj.velocity/obj.targetVelocity;
             if isnan(velDif)
@@ -37,7 +37,7 @@ classdef IdmModel < Car & matlab.mixin.Heterogeneous
             end
             
             
-            a_idm = obj.a*(1 - (velDif)^obj.delta - (s_star/obj.s)^2);
+            a_idm = obj.a*(1 - (velDif)^obj.delta - (s_star/(obj.s-obj.dimension(2)))^2);
             
             if a_idm < obj.a_feas_min
                 a_idm =  obj.a_feas_min;

@@ -3,7 +3,7 @@ classdef ConditionNode < LeafNode
     %   Detailed explanation goes here
     
     properties
-        output = NaN
+        output = -1
         condArray = []
         str
     end
@@ -11,22 +11,25 @@ classdef ConditionNode < LeafNode
     methods
         function obj = ConditionNode(varargin)
             if nargin > 1
-                obj.condArray = varargin{1};                
+                obj.condArray = varargin{1};
                 obj.str = varargin{2};
             end
         end
-        function outputArg = tick(obj)
+        function outputArg = tick(obj,parentOutput)
             %tick Summary of this method goes here
             %   Detailed explanation goes here
-            outputArg = sum(obj.condArray) == numel(obj.condArray);
-            obj.output = outputArg;
-        end
-        function output = plot_tree(obj,ha,rank)
-            obj.axesHandle = ha;
-            obj.plotRankArray = [obj.plotRankArray rank];
-            for i = 1:obj.numChildren
-                obj.Children(i).plot_tree(obj.axesHandle)
+            if parentOutput == 1
+                outputArg = all(obj.condArray);
+            else
+                outputArg = -1;
             end
+            obj.output = outputArg;
+%             obj.output = outputArg;
+%             obj.treeOut = outputArg;
+        end
+        function plot_tree(obj,rank)
+            obj.plotRankArray = rank;
+            obj.outputArg = obj.output;
         end
     end
 end

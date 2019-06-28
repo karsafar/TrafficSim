@@ -3,11 +3,11 @@ classdef ActionNode < LeafNode
     %   Detailed explanation goes here
     
     properties
-        output = NaN
-        setValue
+        output = -1
+        name1
+        name2
         bb_copy
         str
-        name
     end
     
     methods
@@ -15,24 +15,29 @@ classdef ActionNode < LeafNode
             if nargin > 1
                 obj.str = sprintf('Set %s to %s',varargin{1},varargin{2});
             end
-            obj.name = varargin{1};
-            obj.setValue = str2double(varargin{2});            
+            obj.name1 = varargin{1};
+            obj.name2 = varargin{2};            
             obj.bb_copy = varargin{3};
         end
-        function outputArg = tick(obj)
+        function outputArg = tick(obj,parentOutput)
             %tick Summary of this method goes here
             %   Detailed explanation goes here
-            nm = obj.name;
-            obj.bb_copy.(nm) = obj.setValue;
-            outputArg = true;
+            if parentOutput == 1
+                outputArg = 1;
+                obj.set_value()
+            else
+                outputArg = -1;
+            end
             obj.output = outputArg;
         end
-        function output = plot_tree(obj,ha,rank)
-            obj.axesHandle = ha;
-            obj.plotRankArray = [obj.plotRankArray rank];
-            for i = 1:obj.numChildren
-                obj.Children(i).plot_tree(obj.axesHandle)
-            end
+        function set_value(obj)
+            nm1 = obj.name1;
+            nm2 = obj.name2;
+            obj.bb_copy.(nm1) = obj.bb_copy.(nm2);
+        end
+        function plot_tree(obj,rank)
+            obj.plotRankArray = rank;
+            obj.outputArg = obj.output;
         end
     end
 end

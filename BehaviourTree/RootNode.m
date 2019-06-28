@@ -1,12 +1,13 @@
-classdef RootNode < handle & dynamicprops  & matlab.mixin.Heterogeneous
+classdef RootNode < matlab.mixin.Heterogeneous & handle
     % RootNode Summary of this class goes here
     % Detailed explanation goes here
     
     properties
-        axesHandle
+%         axesHandle
         numChildren = 0
         plotRankArray = []
         plotColor = 1
+        outputArg
     end
     
     methods
