@@ -1,50 +1,41 @@
 classdef carTypeA < IdmModel
     properties(SetAccess = public)
         bb
-        
         bbStore = []
-        
         cond1
         cond2
-%         followFrontCar
         cond3
-%         clearedJunction
         cond4
-%         CruisePreOrAfterJunction
-        act1
-%         DoCruise
-        
-        
-%         assignJuncStop
         cond5
         cond6
         cond7
-%         keepJunctionClear
-        
-%         assignJuncStop1
         cond8
-%         stopBeforeJunction
-        
-%         assignBehind
         cond9
-%         passBehind
-        
-%         assignAhead
         cond10
-%         passAhead
-        
-%         selectAheadOrBehind
         cond11
-%         doAheadOrBehind
-        
-%         assignStop
-        
-%         assignZero
         cond12
         cond13
-%         backOff
-
-        actStore
+        %{
+                act1
+                followFrontCar
+                clearedJunction
+                CruisePreOrAfterJunction
+                DoCruise
+                assignJuncStop
+                keepJunctionClear
+                assignJuncStop1
+                stopBeforeJunction
+                assignBehind
+                passBehind
+                assignAhead
+                passAhead
+                selectAheadOrBehind
+                doAheadOrBehind
+                assignStop
+                assignZero
+                backOff
+        %}
+        actStore = ConditionNode.empty
         full_select
         Fig = []
         
@@ -144,7 +135,7 @@ classdef carTypeA < IdmModel
             
             %% Full Behaviour Tree
             obj.full_select = SelectorNode([DoCruise,backOff,keepJunctionClear,doAheadOrBehind,assignStop],obj.bb);
-
+            
             
             obj.actStore = [act1,assignZero,assignJuncStop,assignAhead,assignBehind,assignJuncStop1,assignStop];
         end
@@ -257,8 +248,6 @@ classdef carTypeA < IdmModel
                 
                 %% Update values of the Blackboard
                 
-                
-                
                 obj.bb.AemergStop = emergStop;
                 obj.bb.AjuncStop = juncStop;
                 obj.bb.Aahead = pass_ahead_accel;
@@ -303,7 +292,7 @@ classdef carTypeA < IdmModel
             
             
             %% Update cruising acceleration
-            obj.bb.Afollow = obj.idmAcceleration;            
+            obj.bb.Afollow = obj.idmAcceleration;
             
             %% update BT
             output = tick(obj.full_select,1);
@@ -332,23 +321,55 @@ classdef carTypeA < IdmModel
             
             crossingBegin = obj.s_in;
             crossingEnd = obj.s_out;
-            if s > crossingEnd
-                s = s - roadLength;
+%             if s > crossingEnd
+%                 s = s - roadLength;
+%             end
+            
+            if s <= crossingBegin
+                d_in = crossingBegin - s;
+                d_out = crossingEnd - s;
+            elseif s >= crossingEnd
+                d_in = crossingBegin - s - roadLength;
+                d_out = crossingEnd - s - roadLength;
+            elseif s > crossingBegin && s < crossingEnd
+                d_in = 0;
+                d_out = crossingEnd - s;
             end
             
-            if nargin == 7
+            if  nargin == 7
                 % opposite car time gap
-                if obj.tol < abs(v)
-                    if (s < crossingBegin || s > crossingBegin)
-                        t_in = (crossingBegin - s)/v + t;
-                    else
-                        t_in = 0;
-                    end
-                    t_out = (crossingEnd - s)/v + t;
+                t_in = d_in/v + t;
+                t_out = d_out/v + t;
+            else
+                 % self time gap
+                if obj.tol < abs(a)
+                    v_f_in = min(obj.maximumVelocity,sqrt(max(0,v^2 + 2*a*d_in)));
+                    v_f_out = min(obj.maximumVelocity,sqrt(max(0,v^2 + 2*a*d_out)));
+                    
+                    t_in = (-v + v_f_in)/a + t;
+                    t_out = (-v + v_f_out)/a + t;
                 else
-                    t_in = 1e5;
-                    t_out = 1e5;
+                    t_in = d_in/v + t;
+                    t_out = d_out/v + t;
                 end
+            end
+            
+%{            
+            
+            if nargin == 7
+% %                 opposite car time gap
+%                 if obj.tol < abs(v)
+%                     if (s < crossingBegin || s > crossingBegin)
+%                         t_in = (crossingBegin - s)/v + t;
+%                     else
+%                         t_in = 0;
+%                     end
+%                     t_out = (crossingEnd - s)/v + t;
+%                 else
+%                     t_in = 1e5;
+%                     t_out = 1e5;
+%                 end
+%                
             else
                 % self time gap
                 if obj.tol < abs(a)
@@ -360,7 +381,7 @@ classdef carTypeA < IdmModel
                     v_f_out = min(obj.maximumVelocity,sqrt(max(0,v^2 + 2*a*(crossingEnd - s))));
                     t_in = (-v + v_f_in)/a + t;
                     t_out = (-v + v_f_out)/a + t;
-                elseif obj.tol < abs(a) && obj.tol < abs(v)
+                elseif obj.tol < abs(v)
                     t_in = (crossingBegin - s)/v + t;
                     t_out = (crossingEnd - s)/v + t;
                 else
@@ -368,6 +389,7 @@ classdef carTypeA < IdmModel
                     t_out = 1e5;
                 end
             end
+%}
         end
         function calculate_junc_accel(obj,varargin)
             roadLength = varargin{1};
@@ -414,15 +436,8 @@ classdef carTypeA < IdmModel
             
             obj.juncAccel = obj.a_max*(1 - (velDif)^obj.delta - (s_star/s)^2);
             
-            
-            if obj.juncAccel > obj.a_max
-                obj.juncAccel = obj.a_max;
-            elseif obj.juncAccel < obj.a_min
-                if (emerg_flag == 0 && stop_flag == 0)
-                    if obj.juncAccel < obj.a_feas_min
-                        obj.juncAccel =  obj.a_feas_min;
-                    end
-                elseif (emerg_flag || stop_flag)  && obj.juncAccel < obj.a_feas_min
+            if obj.juncAccel < obj.a_feas_min
+                if (emerg_flag || stop_flag)
                     obj.juncAccel = -Lennard_Jones(s ,obj.a_feas_min);
                 else
                     obj.juncAccel =  obj.a_feas_min;

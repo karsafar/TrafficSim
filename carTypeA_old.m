@@ -238,7 +238,7 @@ classdef carTypeA_old < IdmModel
                 
                 %% Future space gap
                 obj.juncExitVelocity = min(obj.maximumVelocity,sqrt(max(0,v^2+2*pass_ahead_accel*(crossingEnd-s))));
-                futureMinStopGap = calc_safe_gap(obj.a,obj.b,obj.juncExitVelocity,v0,obj.timeGap,obj.minimumGap,obj.delta,obj.a_min,1)+(obj.minimumGap+obj.dimension(2));
+                futureMinStopGap = calc_safe_gap(obj.a,obj.b,obj.juncExitVelocity,v0,obj.timeGap,obj.minimumGap,obj.delta,obj.a_min,1)+(obj.minimumGap);
                 
                 % self t_in and t_out
                 [obj.t_in_self, obj.t_out_self] = calculate_t_in_and_out(obj,pass_ahead_accel,v,s,t,roadLength);
@@ -419,7 +419,7 @@ classdef carTypeA_old < IdmModel
                     v_f_out = min(obj.maximumVelocity,sqrt(max(0,v^2 + 2*a*(crossingEnd - s))));
                     t_in = (-v + v_f_in)/a + t;
                     t_out = (-v + v_f_out)/a + t;
-                elseif obj.tol < abs(a) && obj.tol < abs(v)
+                elseif  obj.tol < abs(v)
                     t_in = (crossingBegin - s)/v + t;
                     t_out = (crossingEnd - s)/v + t;
                 else

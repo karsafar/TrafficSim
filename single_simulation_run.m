@@ -7,7 +7,7 @@ carTypes = {@IdmModel, @HdmModel, @carTypeA, @carTypeB, @carTypeC, @carTypeA_old
 plotFlag = true;
 setappdata(0,'drawRAte',0);
 
-runTime = 300; % sec
+runTime = 100; % sec
 dt = 0.1;
 nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;
@@ -29,10 +29,10 @@ noSpawnAreaLength = 24.4; % length of no spawn area around the junction + length
 max_density = 1/6.4;    % number of cars per metre (0.1562)
 
 
-transientCutOffLength = 250;
+transientCutOffLength = 50;
 swapRate = 0;
 %%
-density = 0.04;
+density = 0.056;
 nCars(1,1) = round(density * road.Length(1));
 nCars(2,1) = round(density * road.Length(2));
 % for i = 1:2
@@ -53,7 +53,7 @@ end
 %single simulation flag 
 setappdata(0,'simType',0);
 
-carTypeRatios = [0 0 0 0 0 1; 0 0 0 0 0 1];
+carTypeRatios = [0 0 1 0 0 0; 0 0 1 0 0 0];
 
 allCarsNumArray_H = zeros(1,numel(carTypes));
 allCarsNumArray_V = zeros(1,numel(carTypes));

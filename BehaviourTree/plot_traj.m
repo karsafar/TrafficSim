@@ -87,9 +87,10 @@ for i = 1:sim.horizArm.numCars
     
     a_aggerg_n = a_aggerg_n + (nansum(b_vec_n,1));
     a_aggerg_norn_n = a_aggerg_norn_n + (nansum(b_vec_n,1)/nIterations);
+    title(ax1,' East Arm','FontSize',16)
+    title(ax3,'North Arm','FontSize',16)
 end
-title(ax1,' East Arm','FontSize',16)
-title(ax3,'North Arm','FontSize',16)
+
 %% East Arm
 figure(3)
 a_aggerg_e = a_aggerg_e/sim.horizArm.numCars;
