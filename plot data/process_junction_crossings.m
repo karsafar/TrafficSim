@@ -139,12 +139,20 @@ for i = 1:numel(data)
 end
 hold(ax3,'on');
 text(ax3,numCars(1,:)',dataNums,num2str(dataNums'),'vert','middle','horiz','left','FontSize',14);
-ylabel('Crossing Platoon Sizes','FontSize',14)
-xlabel('Numer of cars per arm','FontSize',14)
+% ylabel('Crossing Platoon Sizes','FontSize',14)
+% xlabel('Number of cars per arm','FontSize',14)
 
 xticks(numCars(1,1):2:numCars(1,end))
 xlim([numCars(1,1)-2 numCars(1,end)+2])
 view([90 -90])
+
+[k,q, v] = fundamentaldiagram();
+plot(ax3,k*500,2*q*3600,'k-','LineWidth',2)
+ylabel('Number of crosses per 3600 sec','FontSize',14)
+xlabel('Number cars per arm','FontSize',14)
+% xlim([0 3000])
+
+
 saveas(f2,'Platoon-sizes.png')
 close(f2)
 

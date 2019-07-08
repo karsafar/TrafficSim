@@ -6,9 +6,9 @@ classdef carTypeA < IdmModel
         cond2
         cond3
         cond4
-        cond5
-        cond6
-        cond7
+%         cond5
+%         cond6
+%         cond7
         cond8
         cond9
         cond10
@@ -96,16 +96,16 @@ classdef carTypeA < IdmModel
             DoCruise = SequenceNode([CruisePreOrAfterJunction, act1],obj.bb);
             %% 'Junction' Tree
             % 'Stop at Junction' Tree
+%             assignJuncStop = ActionNode('A','AjuncStop',obj.bb);
+%             obj.cond5 = ConditionNode(obj.bb.frontCarPassedJunction == 1,'frontCarPassedJunction == 1');
+%             obj.cond6 = ConditionNode(obj.bb.CarsOpposite == 1,'CarsOpposite == 1');
+%             obj.cond7 = ConditionNode(obj.bb.futureGap < obj.bb.futureMinGap,'futureGap < futureMinGap');
+%             
+%             keepJunctionClear = SequenceNode([obj.cond5, obj.cond6,obj.cond7, assignJuncStop],obj.bb);
+%             
             assignJuncStop = ActionNode('A','AjuncStop',obj.bb);
-            obj.cond5 = ConditionNode(obj.bb.frontCarPassedJunction == 1,'frontCarPassedJunction == 1');
-            obj.cond6 = ConditionNode(obj.bb.CarsOpposite == 1,'CarsOpposite == 1');
-            obj.cond7 = ConditionNode(obj.bb.futureGap < obj.bb.futureMinGap,'futureGap < futureMinGap');
-            
-            keepJunctionClear = SequenceNode([obj.cond5, obj.cond6,obj.cond7, assignJuncStop],obj.bb);
-            
-            assignJuncStop1 = ActionNode('A','AjuncStop',obj.bb);
             obj.cond8 = ConditionNode(obj.bb.distToJunc >= obj.bb.minStopDistToJunc,'distToJunc >= minStopDistToJunc');
-            stopBeforeJunction = SequenceNode([obj.cond8, assignJuncStop1],obj.bb);
+            stopBeforeJunction = SequenceNode([obj.cond8, assignJuncStop],obj.bb);
             
             % 'Cross Behind' Tree
             assignBehind =  ActionNode('A','Afollow',obj.bb);
@@ -134,10 +134,12 @@ classdef carTypeA < IdmModel
             backOff = SequenceNode([obj.cond12, obj.cond13,assignZero],obj.bb);
             
             %% Full Behaviour Tree
-            obj.full_select = SelectorNode([DoCruise,backOff,keepJunctionClear,doAheadOrBehind,assignStop],obj.bb);
+%             obj.full_select = SelectorNode([DoCruise,backOff,keepJunctionClear,doAheadOrBehind,assignStop],obj.bb);
+            obj.full_select = SelectorNode([DoCruise,backOff,doAheadOrBehind,assignStop],obj.bb);
             
             
-            obj.actStore = [act1,assignZero,assignJuncStop,assignAhead,assignBehind,assignJuncStop1,assignStop];
+%             obj.actStore = [act1,assignZero,assignJuncStop,assignAhead,assignBehind,assignJuncStop1,assignStop];
+            obj.actStore = [act1,assignZero,assignAhead,assignBehind,assignJuncStop,assignStop];
         end
         function decide_acceleration(obj,oppositeRoad,roadLength,t,dt,iIteration)
             
@@ -279,9 +281,9 @@ classdef carTypeA < IdmModel
                 obj.cond2.condArray = (selfDistToJunc >= minStopDistGapToJunc);
                 obj.cond3.condArray = (isFrontCarPassedJunction == 0);
                 obj.cond4.condArray = (selfDistToJunc > comfortableStopGap);
-                obj.cond5.condArray = (isFrontCarPassedJunction == 1);
-                obj.cond6.condArray = (any(oppositeDistToJunc > 0) == 1);
-                obj.cond7.condArray = (futureGap<futureMinStopGap);
+%                 obj.cond5.condArray = (isFrontCarPassedJunction == 1);
+%                 obj.cond6.condArray = (any(oppositeDistToJunc > 0) == 1);
+%                 obj.cond7.condArray = (futureGap<futureMinStopGap);
                 obj.cond8.condArray = (selfDistToJunc >= minStopDistGapToJunc);
                 obj.cond9.condArray = (isEnoughGapBehind == 1);
                 obj.cond10.condArray = (isEnoughGapAhead == 1);
@@ -295,7 +297,7 @@ classdef carTypeA < IdmModel
             obj.bb.Afollow = obj.idmAcceleration;
             
             %% update BT
-            output = tick(obj.full_select,1);
+            tick(obj.full_select,1);
             
             obj.bbStore = [obj.bbStore;[obj.actStore(:).output]];
             
@@ -392,7 +394,7 @@ classdef carTypeA < IdmModel
 %}
         end
         function calculate_junc_accel(obj,varargin)
-            roadLength = varargin{1};
+%             roadLength = varargin{1};
             if nargin == 2
                 stop_flag = 0;
                 junc_flag = 0;
@@ -402,8 +404,8 @@ classdef carTypeA < IdmModel
                 junc_flag = 0;
                 emerg_flag = 0;
             elseif varargin{2} == 2
-                junc_flag = 1;
                 stop_flag = 0;
+                junc_flag = 1;
                 emerg_flag = 0;
             elseif varargin{2} == 3
                 stop_flag = 0;

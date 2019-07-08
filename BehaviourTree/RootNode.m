@@ -3,7 +3,6 @@ classdef RootNode < matlab.mixin.Heterogeneous & handle
     % Detailed explanation goes here
     
     properties
-%         axesHandle
         numChildren = 0
         plotRankArray = []
         plotColor = 1
@@ -15,7 +14,6 @@ classdef RootNode < matlab.mixin.Heterogeneous & handle
             % RootNode Construct an instance of this class
             %   Detailed explanation goes here
         end
-        
     end
 end
 

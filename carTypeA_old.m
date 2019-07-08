@@ -391,23 +391,55 @@ classdef carTypeA_old < IdmModel
             
             crossingBegin = obj.s_in;
             crossingEnd = obj.s_out;
-            if s > crossingEnd
-                s = s - roadLength;
+%             if s > crossingEnd
+%                 s = s - roadLength;
+%             end
+            
+            if s <= crossingBegin
+                d_in = crossingBegin - s;
+                d_out = crossingEnd - s;
+            elseif s >= crossingEnd
+                d_in = crossingBegin - s - roadLength;
+                d_out = crossingEnd - s - roadLength;
+            elseif s > crossingBegin && s < crossingEnd
+                d_in = 0;
+                d_out = crossingEnd - s;
             end
             
-            if nargin == 7
+            if  nargin == 7
                 % opposite car time gap
-                if obj.tol < abs(v)
-                    if (s < crossingBegin || s > crossingBegin)
-                        t_in = (crossingBegin - s)/v + t;
-                    else
-                        t_in = 0;
-                    end
-                    t_out = (crossingEnd - s)/v + t;
+                t_in = d_in/v + t;
+                t_out = d_out/v + t;
+            else
+                 % self time gap
+                if obj.tol < abs(a)
+                    v_f_in = min(obj.maximumVelocity,sqrt(max(0,v^2 + 2*a*d_in)));
+                    v_f_out = min(obj.maximumVelocity,sqrt(max(0,v^2 + 2*a*d_out)));
+                    
+                    t_in = (-v + v_f_in)/a + t;
+                    t_out = (-v + v_f_out)/a + t;
                 else
-                    t_in = 1e5;
-                    t_out = 1e5;
+                    t_in = d_in/v + t;
+                    t_out = d_out/v + t;
                 end
+            end
+            
+%{            
+            
+            if nargin == 7
+% %                 opposite car time gap
+%                 if obj.tol < abs(v)
+%                     if (s < crossingBegin || s > crossingBegin)
+%                         t_in = (crossingBegin - s)/v + t;
+%                     else
+%                         t_in = 0;
+%                     end
+%                     t_out = (crossingEnd - s)/v + t;
+%                 else
+%                     t_in = 1e5;
+%                     t_out = 1e5;
+%                 end
+%                
             else
                 % self time gap
                 if obj.tol < abs(a)
@@ -419,7 +451,7 @@ classdef carTypeA_old < IdmModel
                     v_f_out = min(obj.maximumVelocity,sqrt(max(0,v^2 + 2*a*(crossingEnd - s))));
                     t_in = (-v + v_f_in)/a + t;
                     t_out = (-v + v_f_out)/a + t;
-                elseif  obj.tol < abs(v)
+                elseif obj.tol < abs(v)
                     t_in = (crossingBegin - s)/v + t;
                     t_out = (crossingEnd - s)/v + t;
                 else
@@ -427,6 +459,7 @@ classdef carTypeA_old < IdmModel
                     t_out = 1e5;
                 end
             end
+%}
         end
        function calculate_junc_accel(obj,varargin)
             roadLength = varargin{1};

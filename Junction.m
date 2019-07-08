@@ -153,7 +153,7 @@ classdef Junction < handle
             end
             if flag == 0 || iCar > numel(arm.CarsImageHandle)
                 switch class(arm.allCars(iCar))
-                    case 'carTypeA_TEST'
+                    case 'carTypeA'
                         carColour = 'g';
                     case 'carTypeB'
                         carColour = 'r';
@@ -216,6 +216,7 @@ classdef Junction < handle
                         obj.crossCarTypeOrder = [obj.crossCarTypeOrder obj.crossCarTypeOrder(end)];
                     end
                 elseif hCar > 0 && vCar > 0
+                    obj.crossCount = [obj.crossCount NaN];
                     obj.collidingCarsIdx = [hCar; vCar];
                     obj.collisionFlag = 1;
                     if isempty(obj.crossOrder)

@@ -11,7 +11,7 @@
 % % load the test data
 % load(['test-' num2str(loc) '.mat']);
 
-% %{
+%{
 %%
 
 load(['test-' num2str(21) '.mat']);
@@ -63,7 +63,7 @@ plot(northArm.flowChange(1,:))
 xlabel('Iteration No','FontSize',16)
 ylabel('Flow, veh/s','FontSize',16)
 grid on
-
+%}
 %{
 %% occupancy pre-junction
 numNaN = sum(isnan(sim.horizArm.averageVelocityHistory));
@@ -163,7 +163,7 @@ plot(t_rng,North.Occupancy,'-b','LineWidth',1)
     grid(ax1,'on');
     
     axis(ax1,[0 t_rng(nIterations) sim.horizArm.startPoint sim.horizArm.endPoint] )
-    xlim(ax1,[transientCutOffLength t_rng(nIterations)])
+%     xlim(ax1,[transientCutOffLength t_rng(nIterations)])
     
     caxis manual
     caxis([0 maxVelocity]);
@@ -195,10 +195,10 @@ plot(t_rng,North.Occupancy,'-b','LineWidth',1)
     colormap(flipud(jet));
     
     % plot the trajectories
-    sz = 10;
+    sz = 2;
     scatter(ax1,X,Y,sz,Z,'filled');
     scatter(ax2,X1,Y1,sz,Z1,'filled');
-    xlim(ax2,[transientCutOffLength t_rng(nIterations)])
+%     xlim(ax2,[transientCutOffLength t_rng(nIterations)])
     pause(1)
     toc
 % end
