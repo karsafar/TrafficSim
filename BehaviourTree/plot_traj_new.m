@@ -39,12 +39,12 @@ for i = 1:sim.horizArm.numCars
     xlabel(ax1,'Iteration No','FontSize',14)
     
 %     title(ax2,'East Arm Acceleration trajectory','FontSize',16)
-    plot(ax2,sim.horizArm.allCars(i).History(4,:),'b-','LineWidth',2);
+    plot(ax2,sim.horizArm.allCars(i).History(3,:)+(i-1)*10,'b-','LineWidth',2);
     xlim(ax2,[0 nIterations])
     ylabel(ax2,'Acceleration, m/s^2','FontSize',14)
     xlabel(ax2,'Iteration No','FontSize',14)
-    
-    
+    hold(ax2,'on')
+%     xlim(ax2,[0 500])
     %     plot(b_vec(:,1),'r-s','LineWidth',10);
     %     hold on
     %     plot(b_vec(:,2),'g-.','LineWidth',10);
@@ -79,12 +79,12 @@ for i = 1:sim.horizArm.numCars
     xlabel(ax3,'Iteration No','FontSize',14)
     
 %     title(ax4,'North Arm Acceleration trajectory','FontSize',16)
-    plot(ax4,sim.vertArm.allCars(i).History(4,:),'b-','LineWidth',2);
+    plot(ax4,sim.vertArm.allCars(i).History(3,:)+(i-1)*10,'b-','LineWidth',2);
     xlim(ax4,[0 nIterations])
     ylabel(ax4,'Acceleration, m/s^2','FontSize',14)
     xlabel(ax4,'Iteration No','FontSize',14)
-    
-    
+%     hold(ax4,'on')
+    xlim(ax4,[0 500])
     a_aggerg_n = a_aggerg_n + (nansum(b_vec_n,1));
     a_aggerg_norn_n = a_aggerg_norn_n + (nansum(b_vec_n,1)/nIterations);
     title(ax1,' East Arm','FontSize',16)

@@ -148,8 +148,8 @@ view([90 -90])
 
 [k,q, v] = fundamentaldiagram();
 plot(ax3,k*500,2*q*3600,'k-','LineWidth',2)
-ylabel('Number of crosses per 3600 sec','FontSize',14)
-xlabel('Number cars per arm','FontSize',14)
+ylabel('nCrosses/hour','FontSize',14)
+xlabel('nCars/arm','FontSize',14)
 % xlim([0 3000])
 
 
