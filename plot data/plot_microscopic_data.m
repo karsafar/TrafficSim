@@ -194,6 +194,21 @@ plot(t_rng,North.Occupancy,'-b','LineWidth',1)
     c.Label.FontSize = 12;
     colormap(flipud(jet));
     
+%     figure
+%     ddt = delaunayTriangulation(double(X1'),double(Y1')) ;
+%     tri = ddt.ConnectivityList ;
+%     xi = ddt.Points(:,1) ;
+%     yi = ddt.Points(:,2) ;
+%     F = scatteredInterpolant(double(X1'),double(Y1'),double(Z1'));
+%     zi = F(xi,yi) ;
+%     trisurf(tri,xi,yi,zi)
+%         xlabel('Time, s')
+%     ylabel('Position, m')
+%     ylabel('velocity, m/s')
+%     view(2)
+%     oldcmap = colormap;
+%     colormap( flipud(oldcmap) );
+%     shading interp
     % plot the trajectories
     sz = 2;
     scatter(ax1,X,Y,sz,Z,'filled');
