@@ -11,7 +11,7 @@
 % % load the test data
 % load(['test-' num2str(loc) '.mat']);
 
-% %{
+%{
 %%
 
 load(['test-' num2str(21) '.mat']);
@@ -63,7 +63,7 @@ plot(northArm.flowChange(1,:))
 xlabel('Iteration No','FontSize',16)
 ylabel('Flow, veh/s','FontSize',16)
 grid on
-
+%}
 %{
 %% occupancy pre-junction
 numNaN = sum(isnan(sim.horizArm.averageVelocityHistory));
@@ -117,17 +117,16 @@ plot(t_rng,North.Occupancy,'-b','LineWidth',1)
 %}
 %{%
 %% Spatiotenporal Velocity Profiles
-%{
 %%%%%%%%%%%%%% West-East Arm %%%%%%%%%%%%%%
-for i = 1:48
+% for i = 1:48
     tic
-    clf
-    figure(1)
-    load(['test-' num2str(i) '.mat']);
+%     clf
+%     figure(1)
+%     load(['test-' num2str(i) '.mat']);
     X = [];
     Y = [];
     Z = [];
-    d = 4; % density on points in scatter plot
+    d = 1; % density on points in scatter plot
     maxVelocity = 13;
     for iCar = 1:sim.horizArm.numCars
         %     X = [X sim.horizArm.carHistory(iCar).History(1,1:d:end)];
@@ -164,7 +163,7 @@ for i = 1:48
     grid(ax1,'on');
     
     axis(ax1,[0 t_rng(nIterations) sim.horizArm.startPoint sim.horizArm.endPoint] )
-    xlim(ax1,[transientCutOffLength t_rng(nIterations)])
+%     xlim(ax1,[transientCutOffLength t_rng(nIterations)])
     
     caxis manual
     caxis([0 maxVelocity]);
@@ -195,14 +194,29 @@ for i = 1:48
     c.Label.FontSize = 12;
     colormap(flipud(jet));
     
+%     figure
+%     ddt = delaunayTriangulation(double(X1'),double(Y1')) ;
+%     tri = ddt.ConnectivityList ;
+%     xi = ddt.Points(:,1) ;
+%     yi = ddt.Points(:,2) ;
+%     F = scatteredInterpolant(double(X1'),double(Y1'),double(Z1'));
+%     zi = F(xi,yi) ;
+%     trisurf(tri,xi,yi,zi)
+%         xlabel('Time, s')
+%     ylabel('Position, m')
+%     ylabel('velocity, m/s')
+%     view(2)
+%     oldcmap = colormap;
+%     colormap( flipud(oldcmap) );
+%     shading interp
     % plot the trajectories
-    sz = 10;
+    sz = 2;
     scatter(ax1,X,Y,sz,Z,'filled');
     scatter(ax2,X1,Y1,sz,Z1,'filled');
-    xlim(ax2,[transientCutOffLength t_rng(nIterations)])
+%     xlim(ax2,[transientCutOffLength t_rng(nIterations)])
     pause(1)
     toc
-end
+% end
 
 return
 

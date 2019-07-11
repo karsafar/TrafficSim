@@ -62,7 +62,7 @@ for iIteration = 1:nIterations
         VerticalArm.allCars(jCar).store_state_data(t,VerticalArm.allCarsStates(:,jCar));
     end
     % draw cars
-    if plotFlag && t >= transientCutOffLength
+    if plotFlag %&& t >= transientCutOffLength
         junc.draw_all_cars(HorizontalArm,VerticalArm,iIteration,transientCutOffLength)
         if drawRate
             drawnow limitrate
@@ -118,9 +118,9 @@ for iIteration = 1:nIterations
     % Move all the cars along the road
     HorizontalArm.move_all_cars(t,dt,iIteration,nIterations)
     VerticalArm.move_all_cars(t,dt,iIteration,nIterations)
-    
-%     if iIteration == 50
-%         HorizontalArm.allCars(2).velocity = HorizontalArm.allCars(2).velocity + 2;
+%     
+%     if mod(iIteration,400) == 0
+%         HorizontalArm.allCars(2).velocity = HorizontalArm.allCars(2).velocity - 0.5*HorizontalArm.allCars(2).velocity;
 %     end
 
 

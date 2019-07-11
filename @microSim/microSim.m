@@ -55,7 +55,7 @@ function UI_OpeningFcn(hObject, eventdata, handles, varargin)
 %            command line (see VARARGIN)
 
 % Choose default command line output for UI
-handles.carTypes = {@IdmModel, @HdmModel, @carTypeB, @carTypeC, @HesitantCar, @carTypeA};
+handles.carTypes = {@IdmModel, @HdmModel, @carTypeB, @carTypeC, @HesitantCar,@carTypeA, @carTypeA_TEST};
 handles.roadTypes = {@LoopRoad @FiniteRoad};
 
 % handles.hPlot7 = plot(handles.axes7, NaN, NaN)

@@ -1,3 +1,4 @@
+
 classdef LoopRoad < Road
     properties (SetAccess = public)
         diceDistGen = makedist('uniform','lower',0,'upper',1);

@@ -67,7 +67,7 @@ classdef SpawnCars < handle
                         allCarsPoseArray(iCar) = allCarsPoseArray(iCar-1) + minimumSpacing;
                     end
                 end
-                unoccupiedSpace =  obj.roadEnd - allCarsPoseArray(end) - minimumSpacing;
+                unoccupiedSpace =  obj.roadEnd - allCarsPoseArray(end) - 24.4;
                 if FixedSeed > 0
                     rng(FixedSeed);
                 end
@@ -143,7 +143,7 @@ classdef SpawnCars < handle
                         for j = 1:everyCarNum(i)
                             new_car = carTypes{i}(obj.roadOrientation, obj.roadStart,obj.roadWidth,dt);
                             allCarsArray = [allCarsArray; new_car];
-                            allCarsArray(end).velocity = 4.841;
+%                             allCarsArray(end).velocity = 4.841;
                         end
                     end
                 end                    
