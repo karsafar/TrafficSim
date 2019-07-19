@@ -20,7 +20,7 @@ k = densitypoints(vel,s0,l,v0,T,delta);
 
 instabVec = [];
 i = 0.1:0.025:1.1;
-i = [0.2 1 1.5 3.5 ];
+% i = [0.2 0.6 1 1.5 3.5 ];
 for a = i
     % syms a s0 v0 T b delta s dv v l
     syms f(h,dv,v)
@@ -59,14 +59,14 @@ for a = i
     h = s+l;
     temp = double(lambda_2(h,dv,vel));
     % temp1 = double(lambdaSign(h,dv,v));
-    plot(k,temp, 'LineWidth',2)
+%     plot(k,temp, 'LineWidth',2)
     hold on
     grid on
 %     plot(k,temp1,'g', 'LineWidth',2)
 %     plot(k,zeros(1,n),'k--')
-    xlabel('\rho, veh/m','FontSize',16)
-    ylabel('\lambda_2','FontSize',16)
-    
+%     xlabel('\rho, veh/m','FontSize',16)
+%     ylabel('\lambda_2','FontSize',16)
+%     
     
     P = InterX([k;temp],[k;zeros(1,n)]);
     idxZero = (P(1,:)+P(2,:) ~= 0);
@@ -83,14 +83,20 @@ for a = i
     end
 end
 dispname = []
-for a = i
-    dispname = [dispname {sprintf('a_{IDM} = %s m/s^2',num2str(a))}];
-end
-lgd = legend(dispname,'0');
-lgd.FontSize = 14
+% for a = i
+%     dispname = [dispname {sprintf('a_{IDM} = %s m/s^2',num2str(a))}];
+% end
+% lgd = legend(dispname,'0');
+% lgd.FontSize = 14
 plot(i,instabVec, 'LineWidth',2)
 xlabel('a, m/s^2','FontSize',16)
 ylabel('\rho, veh/m','FontSize',16)
+
+axis auto
+xlim([0.1 3.5])
+xticks(0.1:0.1:3.5)
+ylim([0.02 0.144])
+yticks(0.02:0.005:0.144)
 return
 
 

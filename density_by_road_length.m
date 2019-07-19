@@ -5,7 +5,7 @@ roadTypes = {@LoopRoad @FiniteRoad};
 carTypes = {@IdmModel, @HdmModel, @carTypeA, @carTypeB, @carTypeC, @carTypeA_old};
 
 plotFlag = true;
-setappdata(0,'drawRAte',0);
+setappdata(0,'drawRAte',1);
 
 runTime = 720; % sec
 dt = 0.1;
@@ -17,31 +17,35 @@ fixedSeed = [1 1];
 % seedType = rng('shuffle', 'combRecursive');
 priority = false;
 
-% road dimensions
-val = 10000;
-val2 = 10000;
-road.Start = [-val; -val2];
-road.End = [val; val2];
-road.Width = [4; 4];
-road.Length = road.End - road.Start;
-
-noSpawnAreaLength = 24.4; % length of no spawn area around the junction + length of a car for safe re-spawn
-max_density = 1/6.4;    % number of cars per metre (0.1562)
-
 
 transientCutOffLength = 0;
 swapRate = 0;
 %%
-density = 0.059;
-nCars(1,1) = round(density * road.Length(1));
-nCars(2,1) = round(density * road.Length(2));
-% for i = 1:2
-%     if  mod(nCars(i),2) ~= 0
-%         nCars(i) = nCars(i) - 1;
-%     end
-% end
+density = 0.13;
+
+n = 10;
+nCars = [n n];
+
+
+road.Length = round(nCars/density);  % length is rounded so need to correct the value of density
+half_length = road.Length/2;
+road.Start = [-half_length(1); -half_length(2)];
+road.End = [half_length(1); half_length(2)];
+road.Width = [4; 4];
+
+
+noSpawnAreaLength = road.Width(1)+Car.dimension(2); % length of no spawn area around the junction + length of a car for safe re-spawn
+max_density = 1/6.4;    % number of cars per metre (0.1562)
+
+maxDen = nCars./(6.4*nCars+noSpawnAreaLength);
+errMess1 = sprintf('East road density has to be <= %.4f', maxDen(1));
+errMess2 = sprintf('North road density has to be <= %.4f', maxDen(2));
+
+assert(maxDen(1)>=density,errMess1);
+assert(maxDen(1)>=density,errMess1);
+
 density = nCars(1)/road.Length(1);
-% RealDensity(2) = nCars(2)/road.Length(2);
+
 %%
 iIteration = 0;
 if plotFlag == 0

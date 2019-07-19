@@ -424,7 +424,7 @@ classdef carTypeA < IdmModel
                 dV = 1e-5;
             end
             
-            intelligentBreaking = obj.velocity*obj.timeGap + (obj.velocity*dV)/(2*sqrt(obj.a_max*obj.b));
+            intelligentBreaking = obj.velocity*obj.timeGap + (obj.velocity*dV)/(2*sqrt(obj.a*obj.b));
             if stop_flag || junc_flag
                 s_star = 0.1 + max(0,intelligentBreaking);
             else
@@ -436,7 +436,7 @@ classdef carTypeA < IdmModel
                 velDif = 1;
             end
             
-            obj.juncAccel = obj.a_max*(1 - (velDif)^obj.delta - (s_star/s)^2);
+            obj.juncAccel = obj.a*(1 - (velDif)^obj.delta - (s_star/s)^2);
             
             if obj.juncAccel < obj.a_feas_min
                 if (emerg_flag || stop_flag)
