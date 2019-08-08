@@ -121,7 +121,7 @@ for idx = 1:length(data)
     [row,platoonSizes] = find(freq_counter);
 
     platoonNums = freq_counter((freq_counter) > eps);
-    numCars(1,idx);
+%     numCars(1,idx);
     [platoonSizes;platoonNums];
     c = categorical(platoonSizes);
     platoons(idx,1:numel(platoonSizes)) = (platoonNums.*platoonSizes);
@@ -143,8 +143,9 @@ for ii = 1:size(orderedPlatoons,1)
         end
     end
     h = line(ax3,[numCars(1,ii)*ones(1,numel(temp))./500; numCars(1,ii)*ones(1,numel(temp))./500],temp1,'LineWidth',8);
+%     h = line(ax3,[density(1,ii)*ones(1,numel(temp)); density(1,ii)*ones(1,numel(temp))],temp1,'LineWidth',4);
     set(h,{'Color'},num2cell([colourArray(ii).density(:,1),colourArray(ii).density(:,2),colourArray(ii).density(:,3)],2));
-%     plot(ax3,[numCars(1,ii)*ones(1,numel(temp)); numCars(1,ii)*ones(1,numel(temp))],temp1,'LineWidth',20)
+%      plot(ax3,[numCars(1,ii)*ones(1,numel(temp)); numCars(1,ii)*ones(1,numel(temp))],temp1,'LineWidth',20)
     hold on
     if ii == 1
         h_tem = h;
@@ -155,10 +156,13 @@ for i = 1:numel(data)
     dataNums(1,i) = numel(data(i).crossCount(:));
 end
 hold(ax3,'on');
-text(ax3,numCars(1,:)'./500,dataNums,num2str(dataNums'),'vert','middle','horiz','left','FontSize',10);
+ text(ax3,numCars(1,:)'./500,dataNums,num2str(dataNums'),'vert','middle','horiz','left','FontSize',10);
+% text(ax3,density(1,:)',dataNums,num2str(dataNums'),'vert','middle','horiz','left','FontSize',5);
+
 % ylabel('Crossing Platoon Sizes','FontSize',14)
 % xlabel('Number of cars per arm','FontSize',14)
 xlim([0.015 0.15])
+
 xticks(0.02:0.01:0.144)
 
 % xticks(numCars(1,1):2:numCars(1,end))
@@ -167,23 +171,24 @@ view([90 -90])
 
 
 ylabel('nCrosses/hour','FontSize',14)
-xlabel('Density \rho (1/km)','FontSize',14)
+xlabel('Density \rho (m^{-1})','FontSize',14)
 % xlim([0 3000])
 lgd = legend([h_tem],{'North Arm Crossing','East Arm Crossing'},'location','northeast');
 
 [k,q, v] = fundamentaldiagram();
 y_assimptote = 0:0.01:3000;
-x_assimptote = ones(1,300001)*0.06;
+x_assimptote = ones(1,300001)*0.0595;
 plot(ax3,x_assimptote,y_assimptote,'k--','LineWidth',1,'DisplayName','Critical Density')
-
+ax3 = gca;
 plot(ax3,k,2*q*3600,'k-','LineWidth',2,'DisplayName','Fundamental Diagram of Junction')
+hold on
 plot(ax3,k,q*3600,'-','Color',[0.5 0.5 0.5 ],'LineWidth',2,'DisplayName','Findamental Diagram of Single Arm')
 lgd.FontSize = 10;
 
 
 % saveas(f2,'Platoon-sizes.png')
 % close(f2)
-
+return
 
 %%
 f3 = figure('visible', 'off','units','normalized','outerposition',[0 0 1 1]);

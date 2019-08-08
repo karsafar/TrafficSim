@@ -19,8 +19,8 @@ s = gappoints(vel,s0,l,v0,T,delta);
 k = densitypoints(vel,s0,l,v0,T,delta);
 
 instabVec = [];
-i = 0.1:0.025:1.1;
-% i = [0.2 0.6 1 1.5 3.5 ];
+% i = 0.1:0.025:1.1;
+i = [0.2 0.6 1 1.5 3.5 ];
 for a = i
     % syms a s0 v0 T b delta s dv v l
     syms f(h,dv,v)
