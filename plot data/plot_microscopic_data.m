@@ -193,7 +193,8 @@ plot(t_rng,North.Occupancy,'-b','LineWidth',1)
     c.Label.String = 'Velocity, m/s';
     c.Label.FontSize = 12;
     colormap(flipud(jet));
-    
+    patch(ax2,x,y,[0.5 0.5 0.5],'EdgeColor','None');
+
 %     figure
 %     ddt = delaunayTriangulation(double(X1'),double(Y1')) ;
 %     tri = ddt.ConnectivityList ;

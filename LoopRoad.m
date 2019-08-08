@@ -132,7 +132,7 @@ classdef LoopRoad < Road
                 leaderCar.Next.leaderFlag = true;
             end
         end
-        function move_all_cars(obj,t,dt,iIteration,nIterations)
+        function move_all_cars(obj,t,dt,iIteration,nIterations,oppositeArm,oppositeArmLength)
             %%
 %             aggregatedVelocities = 0;
             
@@ -170,6 +170,9 @@ classdef LoopRoad < Road
                 end
                 
                 currentCar.move_car(dt);
+                
+%                 currentCar.decide_acceleration(oppositeArm,oppositeArmLength,t,dt);
+%                 currentCar.update_velocity(dt);
             end
 %{      
       % check if needed later and delete if not!

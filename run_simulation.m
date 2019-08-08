@@ -116,8 +116,8 @@ for iIteration = 1:nIterations
     count_emegrency_breaks(VerticalArm);
     
     % Move all the cars along the road
-    HorizontalArm.move_all_cars(t,dt,iIteration,nIterations)
-    VerticalArm.move_all_cars(t,dt,iIteration,nIterations)
+    HorizontalArm.move_all_cars(t,dt,iIteration,nIterations,VerticalArm,roadDims.Length(1))
+    VerticalArm.move_all_cars(t,dt,iIteration,nIterations,HorizontalArm,roadDims.Length(2))
 %     
 %     if mod(iIteration,400) == 0
 %         HorizontalArm.allCars(2).velocity = HorizontalArm.allCars(2).velocity - 0.5*HorizontalArm.allCars(2).velocity;

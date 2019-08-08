@@ -67,7 +67,7 @@ classdef SpawnCars < handle
                         allCarsPoseArray(iCar) = allCarsPoseArray(iCar-1) + minimumSpacing;
                     end
                 end
-                unoccupiedSpace =  obj.roadEnd - allCarsPoseArray(end) - 24.4;
+                unoccupiedSpace =  obj.roadEnd - allCarsPoseArray(end) - (obj.roadWidth+Car.dimension(2));
                 if FixedSeed > 0
                     rng(FixedSeed);
                 end
@@ -87,13 +87,26 @@ classdef SpawnCars < handle
                         deltaD(iCar) = addonPositions(iCar) - addonPositions(iCar-1);
                     end
                 end
+                
+                
+                s_in = -obj.roadWidth/2-(Car.dimension(3)+(Car.dimension(2) - Car.dimension(3))/2);
+                s_out = obj.roadWidth/2+(Car.dimension(2) - Car.dimension(3))/2;
                 for iCar = 1:obj.numCars
                     allCarsPoseArray(iCar:end) = allCarsPoseArray(iCar:end)+deltaD(iCar);
-                    if allCarsPoseArray(iCar) > -10 && allCarsPoseArray(iCar) < 10
-                        diff = 10 - allCarsPoseArray(iCar);
-                        allCarsPoseArray(iCar:end) = allCarsPoseArray(iCar:end)+diff;
-                    end
+                end                
+%                 passedJunc = allCarsPoseArray(allCarsPoseArray > s_in);
+                idx = find(allCarsPoseArray > s_in);
+                if allCarsPoseArray(idx(1)) < s_out
+                    allCarsPoseArray(idx(1):end) = allCarsPoseArray(idx(1):end) + (s_out-allCarsPoseArray(idx(1)));
                 end
+                
+%                 for iCar = 1:obj.numCars
+%                     allCarsPoseArray(iCar:end) = allCarsPoseArray(iCar:end)+deltaD(iCar);
+%                     if allCarsPoseArray(iCar) > s_in && allCarsPoseArray(iCar) < s_out
+%                         diff = 10 - allCarsPoseArray(iCar);
+%                         allCarsPoseArray(iCar:end) = allCarsPoseArray(iCar:end)+diff;
+%                     end
+%                 end
                 allCarsArray = [];
                 for i = 1:numel(everyCarNum)
                     if everyCarNum(i) > 0
@@ -132,9 +145,11 @@ classdef SpawnCars < handle
                         allCarsPoseArray(iCar) = allCarsPoseArray(iCar-1) + (obj.roadEnd-obj.roadStart)/obj.numCars;
                     end
                 end
-                
+               
                 if strcmpi(obj.roadOrientation,'vertical')
-                    allCarsPoseArray = allCarsPoseArray + (obj.roadEnd-obj.roadStart)/(2*obj.numCars);
+                    allCarsPoseArray = allCarsPoseArray + (obj.roadEnd-obj.roadStart)/(obj.numCars) - 5.575;
+                else
+                    allCarsPoseArray = allCarsPoseArray+2.825;
                 end
                 
                 allCarsArray = [];

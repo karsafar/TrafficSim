@@ -26,7 +26,7 @@ for i = 1:Number_mat
 end
 
 save('aggregatedCrossingData.mat','data','numCars','averageVelocity');
-%}
+% %}
 %% conditional probabilities
 
 m = length(data);
@@ -78,18 +78,21 @@ axis equal
 saveas(f1,'Porbabilities.png')
 close(f1)
 
-
+%}
 
 %% Platoon sizes and frequencies
 
 platoons = NaN(length(data),50);
-orderedPlatoons = NaN(length(data),2000);
+orderedPlatoons = NaN(length(data),3000);
+colourArray = [];
 for idx = 1:length(data)
     temp = [];
 %     selectedTestData = data(idx).crossOrder;
     selectedTestData = data(idx).crossCount;
+    selectedTestData = selectedTestData(isnan(selectedTestData)==0) ;
     freq_counter = zeros(1,length(selectedTestData));
     count = 1;
+    colourArray(idx).density = [];
     for i = 1:length(selectedTestData)-1
         if selectedTestData(i) == selectedTestData(i+1)
             count = count + 1;
@@ -102,6 +105,16 @@ for idx = 1:length(data)
             freq_counter(count) = freq_counter(count) + 1;
             temp = [temp count];
         end
+        if selectedTestData(i) == 1 && (i ==1 || selectedTestData(i) ~= selectedTestData(i-1))
+            colourArray(idx).density = [colourArray(idx).density;[1 0 0]];
+        elseif selectedTestData(i) == 0 && (i ==1 ||selectedTestData(i) ~= selectedTestData(i-1))
+            colourArray(idx).density = [colourArray(idx).density;[0 1 0]];
+        end
+    end
+    if selectedTestData(i+1) == 1 && selectedTestData(i+1) ~= selectedTestData(i)
+        colourArray(idx).density = [colourArray(idx).density;[1 0 0]];
+    elseif selectedTestData(i+1) == 0 && selectedTestData(i+1) ~= selectedTestData(i) 
+        colourArray(idx).density = [colourArray(idx).density;[0 1 0]];
     end
 %     orderedPlatoons(idx,1:length(temp)) = sort(temp,'ascend');
     orderedPlatoons(idx,1:length(temp)) = temp;
@@ -116,8 +129,8 @@ for idx = 1:length(data)
     maxPlatoons(idx) = max(platoonSizes);    
 end
 
-
-f2 = figure('visible', 'off','units','normalized','outerposition',[0 0 1 1]);
+    
+% f2 = figure('visible', 'off','units','normalized','outerposition',[0 0 1 1]);
 ax3 = axes;
 for ii = 1:size(orderedPlatoons,1)
     temp = orderedPlatoons(ii,:);
@@ -129,32 +142,47 @@ for ii = 1:size(orderedPlatoons,1)
             temp1(:,i) = [temp1(2,i-1); temp1(2,i-1)+temp(i)];
         end
     end
-    line(ax3,[numCars(1,ii)*ones(1,numel(temp)); numCars(1,ii)*ones(1,numel(temp))],temp1,'LineWidth',20)
+    h = line(ax3,[numCars(1,ii)*ones(1,numel(temp))./500; numCars(1,ii)*ones(1,numel(temp))./500],temp1,'LineWidth',8);
+    set(h,{'Color'},num2cell([colourArray(ii).density(:,1),colourArray(ii).density(:,2),colourArray(ii).density(:,3)],2));
 %     plot(ax3,[numCars(1,ii)*ones(1,numel(temp)); numCars(1,ii)*ones(1,numel(temp))],temp1,'LineWidth',20)
     hold on
+    if ii == 1
+        h_tem = h;
+    end
 end
 
 for i = 1:numel(data)
     dataNums(1,i) = numel(data(i).crossCount(:));
 end
 hold(ax3,'on');
-text(ax3,numCars(1,:)',dataNums,num2str(dataNums'),'vert','middle','horiz','left','FontSize',14);
+text(ax3,numCars(1,:)'./500,dataNums,num2str(dataNums'),'vert','middle','horiz','left','FontSize',10);
 % ylabel('Crossing Platoon Sizes','FontSize',14)
 % xlabel('Number of cars per arm','FontSize',14)
+xlim([0.015 0.15])
+xticks(0.02:0.01:0.144)
 
-xticks(numCars(1,1):2:numCars(1,end))
-xlim([numCars(1,1)-2 numCars(1,end)+2])
+% xticks(numCars(1,1):2:numCars(1,end))
+% xlim([numCars(1,1)-2 numCars(1,end)+2])
 view([90 -90])
 
-[k,q, v] = fundamentaldiagram();
-plot(ax3,k*500,2*q*3600,'k-','LineWidth',2)
+
 ylabel('nCrosses/hour','FontSize',14)
-xlabel('nCars/arm','FontSize',14)
+xlabel('Density \rho (1/km)','FontSize',14)
 % xlim([0 3000])
+lgd = legend([h_tem],{'North Arm Crossing','East Arm Crossing'},'location','northeast');
+
+[k,q, v] = fundamentaldiagram();
+y_assimptote = 0:0.01:3000;
+x_assimptote = ones(1,300001)*0.06;
+plot(ax3,x_assimptote,y_assimptote,'k--','LineWidth',1,'DisplayName','Critical Density')
+
+plot(ax3,k,2*q*3600,'k-','LineWidth',2,'DisplayName','Fundamental Diagram of Junction')
+plot(ax3,k,q*3600,'-','Color',[0.5 0.5 0.5 ],'LineWidth',2,'DisplayName','Findamental Diagram of Single Arm')
+lgd.FontSize = 10;
 
 
-saveas(f2,'Platoon-sizes.png')
-close(f2)
+% saveas(f2,'Platoon-sizes.png')
+% close(f2)
 
 
 %%
