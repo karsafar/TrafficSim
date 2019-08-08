@@ -20,9 +20,10 @@ priority = false;
 
 
 %
-density = [linspace(0.02,0.048,5), linspace(0.049,0.065,17),linspace(0.072,0.144,10)];
+% density = [linspace(0.02,0.048,5), linspace(0.049,0.065,17),linspace(0.072,0.144,10)];
+density = [linspace(0.02,0.044,7), linspace(0.046,0.07,13)];
 
-n = 50;
+n = 30;
 nCars = [n; n];
 
 road.Length = round(nCars./density);  % length is rounded so need to correct the value of density
@@ -71,7 +72,7 @@ end
 
 %%
 
-save('prescribe_range_density.mat',...
+save('monte_carlo_density_range.mat',...
     'carTypeRatios',...
     'carTypes',...
     'nCars',...

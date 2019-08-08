@@ -7,6 +7,7 @@ d = dir('test-*');
 Number_mat = length(d);   
 clear d
 for i = 1:Number_mat
+    i
         filename = sprintf('test-%s.mat',num2str(i));
         load(fullfile(filename),'-mat','sim','density')
         
@@ -14,8 +15,33 @@ for i = 1:Number_mat
         northArm.density(i) = density;
         junction.density(i) = density;
         
-        eastArm.meanVelocity(i) = nanmean(sim.horizArm.averageVelocityHistory);
-        northArm.meanVelocity(i) = nanmean(sim.vertArm.averageVelocityHistory);
+        
+        %%
+        
+        velArrayEast = NaN(sim.horizArm.numCars,(numel(sim.crossOrder)-1));
+        velArrayNorth = NaN(sim.vertArm.numCars,(numel(sim.crossOrder)-1));
+        for iCar = 1:sim.horizArm.numCars
+            velArrayEast(iCar,:) = sim.horizArm.allCars(iCar).History(3,:);
+        end
+        for iCar = 1:sim.vertArm.numCars
+            velArrayNorth(iCar,:) = sim.vertArm.allCars(iCar).History(3,:);
+        end
+        meanVelArrayEast = mean(velArrayEast,1);
+        meanVelArrayNorth = mean(velArrayNorth,1);
+        
+        cumsumVelEast = cumsum(meanVelArrayEast);
+        cumsumVelNorth = cumsum(meanVelArrayNorth);
+        
+        cumulativeAverage= cumsumVelEast./[1:(numel(sim.crossOrder)-1)];
+        cumulativeAverage(2,:) = cumsumVelNorth./[1:(numel(sim.crossOrder)-1)];
+        
+        
+    %%   
+        
+        
+        
+        eastArm.meanVelocity(i) = nanmean(cumulativeAverage(1,:));
+        northArm.meanVelocity(i) = nanmean(cumulativeAverage(2,:));
         junction.meanVelocity(i) = nanmean([eastArm.meanVelocity(i),northArm.meanVelocity(i)]);
         
         clear sim density
@@ -26,7 +52,7 @@ northArm.flow = northArm.density.*northArm.meanVelocity;
 junction.flow = junction.density.*junction.meanVelocity;
 
 save('processedData.mat','eastArm','northArm','junction')
-
+return
 %%
 
 load('processedData.mat')

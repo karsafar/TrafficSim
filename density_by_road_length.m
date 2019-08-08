@@ -22,7 +22,7 @@ transientCutOffLength = 0;
 swapRate = 0;
 %%
 
-density = 0.06;
+density = 0.04;
 
 n = 50;
 nCars = [n; n];

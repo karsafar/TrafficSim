@@ -126,7 +126,7 @@ plot(t_rng,North.Occupancy,'-b','LineWidth',1)
     X = [];
     Y = [];
     Z = [];
-    d = 1; % density on points in scatter plot
+    d = 2; % density on points in scatter plot
     maxVelocity = 13;
     for iCar = 1:sim.horizArm.numCars
         %     X = [X sim.horizArm.carHistory(iCar).History(1,1:d:end)];
@@ -156,7 +156,7 @@ plot(t_rng,North.Occupancy,'-b','LineWidth',1)
     
     
     set(ax1,'FontSize',16)
-    title(ax1,'West-East Arm Velocity Profiles')
+    title(ax1,'East Arm Velocity Profiles')
     xlabel(ax1,'Time, s')
     ylabel(ax1,'Position, m')
     hold(ax1,'on');
@@ -179,7 +179,7 @@ plot(t_rng,North.Occupancy,'-b','LineWidth',1)
     %%%%%%%%%%%%%% South-North Arm %%%%%%%%%%%%%%
     ax2 = subplot(2,1,2);
     set(ax2,'FontSize',16)
-    title(ax2,'South-North Arm Velocity Profiles')
+    title(ax2,'North Arm Velocity Profiles')
     xlabel(ax2,'Time, s')
     ylabel(ax2,'Position, m')
     hold(ax2,'on');
@@ -188,7 +188,7 @@ plot(t_rng,North.Occupancy,'-b','LineWidth',1)
     
     caxis manual
     caxis([0 maxVelocity]);
-    c = colorbar('location','Manual', 'position', [0.93 0.11 0.02 0.82]);
+    c = colorbar(ax2,'location','Manual', 'position', [0.93 0.11 0.02 0.82]);
     set(c,'YTick',(0:1:maxVelocity))
     c.Label.String = 'Velocity, m/s';
     c.Label.FontSize = 12;
@@ -312,12 +312,12 @@ y = [y1, y1, y2, y2, y1];
 axis(ax5,[0 t_rng(nIterations) sim.horizArm.startPoint sim.horizArm.endPoint] )
 % yyaxis(ax5,'left')
 patch(ax5,x,y,[0.5 0.5 0.5],'EdgeColor','None');
-for iCar = 1:sim.horizArm.nCarHistory
-    h1 = plot(ax5,sim.horizArm.carHistory(iCar).History(1,:),sim.horizArm.carHistory(iCar).History(2,:),'b-','LineWidth',1);
+for iCar = 1:sim.horizArm.numCars
+    h1 = plot(ax5,sim.horizArm.allCars(iCar).History(1,:),sim.horizArm.allCars(iCar).History(2,:),'b.','LineWidth',1);
 end
 % yyaxis(ax5,'right')
-for jCar = 1:sim.vertArm.nCarHistory
-    h2 = plot(ax5,sim.vertArm.carHistory(jCar).History(1,:),-sim.vertArm.carHistory(jCar).History(2,:),'r-','LineWidth',1);
+for jCar = 1:sim.horizArm.numCars
+    h2 = plot(ax5,sim.vertArm.allCars(jCar).History(1,:),-sim.vertArm.allCars(jCar).History(2,:),'r.','LineWidth',1);
 end
 % yticks([ min(-sim.vertArm.carHistory(jCar).History(2,:)) max(-sim.vertArm.carHistory(jCar).History(2,:))])
 % ylabel(ax5,'North Arm, m')

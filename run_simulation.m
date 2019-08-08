@@ -118,10 +118,6 @@ for iIteration = 1:nIterations
     % Move all the cars along the road
     HorizontalArm.move_all_cars(t,dt,iIteration,nIterations,VerticalArm,roadDims.Length(1))
     VerticalArm.move_all_cars(t,dt,iIteration,nIterations,HorizontalArm,roadDims.Length(2))
-%     
-%     if mod(iIteration,400) == 0
-%         HorizontalArm.allCars(2).velocity = HorizontalArm.allCars(2).velocity - 0.5*HorizontalArm.allCars(2).velocity;
-%     end
 
 
     if plotFlag == 0 && mod(iIteration,36) == 0
