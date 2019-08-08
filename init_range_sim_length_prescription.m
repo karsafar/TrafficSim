@@ -6,7 +6,7 @@ roadTypes = {@LoopRoad @FiniteRoad};
 carTypes = {@carTypeA, @carTypeB, @carTypeC};
 
 plotFlag = false;
-runTime = 360;
+runTime = 3600;
 dt = 0.1;
 nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;
@@ -18,28 +18,37 @@ fixedSeed = [1:nSeeds;
 
 priority = false;
 
-% road dimensions
-road.Start = [-250; -250];
-road.End = [250; 250];
-road.Width = [4; 4];
-road.Length = road.End - road.Start;
 
-noSpawnAreaLength = 24.4; % length of no spawn area around the junction + length of a car for safe re-spawn
+%
+density = [linspace(0.02,0.048,5), linspace(0.049,0.065,17),linspace(0.072,0.144,10)];
+
+n = 50;
+nCars = [n; n];
+
+road.Length = round(nCars./density);  % length is rounded so need to correct the value of density
+half_length = road.Length/2;
+road.Start = [-half_length(1,:); -half_length(2,:)];
+road.End = [half_length(1,:); half_length(2,:)];
+road.Width = [4; 4];
+
+noSpawnAreaLength = road.Width(1)+Car.dimension(2); % length of no spawn area around the junction + length of a car for safe re-spawn
 max_density = 1/6.4;    % number of cars per metre (0.1562)
 
-transientCutOffLength = 50;
+maxDen = nCars./(6.4*nCars+noSpawnAreaLength);
+errMess1 = sprintf('East road density has to be <= %.4f', maxDen(1));
+errMess2 = sprintf('North road density has to be <= %.4f', maxDen(2));
+
+density = nCars./road.Length;
+
+%% 
+transientCutOffLength = 0;
 swapRate = 0;
 
 %%
 allCarsNumArray_H = zeros(32,numel(carTypes));
 allCarsNumArray_V = zeros(32,numel(carTypes));
-for i = 1:32
-    init_density = 0.02+(i-1)*0.004;
-    nCars(1) = round(init_density * road.Length(1));
-    nCars(2) = round(init_density * road.Length(2));
-    density = nCars(1)/road.Length(1);
-
-    alpha = 50; beta  = 50; gamma =  0;
+for i = 1:length(density)
+    alpha = 50; beta  = 0; gamma =  0;
     
 %     carTypeRatios = [alpha/100 beta/100 gamma/100; alpha/100 beta/100 gamma/100];
     carTypeRatios = [1 0 0; 1 0 0];
@@ -62,7 +71,7 @@ end
 
 %%
 
-save('E-A-N-A.mat',...
+save('prescribe_range_density.mat',...
     'carTypeRatios',...
     'carTypes',...
     'nCars',...
@@ -76,8 +85,6 @@ save('E-A-N-A.mat',...
     'density',...
     'road',...
     'nIterations',...
-    'Arm_H',...
-    'Arm_V',...
     'fixedSeed',...
     'roadTypes',...
     'alpha',...

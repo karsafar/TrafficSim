@@ -21,16 +21,16 @@ priority = false;
 transientCutOffLength = 0;
 swapRate = 0;
 %%
-density = 0.13;
 
-n = 10;
-nCars = [n n];
+density = 0.06;
 
+n = 50;
+nCars = [n; n];
 
 road.Length = round(nCars/density);  % length is rounded so need to correct the value of density
 half_length = road.Length/2;
-road.Start = [-half_length(1); -half_length(2)];
-road.End = [half_length(1); half_length(2)];
+road.Start = [-half_length(1,:); -half_length(2,:)];
+road.End = [half_length(1,:); half_length(2,:)];
 road.Width = [4; 4];
 
 
@@ -41,10 +41,12 @@ maxDen = nCars./(6.4*nCars+noSpawnAreaLength);
 errMess1 = sprintf('East road density has to be <= %.4f', maxDen(1));
 errMess2 = sprintf('North road density has to be <= %.4f', maxDen(2));
 
-assert(maxDen(1)>=density,errMess1);
-assert(maxDen(1)>=density,errMess1);
 
-density = nCars(1)/road.Length(1);
+assert(maxDen(1)>=density,errMess1);
+assert(maxDen(2)>=density,errMess2);
+
+
+density = nCars./road.Length;
 
 %%
 iIteration = 0;

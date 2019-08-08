@@ -126,7 +126,7 @@ plot(t_rng,North.Occupancy,'-b','LineWidth',1)
     X = [];
     Y = [];
     Z = [];
-    d = 4; % density on points in scatter plot
+    d = 1; % density on points in scatter plot
     maxVelocity = 13;
     for iCar = 1:sim.horizArm.numCars
         %     X = [X sim.horizArm.carHistory(iCar).History(1,1:d:end)];
