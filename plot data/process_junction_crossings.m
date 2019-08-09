@@ -105,16 +105,20 @@ for idx = 1:length(data)
             freq_counter(count) = freq_counter(count) + 1;
             temp = [temp count];
         end
-        if selectedTestData(i) == 1 && (i ==1 || selectedTestData(i) ~= selectedTestData(i-1))
+        if selectedTestData(i) == 1 && (i == 1 || selectedTestData(i) ~= selectedTestData(i-1))
             colourArray(idx).density = [colourArray(idx).density;[1 0 0]];
-        elseif selectedTestData(i) == 0 && (i ==1 ||selectedTestData(i) ~= selectedTestData(i-1))
+        elseif selectedTestData(i) == 0 && (i == 1 ||selectedTestData(i) ~= selectedTestData(i-1))
             colourArray(idx).density = [colourArray(idx).density;[0 1 0]];
+        elseif isnan(selectedTestData(i)) && (i == 1 || selectedTestData(i) ~= selectedTestData(i-1))
+           colourArray(idx).density = [colourArray(idx).density;[0.5 0.5 0.5]]; 
         end
     end
     if selectedTestData(i+1) == 1 && selectedTestData(i+1) ~= selectedTestData(i)
         colourArray(idx).density = [colourArray(idx).density;[1 0 0]];
     elseif selectedTestData(i+1) == 0 && selectedTestData(i+1) ~= selectedTestData(i) 
         colourArray(idx).density = [colourArray(idx).density;[0 1 0]];
+    elseif isnan(selectedTestData(i)) && selectedTestData(i) ~= selectedTestData(i-1)
+        colourArray(idx).density = [colourArray(idx).density;[0.5 0.5 0.5]];
     end
 %     orderedPlatoons(idx,1:length(temp)) = sort(temp,'ascend');
     orderedPlatoons(idx,1:length(temp)) = temp;
@@ -153,7 +157,7 @@ for ii = 1:size(orderedPlatoons,1)
 end
 
 for i = 1:numel(data)
-    dataNums(1,i) = numel(data(i).crossCount(:));
+    dataNums(1,i) = sum(~isnan(data(i).crossCount(:)));
 end
 hold(ax3,'on');
  text(ax3,numCars(1,:)'./500,dataNums,num2str(dataNums'),'vert','middle','horiz','left','FontSize',10);
@@ -176,15 +180,15 @@ xlabel('Density \rho (m^{-1})','FontSize',14)
 lgd = legend([h_tem],{'North Arm Crossing','East Arm Crossing'},'location','northeast');
 
 [k,q, v] = fundamentaldiagram();
-y_assimptote = 0:0.01:3000;
-x_assimptote = ones(1,300001)*0.0595;
-plot(ax3,x_assimptote,y_assimptote,'k--','LineWidth',1,'DisplayName','Critical Density')
+% y_assimptote = 0:0.01:3000;
+% x_assimptote = ones(1,300001)*0.0595;
+% plot(ax3,x_assimptote,y_assimptote,'k--','LineWidth',1,'DisplayName','Critical Density')
 ax3 = gca;
 plot(ax3,k,2*q*3600,'k-','LineWidth',2,'DisplayName','Fundamental Diagram of Junction')
 hold on
 plot(ax3,k,q*3600,'-','Color',[0.5 0.5 0.5 ],'LineWidth',2,'DisplayName','Findamental Diagram of Single Arm')
 lgd.FontSize = 10;
-
+grid on
 
 % saveas(f2,'Platoon-sizes.png')
 % close(f2)
