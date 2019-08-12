@@ -112,7 +112,7 @@ classdef SpawnCars < handle
                     if everyCarNum(i) > 0
                         for j = 1:everyCarNum(i)
                              new_car = carTypes{i}(obj.roadOrientation, obj.roadStart,obj.roadWidth,dt);
-                             new_car.velocity = 5 + (7-5).*rand(1,1);
+%                              new_car.velocity = 5 + (7-5).*rand(1,1);
                             allCarsArray = [allCarsArray new_car];
                         end
                     end
