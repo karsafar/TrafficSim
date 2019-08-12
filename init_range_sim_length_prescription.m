@@ -21,7 +21,8 @@ priority = false;
 
 %
 % density = [linspace(0.02,0.048,5), linspace(0.049,0.065,17),linspace(0.072,0.144,10)];
-density = [linspace(0.02,0.044,7), linspace(0.046,0.07,13)];
+% density = [linspace(0.02,0.044,7), linspace(0.046,0.07,13)];
+density = [linspace(0.02,0.06,21)];
 
 n = 30;
 nCars = [n; n];

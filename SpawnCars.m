@@ -23,9 +23,9 @@ classdef SpawnCars < handle
                 obj.numCars = sum(everyCarNum);
                 FixedSeed = SpawnData{2};
                 carTypes = SpawnData{3};
-%                  obj.randomSpawn(everyCarNum,carTypes,FixedSeed,dt)
+                 obj.randomSpawn(everyCarNum,carTypes,FixedSeed,dt)
                 %%
-                obj.controlled_spacing_spawn(everyCarNum,carTypes,FixedSeed,dt)
+%                 obj.controlled_spacing_spawn(everyCarNum,carTypes,FixedSeed,dt)
             end
         end
         
@@ -112,6 +112,7 @@ classdef SpawnCars < handle
                     if everyCarNum(i) > 0
                         for j = 1:everyCarNum(i)
                              new_car = carTypes{i}(obj.roadOrientation, obj.roadStart,obj.roadWidth,dt);
+                             new_car.velocity = 5 + (7-5).*rand(1,1);
                             allCarsArray = [allCarsArray new_car];
                         end
                     end
