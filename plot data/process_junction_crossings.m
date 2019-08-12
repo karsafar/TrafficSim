@@ -180,9 +180,9 @@ xlabel('Density \rho (m^{-1})','FontSize',14)
 lgd = legend([h_tem],{'North Arm Crossing','East Arm Crossing'},'location','northeast');
 
 [k,q, v] = fundamentaldiagram();
-% y_assimptote = 0:0.01:3000;
-% x_assimptote = ones(1,300001)*0.0595;
-% plot(ax3,x_assimptote,y_assimptote,'k--','LineWidth',1,'DisplayName','Critical Density')
+y_assimptote = 0:0.01:3000;
+x_assimptote = ones(1,300001)*0.0595;
+plot(ax3,x_assimptote,y_assimptote,'k--','LineWidth',1,'DisplayName','Critical Density','LineWidth',3)
 ax3 = gca;
 plot(ax3,k,2*q*3600,'k-','LineWidth',2,'DisplayName','Fundamental Diagram of Junction')
 hold on

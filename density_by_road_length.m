@@ -13,7 +13,7 @@ nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;
 t_rng = 0:dt:runTime;
 
-fixedSeed = [1 1];
+fixedSeed = [0 0];
 % seedType = rng('shuffle', 'combRecursive');
 priority = false;
 
@@ -24,7 +24,7 @@ swapRate = 0;
 
 density = 0.04;
 
-n = 50;
+n = 10;
 nCars = [n; n];
 
 road.Length = round(nCars/density);  % length is rounded so need to correct the value of density
