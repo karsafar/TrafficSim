@@ -76,17 +76,12 @@ classdef carTypeB < AutonomousCar
             
             %% 'Junction' Tree
             % 'Cross Behind' Tree
-
             obj.cond5 = ConditionNode(obj.bb.AmaxBehind > obj.bb.Amin,'AmaxBehind > Amin');  
             assignBehind = ActionNode('A','AmaxBehind',obj.bb);
             behindCar = SequenceNode([obj.cond5,assignBehind],obj.bb);
             
-            
             % 'Cross Following Front car' Tree
-            
             obj.cond6 = ConditionNode(obj.bb.AmaxBehind > obj.bb.Afollow,'AmaxBehind > Afollow');
-%             behindWithIdm = SequenceNode([obj.cond6, ActionNode('A','Afollow',obj.bb)],obj.bb);
-%             aheadWithIdm = SequenceNode([obj.cond7, ActionNode('A','Afollow',obj.bb)],obj.bb);
             obj.cond7 = ConditionNode(obj.bb.AminAhead <= obj.bb.Afollow,'AminAhead <= Afollow');
             aheadOrBehindIDM = SelectorNode([obj.cond7,obj.cond6],obj.bb);
             crossFollowingFrontCar = SequenceNode([aheadOrBehindIDM, assignFollow],obj.bb);
@@ -100,30 +95,11 @@ classdef carTypeB < AutonomousCar
             selectAheadOrBehind = SelectorNode([aheadCar, crossFollowingFrontCar, behindCar],obj.bb);
 %             selectAheadOrBehind = SelectorNode([ crossFollowingFrontCar,aheadCar, behindCar],obj.bb);
 
-%{
-            assignJuncStop = ActionNode('A','AjuncStop',obj.bb);
-            obj.cond5 = ConditionNode(obj.bb.distToJunc >= obj.bb.minStopDistToJunc,'distToJunc >= minStopDistToJunc');
-            stopBeforeJunction = SequenceNode([obj.cond5, assignJuncStop],obj.bb);
-            
-            % 'Cross Behind' Tree
-            assignBehind =  ActionNode('A','Afollow',obj.bb);
-            obj.cond9 = ConditionNode(obj.bb.canPassBehind == 1,'canPassBehind == 1');
-            passBehind = SequenceNode([obj.cond9, assignBehind],obj.bb);
-            
-           %  'Cross Ahead' Tree
-            assignAhead =  ActionNode('A','Aahead',obj.bb);
-            obj.cond10 = ConditionNode(obj.bb.canPassAhead == 1,'canPassAhead == 1');
-            passAhead = SequenceNode([obj.cond10, assignAhead],obj.bb);
-             
-            % Choose 'Ahead or Behind' Tree
-            selectAheadOrBehind = SelectorNode([passAhead,passBehind,stopBeforeJunction],obj.bb);
-%}            
             obj.cond10 = ConditionNode(obj.bb.futureGap >= obj.bb.futureMinGap,'futureGap >= futureMinGap');
             doAheadOrBehind = SequenceNode([obj.cond10, selectAheadOrBehind],obj.bb);
             
             %% 'Emengency Stop' Tree
             assignStop = ActionNode('A','AemergStop',obj.bb);
-            
             
             %% random back-off
             assignZero = ActionNode('A','Zero',obj.bb);
@@ -132,7 +108,6 @@ classdef carTypeB < AutonomousCar
             backOff = SequenceNode([obj.cond11, obj.cond12,assignZero],obj.bb);
             
             %% Full Behaviour Tree
-%             obj.full_select = SelectorNode([DoCruise,backOff,keepJunctionClear,doAheadOrBehind,assignStop],obj.bb);
             obj.full_select = SelectorNode([DoCruise,backOff,doAheadOrBehind,assignStop],obj.bb);
             
             
@@ -271,14 +246,11 @@ classdef carTypeB < AutonomousCar
                 obj.cond11.condArray = (obj.bb.isDeadlock == 1);
                 obj.cond12.condArray = (obj.bb.backOffTime >= t);
             end
-            
-            
-            
+
             %% update BT
             tick(obj.full_select,1);
             
             obj.bbStore = [obj.bbStore;[obj.actStore(:).output]];
-            
             
             % draw behaviour tree
             if obj.BT_plot_flag

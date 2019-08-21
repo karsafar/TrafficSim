@@ -1,5 +1,4 @@
 classdef AutonomousCar < IdmModel
-    
     properties (SetAccess = public)
         acc_min_ahead
         acc_max_behind
@@ -7,7 +6,6 @@ classdef AutonomousCar < IdmModel
         juncExitVelocity = NaN
         t_in = NaN
         t_out = NaN
-%         tol = 1e-6
     end
     methods
         function obj = AutonomousCar(varargin)
@@ -26,22 +24,14 @@ classdef AutonomousCar < IdmModel
             s = obj.pose(1);
             s_in = obj.s_in;
             s_out = obj.s_out;
-%             T_safe = obj.T_safe;
-%             tol = obj.tol;
             if competingCar.pose(1) > s_out
                 s_comp = competingCar.pose(1)-OppositeLength;
             else
                 s_comp = competingCar.pose(1);
             end
             v_comp = competingCar.velocity;
-%             a_comp = competingCar.acceleration;
-            a_comp = competingCar.History(4,competingCar.historyIndex-1);
+%             a_comp = competingCar.History(4,competingCar.historyIndex-1);
             if s_comp <= s_in && obj.tol < v_comp
-%                 if obj.tol < a_comp
-%                     obj.t_in = (-v_comp+sqrt((v_comp)^2+2*a_comp*(s_in-s_comp)))/a_comp+t;
-%                 else
-%                     obj.t_in = (s_in - s_comp)/v_comp+t;
-%                 end
                 obj.t_in = (s_in - s_comp)/v_comp+t;
                 if t < obj.t_in && s >= (s_out-v_max*(obj.t_in-t))
                     
@@ -83,15 +73,13 @@ classdef AutonomousCar < IdmModel
             s = obj.pose(1);
             s_in = obj.s_in; 
             s_out = obj.s_out;
-%             T_safe = obj.T_safe; %#ok<*PROPLC>
-%             tol = obj.tol;
+
             if competingCar.pose(1) > s_out
                 s_comp = competingCar.pose(1)-OppositeLength;
             else
                 s_comp = competingCar.pose(1);
             end
             v_comp = competingCar.velocity;
-            %             a_comp = competingCar.acceleration;
             a_comp = competingCar.History(4,competingCar.historyIndex-1);
             if s_comp <= s_out && obj.tol < v_comp
                 if  abs(a_comp) > obj.tol
@@ -99,28 +87,18 @@ classdef AutonomousCar < IdmModel
                 else
                     obj.t_out = (s_out - s_comp)/v_comp+t;
                 end
-                
-                
-%                 if obj.t_out < (t + dt)
-%                     %% if t_out is less than t+dt then the equation gives a negative time which is impossible
-%                     obj.t_out = t + dt;
-%                 end
-                
+
                 if  s <= obj.s_in && obj.t_out > (t + dt)
                     behindWithNegative_A = (s_in - 0.5*obj.a_min*(obj.t_out-(t+dt))^2 -v*(obj.t_out-t) - s)/ (dt*(obj.t_out-(t+dt/2)));
                     junctionExitVelocity = (v + behindWithNegative_A*dt) + obj.a_min*(obj.t_out-(t+dt));
                     
 %                     behindWithZeroVel = ((dt*obj.a_min-2*v) + sqrt(((dt*obj.a_min-2*v)^2 -4*(2*obj.a_min*(s_in-s-v*dt)+v^2))))/(2*dt);
                     
-%                     if junctionExitVelocity < 0 || A_min_ahead_next > -50
-%                         obj.acc_max_behind = behindWithZeroVel;
-%                     else
                     if  junctionExitVelocity > 0 && A_min_ahead_next <= 50
                         obj.acc_max_behind =  behindWithNegative_A;
                     else
                         obj.acc_max_behind = -1e3;
                     end
-                    
                 else
                     obj.acc_max_behind = 1e3;
                 end
