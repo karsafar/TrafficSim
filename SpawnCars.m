@@ -23,9 +23,9 @@ classdef SpawnCars < handle
                 obj.numCars = sum(everyCarNum);
                 FixedSeed = SpawnData{2};
                 carTypes = SpawnData{3};
-                 obj.randomSpawn(everyCarNum,carTypes,FixedSeed,dt)
+%                  obj.randomSpawn(everyCarNum,carTypes,FixedSeed,dt)
                 %%
-%                 obj.controlled_spacing_spawn(everyCarNum,carTypes,FixedSeed,dt)
+                obj.controlled_spacing_spawn(everyCarNum,carTypes,FixedSeed,dt)
             end
         end
         
@@ -96,7 +96,7 @@ classdef SpawnCars < handle
                 end                
 %                 passedJunc = allCarsPoseArray(allCarsPoseArray > s_in);
                 idx = find(allCarsPoseArray > s_in);
-                if allCarsPoseArray(idx(1)) < s_out
+                if ~isempty(idx) && allCarsPoseArray(idx(1)) < s_out
                     allCarsPoseArray(idx(1):end) = allCarsPoseArray(idx(1):end) + (s_out-allCarsPoseArray(idx(1)));
                 end
                 

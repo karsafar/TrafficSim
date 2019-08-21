@@ -44,11 +44,11 @@ xlabel('Num cars per arm','FontSize',14)
 ax3 = axes;
 xRange = density(1,:);
 boxplot(ax3,turnTakinglengths',xRange)
-ylabel('nCrosses/hour','FontSize',14)
-xlabel('Density \rho (m^{-1})','FontSize',14)
+ylabel('Junction Capacity Q veh/hour','FontSize',14)
+xlabel('Density \rho (veh/m)','FontSize',14)
 
 % % xticks(1:1:20)
-xticklabels(string([0.02:0.004:0.044,0.046:0.002:0.07]))
+% xticklabels(string([0.02:0.01:0.06]))
 grid on
 hold on
-view([90 -90])
+% view([90 -90])

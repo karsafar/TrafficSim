@@ -16,6 +16,7 @@ function  [sim] = run_simulation(...
 HorizontalArm = roadTypes{1}([{carTypes},0,roadDims,priority],ArmH);
 VerticalArm = roadTypes{2}([{carTypes},90,roadDims,priority],ArmV);
 
+clear ArmH ArmV 
 % plot the junction
 junc = Junction(roadDims, plotFlag);
 
@@ -47,7 +48,7 @@ end
 for iIteration = 1:nIterations
     % update time
     t = t_rng(iIteration);
-    
+
     % define the length of storage data for all cars
     for iCar = 1:HorizontalArm.numCars
         HorizontalArm.allCarsStates(1,iCar) = HorizontalArm.allCars(iCar).pose(1);

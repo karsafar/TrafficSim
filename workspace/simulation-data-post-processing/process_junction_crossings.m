@@ -146,8 +146,8 @@ for ii = 1:size(orderedPlatoons,1)
             temp1(:,i) = [temp1(2,i-1); temp1(2,i-1)+temp(i)];
         end
     end
-    h = line(ax3,[numCars(1,ii)*ones(1,numel(temp))./500; numCars(1,ii)*ones(1,numel(temp))./500],temp1,'LineWidth',8);
-%     h = line(ax3,[density(1,ii)*ones(1,numel(temp)); density(1,ii)*ones(1,numel(temp))],temp1,'LineWidth',4);
+%     h = line(ax3,[numCars(1,ii)*ones(1,numel(temp))./500; numCars(1,ii)*ones(1,numel(temp))./500],temp1,'LineWidth',8);
+    h = line(ax3,[density(1,ii)*ones(1,numel(temp)); density(1,ii)*ones(1,numel(temp))],temp1,'LineWidth',4);
     set(h,{'Color'},num2cell([colourArray(ii).density(:,1),colourArray(ii).density(:,2),colourArray(ii).density(:,3)],2));
 %      plot(ax3,[numCars(1,ii)*ones(1,numel(temp)); numCars(1,ii)*ones(1,numel(temp))],temp1,'LineWidth',20)
     hold on
@@ -160,7 +160,7 @@ for i = 1:numel(data)
     dataNums(1,i) = sum(~isnan(data(i).crossCount(:)));
 end
 hold(ax3,'on');
- text(ax3,numCars(1,:)'./500,dataNums,num2str(dataNums'),'vert','middle','horiz','left','FontSize',10);
+%  text(ax3,numCars(1,:)'./500,dataNums,num2str(dataNums'),'vert','middle','horiz','left','FontSize',10);
 % text(ax3,density(1,:)',dataNums,num2str(dataNums'),'vert','middle','horiz','left','FontSize',5);
 
 % ylabel('Crossing Platoon Sizes','FontSize',14)
@@ -171,18 +171,18 @@ xticks(0.02:0.01:0.144)
 
 % xticks(numCars(1,1):2:numCars(1,end))
 % xlim([numCars(1,1)-2 numCars(1,end)+2])
-view([90 -90])
+% view([90 -90])
 
 
-ylabel('nCrosses/hour','FontSize',14)
-xlabel('Density \rho (m^{-1})','FontSize',14)
+ylabel('Junction Capacity Q (veh/hour)','FontSize',14)
+xlabel('Density \rho (veh/m)','FontSize',14)
 % xlim([0 3000])
 lgd = legend([h_tem],{'North Arm Crossing','East Arm Crossing'},'location','northeast');
 
 [k,q, v] = fundamentaldiagram();
 y_assimptote = 0:0.01:3000;
 x_assimptote = ones(1,300001)*0.0595;
-plot(ax3,x_assimptote,y_assimptote,'k--','LineWidth',1,'DisplayName','Critical Density','LineWidth',3)
+% plot(ax3,x_assimptote,y_assimptote,'k--','LineWidth',1,'DisplayName','Critical Density','LineWidth',3)
 ax3 = gca;
 plot(ax3,k,2*q*3600,'k-','LineWidth',2,'DisplayName','Fundamental Diagram of Junction')
 hold on
