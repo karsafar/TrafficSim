@@ -270,26 +270,7 @@ classdef carTypeB < AutonomousCar
             check_for_negative_velocity(obj,dt);
         end
         function calculate_junc_accel(obj,varargin)
-%             roadLength = varargin{1};
-            if nargin == 2
-                stop_flag = 0;
-                junc_flag = 0;
-                emerg_flag = 0;
-            elseif varargin{2} == 1
-                stop_flag = 1;
-                junc_flag = 0;
-                emerg_flag = 0;
-            elseif varargin{2} == 2
-                stop_flag = 0;
-                junc_flag = 1;
-                emerg_flag = 0;
-            elseif varargin{2} == 3
-                stop_flag = 0;
-                junc_flag = 0;
-                emerg_flag = 1;
-            end
-            
-            if stop_flag ||junc_flag
+            if varargin{2} == 1
                 s = obj.s_in - obj.pose(1);
                 dV = obj.velocity;
             elseif obj.leaderFlag == 0
@@ -301,7 +282,7 @@ classdef carTypeB < AutonomousCar
             end
             
             intelligentBreaking = obj.velocity*obj.timeGap + (obj.velocity*dV)/(2*sqrt(obj.a*obj.b));
-            if stop_flag || junc_flag
+            if varargin{2} == 1
                 s_star = 0.1 + max(0,intelligentBreaking);
             else
                 s_star = obj.minimumGap + max(0,intelligentBreaking);
@@ -315,11 +296,7 @@ classdef carTypeB < AutonomousCar
             obj.juncAccel = obj.a*(1 - (velDif)^obj.delta - (s_star/s)^2);
             
             if obj.juncAccel < obj.a_feas_min
-                if (emerg_flag || stop_flag)
-                    obj.juncAccel = -Lennard_Jones(s ,obj.a_feas_min);
-                else
-                    obj.juncAccel =  obj.a_feas_min;
-                end
+                obj.juncAccel = -Lennard_Jones(s ,obj.a_feas_min);
             end
         end
     end

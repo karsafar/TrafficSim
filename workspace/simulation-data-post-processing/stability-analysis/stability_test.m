@@ -19,16 +19,15 @@ s = gappoints(vel,s0,l,v0,T,delta);
 k = densitypoints(vel,s0,l,v0,T,delta);
 
 instabVec = [];
-% i = 0.1:0.025:1.1;
-i = [0.2 0.6 1 1.5 3.5 ];
+i = 0.1:0.025:1.1;
+% i = [0.2 0.6 1 1.5 3.5 ];
 colArray = {'r','m','g','b','c'};
 idx = 0;
-plot(k,zeros(1,n),'k-' ,'LineWidth',2)
-hold on
-xlim([0.015 0.15])
-ylim([-1 3.5])
-xticks(0.02:0.01:0.144)
-
+% plot(k,zeros(1,n),'k--' ,'LineWidth',2)
+% hold on
+% xlim([0.015 0.15])
+% ylim([-1 3.5])
+% xticks(0.02:0.01:0.144)
 for a = i
     % syms a s0 v0 T b delta s dv v l
     syms f(h,dv,v)
@@ -68,13 +67,13 @@ for a = i
     temp = double(lambda_2(h,dv,vel));
     % temp1 = double(lambdaSign(h,dv,v));
     idx = idx+1;
-    plot(k,temp,'-','Color',colArray{idx}, 'LineWidth',2)
-    hold on
-    grid on
+%     plot(k,temp,'-','Color',colArray{idx}, 'LineWidth',2)
+%     hold on
+%     grid on
 %     plot(k,temp1,'g', 'LineWidth',2)
 %     plot(k,zeros(1,n),'-','Color',[0.5 0.5 0.5 ],'LineWidth',2)
-    xlabel('Density \rho veh/m','FontSize',16)
-    ylabel('\lambda_2','FontSize',16)
+%     xlabel('Density \rho (veh/m)','FontSize',14)
+%     ylabel('\lambda_2','FontSize',14)
 %     
     
     P = InterX([k;temp],[k;zeros(1,n)]);
@@ -98,8 +97,8 @@ end
 lgd = legend(dispname);
 lgd.FontSize = 14
 plot(i,instabVec, 'LineWidth',2)
-xlabel('a, m/s^2','FontSize',16)
-ylabel('\rho, veh/m','FontSize',16)
+xlabel('IDM Acceleration parameter a (m/s^2)','FontSize',14)
+ylabel('Density \rho (veh/m)','FontSize',14)
 
 axis auto
 xlim([0.1 3.5])

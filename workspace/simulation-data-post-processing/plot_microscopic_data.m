@@ -278,33 +278,44 @@ figure(2)
 % ax3 = subplot(2,1,1);
 ax3 = axes;
 set(ax3,'FontSize',16)
-title(ax3,'Demand')
-xlabel(ax3,'Time, s')
-ylabel(ax3,'Flow, veh/s')
+% title(ax3,'Demand')
+xlabel(ax3,'Time (s)')
+ylabel(ax3,'Flow (veh/s)')
 hold(ax3,'on');
 grid(ax3,'on');
-plot(ax3,t_rng,flow.WestEast,'LineWidth',1)
-plot(ax3,t_rng,flow.SouthNorth,'LineWidth',1)
-plot(ax3,t_rng,flowDifference,'-k','LineWidth',1)
+% plot(ax3,t_rng,flow.WestEast,'LineWidth',1)
+% plot(ax3,t_rng,flow.SouthNorth,'LineWidth',1)
+plot(ax3,t_rng,flowDifference,'-b','LineWidth',2)
 axis(ax3,[0 t_rng(nIterations) 0 max(max(flow.WestEast),max(flow.SouthNorth))])
-legend(ax3,'West-East Arm Flow','South-North Arm Flow','Junction Flow','Location','southwest')
+% legend(ax3,'West-East Arm Flow','South-North Arm Flow','Junction Flow','Location','southwest')
+legend(ax3,'Junction Demand')
 
 %% Speed variance
 varianceEast = sum((velArrayEast-meanVelArrayEast).^2,1)/sim.horizArm.numCars;
 varianceNorth = sum((velArrayNorth-meanVelArrayNorth).^2,1)/sim.vertArm.numCars;
+varianceJunciton = (varianceEast + varianceNorth)./2;
 
-figure(3)
 ax4 = axes;
 set(ax4,'FontSize',16)
-title(ax4,'Speed Variance')
-xlabel(ax4,'Time, s')
-ylabel(ax4,' \sigma^{2}, m^{2}/s^{2}')
+% title(ax4,'Speed Variance')
+xlabel(ax4,'Time (s)')
+ylabel(ax4,'Variance \sigma^{2} (m^{2}/s^{2})')
 hold(ax4,'on');
 grid(ax4,'on');
-plot(ax4,t_rng,varianceEast,'LineWidth',1)
-plot(ax4,t_rng,varianceNorth,'LineWidth',1)
-axis(ax4,[0 t_rng(nIterations) 0 max(max(varianceEast),max(varianceNorth))])
-legend(ax4,'West-East Arm Flow','South-North Arm Flow')
+% plot(ax4,t_rng,varianceEast,'LineWidth',1)
+% plot(ax4,t_rng,varianceNorth,'LineWidth',1)
+plot(ax4,t_rng,varianceJunciton,'LineWidth',2)
+
+if max(max(varianceEast),max(varianceNorth)) > 0
+    axis(ax4,[0 t_rng(nIterations) 0 max(max(varianceEast),max(varianceNorth))])
+else
+    xlim(ax4,[0 t_rng(nIterations)])
+end
+% legend(ax4,'West-East Arm Flow','South-North Arm Flow','Junction Variance')
+
+legend(ax4,'Junction Variance')
+
+
 
 %}
 
@@ -327,11 +338,11 @@ axis(ax5,[0 t_rng(nIterations) sim.horizArm.startPoint sim.horizArm.endPoint] )
 % yyaxis(ax5,'left')
 patch(ax5,x,y,[0.5 0.5 0.5],'EdgeColor','None');
 for iCar = 1:sim.horizArm.numCars
-    h1 = plot(ax5,sim.horizArm.allCars(iCar).History(1,:),sim.horizArm.allCars(iCar).History(2,:),'b-','LineWidth',0.5);
+    h1 = plot(ax5,sim.horizArm.allCars(iCar).History(1,:),sim.horizArm.allCars(iCar).History(2,:),'b.','LineWidth',0.5);
 end
 % yyaxis(ax5,'right')
 for jCar = 1:sim.horizArm.numCars
-    h2 = plot(ax5,sim.vertArm.allCars(jCar).History(1,:),-sim.vertArm.allCars(jCar).History(2,:),'r-','LineWidth',0.5);
+    h2 = plot(ax5,sim.vertArm.allCars(jCar).History(1,:),-sim.vertArm.allCars(jCar).History(2,:),'r.','LineWidth',0.5);
 end
 % yticks([ min(-sim.vertArm.carHistory(jCar).History(2,:)) max(-sim.vertArm.carHistory(jCar).History(2,:))])
 % ylabel(ax5,'North Arm, m')

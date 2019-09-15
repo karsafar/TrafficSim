@@ -40,3 +40,5 @@ plot data/junc_cross_plot/
 parallel_density_range_4\.m
 
 workspace/crossing-regimes-data-analysis/
+
+workspace/
