@@ -160,7 +160,7 @@ for i = 1:numel(data)
     dataNums(1,i) = sum(~isnan(data(i).crossCount(:)));
 end
 hold(ax3,'on');
- text(ax3,numCars(1,:)'./500,dataNums,num2str(dataNums'),'vert','middle','horiz','left','FontSize',10);
+%  text(ax3,numCars(1,:)'./500,dataNums,num2str(dataNums'),'vert','middle','horiz','left','FontSize',10);
 % text(ax3,density(1,:)',dataNums,num2str(dataNums'),'vert','middle','horiz','left','FontSize',5);
 
 % ylabel('Crossing Platoon Sizes','FontSize',14)
@@ -171,11 +171,11 @@ xticks(0.02:0.01:0.144)
 
 % xticks(numCars(1,1):2:numCars(1,end))
 % xlim([numCars(1,1)-2 numCars(1,end)+2])
-view([90 -90])
+% view([90 -90])
 
 
-ylabel('nCrosses/hour','FontSize',14)
-xlabel('Density \rho (m^{-1})','FontSize',14)
+ylabel('Junction Capacity Q (veh/hour)','FontSize',14)
+xlabel('Density \rho (veh/m)','FontSize',14)
 % xlim([0 3000])
 lgd = legend([h_tem],{'North Arm Crossing','East Arm Crossing'},'location','northeast');
 

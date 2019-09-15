@@ -27,7 +27,7 @@ classdef Car < dlnode & matlab.mixin.Copyable
     end
     properties (Constant)
         dimension = [2.16 4.4 2.75];
-        tol = 1e-6
+        tol = 1e-4
     end
     methods
         

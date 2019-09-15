@@ -20,9 +20,10 @@ priority = false;
 
 
 %
+%  density = [linspace(0.02,0.07,26), linspace(0.08,0.13, 6)];
 % density = [linspace(0.02,0.048,5), linspace(0.049,0.065,17),linspace(0.072,0.144,10)];
 % density = [linspace(0.02,0.044,7), linspace(0.046,0.07,13)];
-density = [linspace(0.02,0.06,21)];
+density = linspace(0.02,0.06,21);
 
 n = 30;
 nCars = [n; n];
@@ -53,7 +54,7 @@ for i = 1:length(density)
     alpha = 50; beta  = 0; gamma =  0;
     
 %     carTypeRatios = [alpha/100 beta/100 gamma/100; alpha/100 beta/100 gamma/100];
-    carTypeRatios = [1 0 0; 1 0 0];
+    carTypeRatios = [0 1 0; 0 1 0];
 
 
     for j = 1:numel(carTypes)
@@ -73,7 +74,7 @@ end
 
 %%
 
-save('monte_carlo_density_range.mat',...
+save('type_B_ensembles.mat',...
     'carTypeRatios',...
     'carTypes',...
     'nCars',...

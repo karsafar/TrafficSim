@@ -38,7 +38,8 @@ classdef Junction < handle
             else
                 h1 = figure('units', 'normalized', 'position', [0.4, 0, 0.6, 1]);
             end
-            obj.junctionPlotHandle = axes('Parent',h1,'Units','normalized','Position',[0.05 0.5 0.9 0.45]);
+%             obj.junctionPlotHandle = axes('Parent',h1,'Units','normalized','Position',[0.05 0.5 0.9 0.45]);
+            obj.junctionPlotHandle = axes;
             %{
             obj.flowHandle = axes('Parent',h1,'Units','normalized','Position',[0.05 0.3 0.9 0.15]);
             hold(obj.flowHandle,'on')

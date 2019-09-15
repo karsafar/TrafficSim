@@ -42,13 +42,22 @@ xlabel('Num cars per arm','FontSize',14)
 %% 
 % xRange = [10:2:30];
 ax3 = axes;
+%%
 xRange = density(1,:);
 boxplot(ax3,turnTakinglengths',xRange)
-ylabel('nCrosses/hour','FontSize',14)
-xlabel('Density \rho (m^{-1})','FontSize',14)
+ylabel('Junction Capacity Q veh/hour','FontSize',14)
+xlabel('Density \rho (veh/m)','FontSize',14)
 
 % % xticks(1:1:20)
-xticklabels(string([0.02:0.004:0.044,0.046:0.002:0.07]))
+% xticklabels(string([0.02:0.01:0.06]))
 grid on
 hold on
-view([90 -90])
+%%
+[k,q, v] = fundamentaldiagram();
+k_new = k*500-9;
+xticks('auto')
+xticklabels({'0.022','0.026','0.030','0.034','0.038','0.042','0.046','0.050','0.054','0.058'})
+plot(ax3,k_new,2*q*3600,'k-','LineWidth',2,'DisplayName','Fundamental Diagram of Junction')
+hold on
+plot(ax3,k_new,q*3600,'-','Color',[0.5 0.5 0.5 ],'LineWidth',2,'DisplayName','Findamental Diagram of Single Arm')
+% view([90 -90])
