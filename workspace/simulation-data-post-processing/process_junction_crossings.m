@@ -133,65 +133,79 @@ for idx = 1:length(data)
     maxPlatoons(idx) = max(platoonSizes);    
 end
 
-    
-% f2 = figure('visible', 'off','units','normalized','outerposition',[0 0 1 1]);
+% tic  
+f2 = figure('visible', 'off');
 ax3 = axes;
+xlim(ax3,[0.015 0.15])
+ylim(ax3,[0 3000])
+xticks(ax3,0.02:0.01:0.144)
+% platoonY = NaN(size(orderedPlatoons));
+% platoonX = repmat(density(1,:),size(orderedPlatoons,2),1)';
 for ii = 1:size(orderedPlatoons,1)
     temp = orderedPlatoons(ii,:);
     temp(isnan(temp)) = [];
     temp1 = NaN(2,numel(temp));
     temp1(:,1) = [0; temp(1)];
+%     platoonY(ii,1) = 0;
     if numel(temp) >= 2
         for i = 2:numel(temp)
             temp1(:,i) = [temp1(2,i-1); temp1(2,i-1)+temp(i)];
+%             platoonY(ii,i) = platoonY(ii,i-1)+temp(i);
         end
     end
-    h = line(ax3,[numCars(1,ii)*ones(1,numel(temp))./500; numCars(1,ii)*ones(1,numel(temp))./500],temp1,'LineWidth',8);
-%     h = line(ax3,[density(1,ii)*ones(1,numel(temp)); density(1,ii)*ones(1,numel(temp))],temp1,'LineWidth',4);
+% %     h = line(ax3,[numCars(1,ii)*ones(1,numel(temp))./500; numCars(1,ii)*ones(1,numel(temp))./500],temp1,'LineWidth',8);
+
+    h = plot(ax3,[density(1,ii)*ones(1,numel(temp)); density(1,ii)*ones(1,numel(temp))],temp1,'LineWidth',4);
     set(h,{'Color'},num2cell([colourArray(ii).density(:,1),colourArray(ii).density(:,2),colourArray(ii).density(:,3)],2));
-%      plot(ax3,[numCars(1,ii)*ones(1,numel(temp)); numCars(1,ii)*ones(1,numel(temp))],temp1,'LineWidth',20)
+
+% %      plot(ax3,[numCars(1,ii)*ones(1,numel(temp)); numCars(1,ii)*ones(1,numel(temp))],temp1,'LineWidth',20)
+
     hold on
     if ii == 1
         h_tem = h;
     end
 end
+% h = plot(ax3,platoonX,platoonY,'.','LineWidth',4);
+% toc
+% f2.Visible = 'on';
+ylabel('Junction Capacity Q (veh/hour)','FontSize',14)
+xlabel('Density \rho (veh/m)','FontSize',14)
+lgd = legend([h_tem],{'North Arm Crossing','East Arm Crossing'},'location','northeast');
 
-for i = 1:numel(data)
-    dataNums(1,i) = sum(~isnan(data(i).crossCount(:)));
-end
-hold(ax3,'on');
+
+% for i = 1:numel(data)
+%     dataNums(1,i) = sum(~isnan(data(i).crossCount(:)));
+% end
+% hold(ax3,'on');
 %  text(ax3,numCars(1,:)'./500,dataNums,num2str(dataNums'),'vert','middle','horiz','left','FontSize',10);
 % text(ax3,density(1,:)',dataNums,num2str(dataNums'),'vert','middle','horiz','left','FontSize',5);
 
 % ylabel('Crossing Platoon Sizes','FontSize',14)
 % xlabel('Number of cars per arm','FontSize',14)
-xlim([0.015 0.15])
 
-xticks(0.02:0.01:0.144)
 
 % xticks(numCars(1,1):2:numCars(1,end))
 % xlim([numCars(1,1)-2 numCars(1,end)+2])
 % view([90 -90])
 
 
-ylabel('Junction Capacity Q (veh/hour)','FontSize',14)
-xlabel('Density \rho (veh/m)','FontSize',14)
-% xlim([0 3000])
-lgd = legend([h_tem],{'North Arm Crossing','East Arm Crossing'},'location','northeast');
 
 [k,q, v] = fundamentaldiagram();
 y_assimptote = 0:0.01:3000;
 x_assimptote = ones(1,300001)*0.0595;
 plot(ax3,x_assimptote,y_assimptote,'k--','LineWidth',1,'DisplayName','Critical Density','LineWidth',3)
-ax3 = gca;
-plot(ax3,k,2*q*3600,'k-','LineWidth',2,'DisplayName','Fundamental Diagram of Junction')
 hold on
+plot(ax3,k,2*q*3600,'k','LineWidth',2,'DisplayName','Fundamental Diagram of Junction')
 plot(ax3,k,q*3600,'-','Color',[0.5 0.5 0.5 ],'LineWidth',2,'DisplayName','Findamental Diagram of Single Arm')
 lgd.FontSize = 10;
 grid on
+xlim(ax3,[0.015 0.15])
+ylim(ax3,[0 3000])
+xticks(ax3,0.02:0.01:0.144)
 
-% saveas(f2,'Platoon-sizes.png')
-% close(f2)
+f2.Renderer='Painters';
+saveas(f2,'b-random-35-sym-capacity.eps','epsc');
+close(f2)
 return
 
 %%

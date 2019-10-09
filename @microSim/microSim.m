@@ -539,7 +539,7 @@ for iIteration = handles.iIteration:nIterations
     
     % Itersection Collision Avoidance (ICA)
     for iCar = 1:HorizontalArm.numCars
-        if t >= transientCutOffLength*0.8
+        if t >= transientCutOffLength
             HorizontalArm.allCars(iCar).decide_acceleration(VerticalArm,roadDims.Length(1),t,dt);
         else
             HorizontalArm.allCars(iCar).acceleration = HorizontalArm.allCars(iCar).idmAcceleration;
@@ -549,7 +549,7 @@ for iIteration = handles.iIteration:nIterations
         
     end
     for jCar = 1:VerticalArm.numCars
-        if t >= transientCutOffLength*0.8
+        if t >= transientCutOffLength
             VerticalArm.allCars(jCar).decide_acceleration(HorizontalArm,roadDims.Length(2),t,dt);
         else
             VerticalArm.allCars(jCar).acceleration = VerticalArm.allCars(jCar).idmAcceleration;

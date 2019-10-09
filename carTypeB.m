@@ -255,10 +255,13 @@ classdef carTypeB < AutonomousCar
             % draw behaviour tree
             if obj.BT_plot_flag
                 if isempty(obj.Fig)
-                    obj.Fig = figure();
+                    clf(obj.Fig) = figure(2);
+                else
+                    gcf = figure(2);
                 end
                 obj.full_select.plot_tree(0);
                 obj.full_select.plot_bt(obj.Fig);
+                cla(obj.Fig)
             end
             [obj.actStore(:).output]=deal(-1);
             
@@ -295,9 +298,15 @@ classdef carTypeB < AutonomousCar
             
             obj.juncAccel = obj.a*(1 - (velDif)^obj.delta - (s_star/s)^2);
             
-            if obj.juncAccel < obj.a_feas_min
-                obj.juncAccel = -Lennard_Jones(s ,obj.a_feas_min);
+
+            if obj.juncAccel < obj.a_min
+                obj.juncAccel = obj.a_min;
             end
+            
+%             
+%             if obj.juncAccel < obj.a_feas_min
+%                 obj.juncAccel = -Lennard_Jones(s ,obj.a_feas_min);
+%             end
         end
     end
 end

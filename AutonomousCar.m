@@ -29,14 +29,16 @@ classdef AutonomousCar < IdmModel
             else
                 s_comp = competingCar.pose(1);
             end
-            v_comp = competingCar.velocity;
-%             a_comp = competingCar.History(4,competingCar.historyIndex-1);
+            phi =  0.75 + rand()*0.5; % phi in [0.75, 1.25] ie +- 25%
+            phi = 1;
+            v_comp = competingCar.velocity*phi;
+            %             a_comp = competingCar.History(4,competingCar.historyIndex-1);
             if s_comp <= s_in && obj.tol < v_comp
                 obj.t_in = (s_in - s_comp)/v_comp+t;
                 if t < obj.t_in && s >= (s_out-v_max*(obj.t_in-t))
                     
-                    aheadWithPositive_A = (s_out - 0.5*obj.a_max*(obj.t_in-(t+dt))^2 - v*(obj.t_in-t) - s)/ (dt*(obj.t_in-(t+dt/2)));
-                    juncExitVel  = (v + aheadWithPositive_A*dt) + obj.a_max*(obj.t_in-(t+dt));
+                    A_ahead = (s_out - 0.5*obj.a_max*(obj.t_in-(t+dt))^2 - v*(obj.t_in-t) - s)/ (dt*(obj.t_in-(t+dt/2)));
+                    juncExitVel  = (v + A_ahead*dt) + obj.a_max*(obj.t_in-(t+dt));
 
                     aheadWithMaxVel = (-sqrt((v_max-v+0.5*obj.a_max*dt)^2-2*obj.a_max*(s_out-v_max*(obj.t_in-(t+dt))-s-v*dt)-v_max^2+2*v*v_max-v^2)+v_max-v+0.5*obj.a_max*dt)/dt;
                     
@@ -47,8 +49,8 @@ classdef AutonomousCar < IdmModel
                         else
                             obj.juncExitVelocity = sqrt(v^2+2*obj.a_max*(s_out-s));
                         end
-                    elseif aheadWithMaxVel >= aheadWithPositive_A
-                        obj.acc_min_ahead = aheadWithPositive_A;
+                    elseif aheadWithMaxVel >= A_ahead
+                        obj.acc_min_ahead = A_ahead;
                         obj.juncExitVelocity = juncExitVel;
                     else
                         obj.acc_min_ahead = 1e3;
@@ -79,28 +81,42 @@ classdef AutonomousCar < IdmModel
             else
                 s_comp = competingCar.pose(1);
             end
-            v_comp = competingCar.velocity;
+            phi =  0.75 + rand()*0.5; % phi in [0.75, 1.25] ie +- 25%
+            phi = 1;
+            v_comp = competingCar.velocity*phi;
             a_comp = competingCar.History(4,competingCar.historyIndex-1);
             if s_comp <= s_out && obj.tol < v_comp
+                exit_vel_sqr = (v_comp)^2+2*a_comp*(s_out-s_comp);
                 if  abs(a_comp) > obj.tol
-                    obj.t_out = (-v_comp+sqrt((v_comp)^2+2*a_comp*(s_out-s_comp)))/a_comp+t;
+                    if exit_vel_sqr > 0
+                        obj.t_out = (-v_comp+sqrt(exit_vel_sqr))/a_comp+t;
+                    else
+                        obj.t_out = t;
+                    end
                 else
                     obj.t_out = (s_out - s_comp)/v_comp+t;
                 end
 
                 if  s <= obj.s_in && obj.t_out > (t + dt)
-                    behindWithNegative_A = (s_in - 0.5*obj.a_min*(obj.t_out-(t+dt))^2 -v*(obj.t_out-t) - s)/ (dt*(obj.t_out-(t+dt/2)));
-                    junctionExitVelocity = (v + behindWithNegative_A*dt) + obj.a_min*(obj.t_out-(t+dt));
+                    A_nonZero = (s_in - 0.5*obj.a_min*(obj.t_out-(t+dt))^2 -v*(obj.t_out-t) - s)/ (dt*(obj.t_out-(t+dt/2)));
+                    ExitVel = (v + A_nonZero*dt) + obj.a_min*(obj.t_out-(t+dt));
                     
 %                     behindWithZeroVel = ((dt*obj.a_min-2*v) + sqrt(((dt*obj.a_min-2*v)^2 -4*(2*obj.a_min*(s_in-s-v*dt)+v^2))))/(2*dt);
-                    
-                    if  junctionExitVelocity > 0 && A_min_ahead_next <= 50
-                        obj.acc_max_behind =  behindWithNegative_A;
+
+                    % why is 50? fixed numbers need explanations
+%                     if  ExitVel > 0 && A_min_ahead_next <= 50
+                    if  ExitVel > 0 && A_min_ahead_next <= obj.a_max
+                        obj.acc_max_behind =  A_nonZero;
                     else
                         obj.acc_max_behind = -1e3;
                     end
                 else
-                    obj.acc_max_behind = 1e3;
+                    if A_min_ahead_next <= obj.a_max
+                        obj.acc_max_behind =  A_min_ahead_next;
+                    else
+                        obj.acc_max_behind = -1e3;
+                    end
+%                     obj.acc_max_behind = 1e3;
                 end
             elseif obj.tol > v_comp && s_comp <= s_in
                 obj.acc_max_behind = obj.idmAcceleration;

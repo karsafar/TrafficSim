@@ -7,24 +7,23 @@ carTypes = {@IdmModel, @HdmModel, @carTypeA, @carTypeB, @carTypeC, @carTypeA_old
 plotFlag = true;
 setappdata(0,'drawRAte',1);
 
-runTime = 360; % sec
+runTime = 200; % sec
 dt = 0.1;
 nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;
 t_rng = 0:dt:runTime;
 
-fixedSeed = [ 0 0];
+fixedSeed = [1 2];
 % seedType = rng('shuffle', 'combRecursive');
 priority = false;
 
-
-transientCutOffLength = 0;
+transientCutOffLength = 50;
 swapRate = 0;
 %%
 
-density = 0.010;
+density = 0.05;
 
-n = 1;
+n = 3;
 nCars = [n; n];
 
 road.Length = round(nCars/density);  % length is rounded so need to correct the value of density
@@ -59,8 +58,8 @@ end
 %single simulation flag 
 setappdata(0,'simType',0);
 
-carTypeRatios = [0 0 1 0 0 0; 0 0 1 0 0 0];
-% carTypeRatios = [0 0 0 1 0 0; 0 0 0 1 0 0];
+% carTypeRatios = [0 0 1 0 0 0; 0 0 1 0 0 0];
+carTypeRatios = [0 0 0 1 0 0; 0 0 0 1 0 0];
 % carTypeRatios = [0 0 1 0 0 0; 0 0 1 0 0 0];
 
 allCarsNumArray_H = zeros(1,numel(carTypes));

@@ -49,6 +49,9 @@ for iIteration = 1:nIterations
     % update time
     t = t_rng(iIteration);
 
+%     if iIteration == 1848
+%         VerticalArm.allCars(2).BT_plot_flag = 1;
+%     end
     % define the length of storage data for all cars
     for iCar = 1:HorizontalArm.numCars
         HorizontalArm.allCarsStates(1,iCar) = HorizontalArm.allCars(iCar).pose(1);
