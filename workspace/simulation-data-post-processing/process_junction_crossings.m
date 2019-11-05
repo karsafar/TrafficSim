@@ -158,7 +158,7 @@ for ii = 1:size(orderedPlatoons,1)
     h = plot(ax3,[density(1,ii)*ones(1,numel(temp)); density(1,ii)*ones(1,numel(temp))],temp1,'LineWidth',4);
     set(h,{'Color'},num2cell([colourArray(ii).density(:,1),colourArray(ii).density(:,2),colourArray(ii).density(:,3)],2));
 
-% %      plot(ax3,[numCars(1,ii)*ones(1,numel(temp)); numCars(1,ii)*ones(1,numel(temp))],temp1,'LineWidth',20)
+%      plot(ax3,[numCars(1,ii)*ones(1,numel(temp)); numCars(1,ii)*ones(1,numel(temp))],temp1,'LineWidth',20)
 
     hold on
     if ii == 1
@@ -168,8 +168,8 @@ end
 % h = plot(ax3,platoonX,platoonY,'.','LineWidth',4);
 % toc
 % f2.Visible = 'on';
-ylabel('Junction Capacity Q (veh/hour)','FontSize',14)
-xlabel('Density \rho (veh/m)','FontSize',14)
+ylabel('Junction Capacity Q (veh/hour)','FontSize',16)
+xlabel('Density \rho (veh/m)','FontSize',16)
 lgd = legend([h_tem],{'North Arm Crossing','East Arm Crossing'},'location','northeast');
 
 

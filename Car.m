@@ -55,13 +55,19 @@ classdef Car < dlnode & matlab.mixin.Copyable
         end
         
         function move_car(obj,dt)
-            obj.pose(1) = obj.pose(1) + obj.velocity*dt + 0.5*obj.acceleration*dt^2;
-            
-%             obj.tempAccel = obj.acceleration;
-            obj.velocity = obj.velocity + obj.acceleration*dt;
-            if obj.velocity < obj.tol && obj.velocity > 0
-                obj.velocity = 0;
-            end
+            %% profile these two methods to find out which is faster
+%             obj.pose(1) = obj.pose(1) + obj.velocity*dt + 0.5*obj.acceleration*dt^2;
+%             
+% %             obj.tempAccel = obj.acceleration;
+%             obj.velocity = obj.velocity + obj.acceleration*dt;
+%             if obj.velocity < obj.tol && obj.velocity > 0
+%                 obj.velocity = 0;
+%             end
+
+        vel_prev = obj.velocity;
+        vel_new = vel_prev + obj.acceleration*dt;
+        obj.velocity = vel_new;
+        obj.pose(1) = obj.pose(1) + 0.5*(vel_prev + vel_new)*dt;
         end
         function update_velocity(obj,dt)
             obj.velocity = obj.velocity + 0.5*(obj.tempAccel+obj.acceleration)*dt;

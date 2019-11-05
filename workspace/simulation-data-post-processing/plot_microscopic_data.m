@@ -22,7 +22,7 @@ end
 
 %% Spatiotenporal Velocity Profiles
 
-d = 4; % density on points in scatter plot
+d = 1; % density on points in scatter plot
 plot_spatiotemporal_profiles(sim,transCut,t_rng(transCut+1:end),(nIterations-transCut),d)
 
 
@@ -101,21 +101,21 @@ for i = 1:nIterations
 end
 junction.flowChange = mean([eastArm.flowChange;northArm.flowChange]);
 
-figure(1)
+figure()
 ax1 = axes;
-plot(ax1,t_rng,northArm.flowChange,'r-')
+plot(ax1,t_rng,northArm.flowChange,'r-','LineWidth',2)
 xlabel(ax1,'Time (s)')
 ylabel(ax1,'Flow (veh/s)')
 
-figure(2)
+figure()
 ax2 = axes;
-plot(ax2,t_rng,eastArm.flowChange,'g-')
+plot(ax2,t_rng,eastArm.flowChange,'g-','LineWidth',2)
 xlabel(ax2,'Time (s)')
 ylabel(ax2,'Flow (veh/s)')
 
-figure(3)
+figure()
 ax3 = axes;
-plot(ax3,t_rng,junction.flowChange,'b--')
+plot(ax3,t_rng,junction.flowChange,'b-','LineWidth',2)
 xlabel(ax3,'Time (s)')
 ylabel(ax3,'Flow (veh/s)')
 
@@ -207,7 +207,7 @@ function plot_spatiotemporal_profiles(sim,transCut,t_rng,nIterations,d)
     end
     
 %     ax1 = subplot(2,1,1);
-
+    figure()
     ax1 = axes;
     
     
@@ -238,7 +238,7 @@ function plot_spatiotemporal_profiles(sim,transCut,t_rng,nIterations,d)
     patch(ax1,x,y,[0.5 0.5 0.5],'EdgeColor','None'); 
     
        
-    sz = 2;
+    sz = 4;
     scatter(ax1,X,Y,sz,Z,'filled');
     
 %     return
@@ -281,7 +281,6 @@ function plot_spatiotemporal_profiles(sim,transCut,t_rng,nIterations,d)
 %     colormap( flipud(oldcmap) );
 %     shading interp
     % plot the trajectories
-    sz = 2;
 %     scatter(ax1,X,Y,sz,Z,'filled');
     scatter(ax2,X1,Y1,sz,Z1,'filled');
 %     xlim(ax2,[transientCutOffLength t_rng(nIterations)])
@@ -327,7 +326,7 @@ flow.SouthNorth = density(2)*cumulativeAverage(2,:);
 
 flowDifference = abs(flow.WestEast + flow.SouthNorth)/2;
 
-figure(2)
+figure()
 % ax3 = subplot(2,1,1);
 ax = axes;
 % title(ax3,'Demand')
@@ -351,6 +350,7 @@ varianceEast = sum((velArrayEast-meanVelArrayEast).^2,1)/sim.horizArm.numCars;
 varianceNorth = sum((velArrayNorth-meanVelArrayNorth).^2,1)/sim.vertArm.numCars;
 varianceJunciton = (varianceEast + varianceNorth)./2;
 
+figure()
 ax = axes;
 % title(ax,'Speed Variance')
 xlabel(ax,'Time (s)')
@@ -375,7 +375,7 @@ function split_trajectory_profiles(sim,transCut,t_rng,nIterations)
 figure()
 ax = axes;
 xlabel(ax,'Time (s)')
-ylabel(ax,'Displacement (m)')
+ylabel(ax,'Position (m)')
 hold(ax,'on');
 x1 = 0;
 x2 = t_rng(nIterations);

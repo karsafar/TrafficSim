@@ -5,25 +5,25 @@ roadTypes = {@LoopRoad @FiniteRoad};
 carTypes = {@IdmModel, @HdmModel, @carTypeA, @carTypeB, @carTypeC, @carTypeA_old};
 
 plotFlag = true;
-setappdata(0,'drawRAte',1);
+setappdata(0,'drawRAte',0);
 
-runTime = 200; % sec
+runTime = 100; % sec
 dt = 0.1;
 nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;
 t_rng = 0:dt:runTime;
 
-fixedSeed = [1 2];
+fixedSeed = [2 2 ];
 % seedType = rng('shuffle', 'combRecursive');
 priority = false;
 
-transientCutOffLength = 50;
+transientCutOffLength = 0;
 swapRate = 0;
 %%
 
 density = 0.05;
 
-n = 3;
+n = 4;
 nCars = [n; n];
 
 road.Length = round(nCars/density);  % length is rounded so need to correct the value of density
@@ -60,7 +60,7 @@ setappdata(0,'simType',0);
 
 % carTypeRatios = [0 0 1 0 0 0; 0 0 1 0 0 0];
 carTypeRatios = [0 0 0 1 0 0; 0 0 0 1 0 0];
-% carTypeRatios = [0 0 1 0 0 0; 0 0 1 0 0 0];
+% carTypeRatios = [0 0 0 1 0 0; 1 0 0 0 0 0];
 
 allCarsNumArray_H = zeros(1,numel(carTypes));
 allCarsNumArray_V = zeros(1,numel(carTypes));
@@ -94,7 +94,7 @@ end
 % control random process
 rng('shuffle', 'combRecursive');
 
-% tic
+tic
 %% run the simuation
 sim = run_simulation(...
     {roadTypes{selectRoadTypes(1)},...
@@ -110,7 +110,7 @@ sim = run_simulation(...
     transientCutOffLength,...
     swapRate,...
     dt);
-% toc
+toc
 
 % %% close the waitbar
 if plotFlag == 0

@@ -126,7 +126,7 @@ classdef Junction < handle
         function draw_car(obj,Arm,flag)
             plotVectorX = NaN(1,5);
             plotVectorY = NaN(1,5);
-            
+            delete(Arm.CarsNumberHandle);
             for iCar = 1:Arm.numCars
                 iDimension = Arm.allCars(iCar).dimension;
                 iPosition = Arm.allCars(iCar).pose;
@@ -175,10 +175,16 @@ classdef Junction < handle
                         carColour = 'k';
                 end
                 arm.CarsImageHandle = [arm.CarsImageHandle; fill(obj.junctionPlotHandle,plotVectorX',plotVectorY',carColour)];
-                
+%                 msg = sprintf('%i', iCar);
+%                 arm.CarsNumberHandle = [arm.CarsNumberHandle; text(mean(plotVectorX),mean(plotVectorY),msg,'Color','black')];
             else
                 set(arm.CarsImageHandle(iCar),'XData',plotVectorX','YData',plotVectorY');
+%                 set(arm.CarsNumberHandle(iCar),'XData',mean(plotVectorX),'YData',mean(plotVectorY));
             end
+            msg = sprintf('%i', iCar);
+            arm.CarsNumberHandle = [arm.CarsNumberHandle; text(mean(plotVectorX),mean(plotVectorY),msg,'Color','black')];
+            
+            
         end
         function collision_check(obj,allCarsHoriz,allCarsVert,nCars,mCars,plotFlag,t)
             hCar = 0;
@@ -297,8 +303,8 @@ classdef Junction < handle
             end
 %             %{
             if obj.collisionFlag
-                msg = sprintf('Collision occured at time t = %f. collided cars = [%d %d] %i',t,hCar,vCar);
-                obj.collisionMsgs = [obj.collisionMsgs; msg];
+                msg = sprintf('Collision occured at time t = %f.2 collided cars = [%d %d]',t,hCar,vCar);
+                obj.collisionMsgs = [obj.collisionMsgs; size(msg)];
                 %save(['coll_t-' num2str(t) '.mat'],'allCarsHoriz','allCarsVert');
                 disp(msg);
 

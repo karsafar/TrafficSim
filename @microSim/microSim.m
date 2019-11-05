@@ -497,18 +497,13 @@ for iIteration = handles.iIteration:nIterations
     % update time
     t = handles.t_rng(iIteration);
     
-    % define the length of storage data for all cars
     for iCar = 1:HorizontalArm.numCars
         HorizontalArm.allCarsStates(1,iCar) = HorizontalArm.allCars(iCar).pose(1);
         HorizontalArm.allCarsStates(2,iCar) = HorizontalArm.allCars(iCar).velocity;
-        HorizontalArm.allCarsStates(3,iCar) = HorizontalArm.allCars(iCar).acceleration;
-        HorizontalArm.allCars(iCar).store_state_data(t,HorizontalArm.allCarsStates(:,iCar));
     end
     for jCar = 1:VerticalArm.numCars
         VerticalArm.allCarsStates(1,jCar) = VerticalArm.allCars(jCar).pose(1);
         VerticalArm.allCarsStates(2,jCar) = VerticalArm.allCars(jCar).velocity;
-        VerticalArm.allCarsStates(3,jCar) = VerticalArm.allCars(jCar).acceleration;
-        VerticalArm.allCars(jCar).store_state_data(t,VerticalArm.allCarsStates(:,jCar));
     end
     
     % draw cars
@@ -539,7 +534,7 @@ for iIteration = handles.iIteration:nIterations
     
     % Itersection Collision Avoidance (ICA)
     for iCar = 1:HorizontalArm.numCars
-        if t >= transientCutOffLength
+        if t > transientCutOffLength
             HorizontalArm.allCars(iCar).decide_acceleration(VerticalArm,roadDims.Length(1),t,dt);
         else
             HorizontalArm.allCars(iCar).acceleration = HorizontalArm.allCars(iCar).idmAcceleration;
@@ -549,13 +544,23 @@ for iIteration = handles.iIteration:nIterations
         
     end
     for jCar = 1:VerticalArm.numCars
-        if t >= transientCutOffLength
+        if t > transientCutOffLength
             VerticalArm.allCars(jCar).decide_acceleration(HorizontalArm,roadDims.Length(2),t,dt);
         else
             VerticalArm.allCars(jCar).acceleration = VerticalArm.allCars(jCar).idmAcceleration;
             check_for_negative_velocity( VerticalArm.allCars(jCar),dt);
         end
 %         VerticalArm.allCarsStates(3,jCar) = VerticalArm.allCars(jCar).acceleration;
+    end
+    
+    % define the length of storage data for all cars
+    for iCar = 1:HorizontalArm.numCars
+        HorizontalArm.allCarsStates(3,iCar) = HorizontalArm.allCars(iCar).acceleration;
+        HorizontalArm.allCars(iCar).store_state_data(t,HorizontalArm.allCarsStates(:,iCar));
+    end
+    for jCar = 1:VerticalArm.numCars
+        VerticalArm.allCarsStates(3,jCar) = VerticalArm.allCars(jCar).acceleration;
+        VerticalArm.allCars(jCar).store_state_data(t,VerticalArm.allCarsStates(:,jCar));
     end
     
     count_emegrency_breaks(HorizontalArm);
@@ -589,6 +594,38 @@ if plotFlag == 0
     f = findall(0,'type','figure','tag','TMWWaitbar');
     delete(f)
 end
+
+sim.horizArm = HorizontalArm;
+sim.vertArm = VerticalArm;
+sim.crossOrder = junc.crossOrder;
+sim.crossCount = junc.crossCount;
+sim.crossCarTypeCount = junc.crossCarTypeCount;
+sim.crossCarTypeOrder = junc.crossCarTypeOrder;
+
+allCarsNumArray_H = handles.allCarsNumArray_H;
+allCarsNumArray_V = handles.allCarsNumArray_V;
+carTypes = handles.carTypes;
+nCars(1) = HorizontalArm.numCars;
+nCars(2) = VerticalArm.numCars;
+density = roadDims.Length./nCars';
+t_rng = handles.t_rng;
+road = roadDims;
+save('Unit-test-1.mat',...
+    'carTypes',...
+    'nCars',...
+    'allCarsNumArray_H',...
+    'allCarsNumArray_V',...
+    'dt',...
+    't_rng',...
+    'plotFlag',...
+    'density',...
+    'road',...
+    'nIterations',...
+    'sim',...
+    'transientCutOffLength',...
+    'swapRate',...
+    '-v7.3')
+
 
 set(handles.pushbutton_plot_resutls, 'enable', 'on')
 toc
