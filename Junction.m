@@ -71,9 +71,28 @@ classdef Junction < handle
                 xBox = xLimit([1 1 2 2 1]);
                 yBox = yLimit([1 2 2 1 1]);
                 
-                fill(obj.junctionPlotHandle,xBox,yBox,[0.5 0.5 0.5])
+                % roadPlotHanlde - handle for each individual road  
+                roadPlotHanlde(i) = fill(obj.junctionPlotHandle,xBox,yBox,[0.5 0.5 0.5]);
             end
-            
+            x1=-roadDimensions.Width(1)/2;
+            x2=roadDimensions.Width(1)/2;
+            y1=-roadDimensions.Width(1)/2;
+            y2=roadDimensions.Width(1)/2;
+            x = [x1, x2, x2, x1, x1];
+            y = [y1, y1, y2, y2, y1];
+           
+            % juncBoxhandle - handle for junction box
+            juncBoxhandle = plot(obj.junctionPlotHandle,x, y,'k');
+
+            %RoadOrJunctionFlag - flag determins if plotting junction or single road
+            % True - plot just road; False - plot full junction
+            RoadOrJunctionFlag = getappdata(0,'RoadOrJunctionFlag');
+             
+            if RoadOrJunctionFlag
+                roadPlotHanlde(2).Visible = 'Off';
+                juncBoxhandle.Visible = 'Off';
+            end
+                                
             if isempty(allAxesInFigure)
                 iDimension = [2.16 4.4 2.75];
                 carRectangle = [ 0 0; iDimension(2) 0; iDimension(2) iDimension(1); 0 iDimension(1)]-...
@@ -119,7 +138,7 @@ classdef Junction < handle
         function draw_car(obj,Arm,flag)
             plotVectorX = NaN(1,5);
             plotVectorY = NaN(1,5);
-            
+            delete(Arm.CarsNumberHandle);
             for iCar = 1:Arm.numCars
                 iDimension = Arm.allCars(iCar).dimension;
                 iPosition = Arm.allCars(iCar).pose;
@@ -168,10 +187,16 @@ classdef Junction < handle
                         carColour = 'k';
                 end
                 arm.CarsImageHandle = [arm.CarsImageHandle; fill(obj.junctionPlotHandle,plotVectorX',plotVectorY',carColour)];
-                
+%                 msg = sprintf('%i', iCar);
+%                 arm.CarsNumberHandle = [arm.CarsNumberHandle; text(mean(plotVectorX),mean(plotVectorY),msg,'Color','black')];
             else
                 set(arm.CarsImageHandle(iCar),'XData',plotVectorX','YData',plotVectorY');
+%                 set(arm.CarsNumberHandle(iCar),'XData',mean(plotVectorX),'YData',mean(plotVectorY));
             end
+            msg = sprintf('%i', iCar);
+            arm.CarsNumberHandle = [arm.CarsNumberHandle; text(mean(plotVectorX),mean(plotVectorY),msg,'Color','black')];
+            
+            
         end
         function collision_check(obj,allCarsHoriz,allCarsVert,nCars,mCars,plotFlag,t)
             hCar = 0;
@@ -288,19 +313,20 @@ classdef Junction < handle
                 obj.crossOrder = [obj.crossOrder obj.crossOrder(end)];
                 obj.crossCarTypeOrder = [obj.crossCarTypeOrder obj.crossCarTypeOrder(end)];
             end
-            %{
-                        if obj.collisionFlag
-                            msg = sprintf('Collision occured at time t = %f. collided cars = [%d %d] %i',t,hCar,vCar);
-                            obj.collisionMsgs = [obj.collisionMsgs; msg];
-                            %save(['coll_t-' num2str(t) '.mat'],'allCarsHoriz','allCarsVert');
-                            disp(msg);
-            
-                            if plotFlag
-                                junctionAxesHandle = text(obj.junctionPlotHandle,3,-7,msg,'Color','red');
-                                delete(junctionAxesHandle);
-                            else
-                            end
-                        end
+%             %{
+            if obj.collisionFlag
+                msg = sprintf('Collision occured at time t = %f.2 collided cars = [%d %d]',t,hCar,vCar);
+                obj.collisionMsgs = [obj.collisionMsgs; size(msg)];
+                %save(['coll_t-' num2str(t) '.mat'],'allCarsHoriz','allCarsVert');
+                disp(msg);
+
+                if plotFlag
+                    junctionAxesHandle = text(obj.junctionPlotHandle,3,-7,msg,'Color','red');
+                    delete(junctionAxesHandle);
+                else
+                end
+                obj.collisionFlag = 0;
+            end
             %}
         end
         

@@ -14,6 +14,7 @@ classdef Road < handle
         allCarsStates = []
         carHistory = []
         CarsImageHandle = []
+        CarsNumberHandle = []
         nCarHistory = 0
         averageVelocityHistory = []
         variance

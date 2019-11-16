@@ -47,6 +47,8 @@ xRange = density(1,:);
 boxplot(ax3,turnTakinglengths',xRange)
 ylabel('Junction Capacity Q veh/hour','FontSize',14)
 xlabel('Density \rho (veh/m)','FontSize',14)
+xticks('auto')
+xticklabels({'0.022','0.026','0.030','0.034','0.038','0.042','0.046','0.050','0.054','0.058'})
 
 % % xticks(1:1:20)
 % xticklabels(string([0.02:0.01:0.06]))

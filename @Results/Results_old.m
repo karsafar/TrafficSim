@@ -22,7 +22,7 @@ function varargout = Results(varargin)
 
 % Edit the above text to modify the response to help Results
 
-% Last Modified by GUIDE v2.5 28-Oct-2019 18:14:10
+% Last Modified by GUIDE v2.5 21-Aug-2018 03:00:19
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -160,7 +160,6 @@ end
 
 if get(handles.checkbox_macro,'Value')
     if get(handles.checkbox_time_av_vel,'Value')
-        
        % cla(findall(handles.axes_time_av_vel,'type','axes'));
         title(handles.axes_time_av_vel,'Velocity Average Across All Cars','FontSize',12)
         xlabel(handles.axes_time_av_vel,'Time, s','FontSize',12)

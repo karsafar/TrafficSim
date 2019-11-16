@@ -17,9 +17,11 @@ classdef CompositeNode < RootNode
             unique_y = fliplr(unique(y));
             hierarchy(1) = obj.plotRankArray(1);
             for i = 2:numel(obj.plotRankArray)
-                if obj.plotRankArray(i) >= h && obj.plotRankArray(i) > obj.plotRankArray(i-1)
+%                 if obj.plotRankArray(i) >= h && obj.plotRankArray(i) > obj.plotRankArray(i-1)
+                if obj.plotRankArray(i) > obj.plotRankArray(i-1)   
                     hierarchy(i) = hierarchy(i-1)+1;
-                elseif obj.plotRankArray(i) >= h && obj.plotRankArray(i) == obj.plotRankArray(i-1)
+%                 elseif obj.plotRankArray(i) >= h && obj.plotRankArray(i) == obj.plotRankArray(i-1)
+                elseif obj.plotRankArray(i) == obj.plotRankArray(i-1)
                     hierarchy(i) = hierarchy(i-1);
                 elseif obj.plotRankArray(i) >= h && obj.plotRankArray(i) < obj.plotRankArray(i-1)
                     hierarchy(i) = hierarchy(obj.plotRankArray(i))+1;
