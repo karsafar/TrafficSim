@@ -5,25 +5,36 @@ roadTypes = {@LoopRoad @FiniteRoad};
 carTypes = {@IdmModel, @HdmModel, @carTypeA, @carTypeB, @carTypeC, @carTypeA_old};
 
 plotFlag = true;
-setappdata(0,'drawRAte',0);
+setappdata(0,'drawRAte',1);
 
-runTime = 100; % sec
-dt = 0.1;
+runTime = 50; % sec
+dt = 0.2;
 nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;
 t_rng = 0:dt:runTime;
 
-fixedSeed = [2 2 ];
+fixedSeed = [1 2];
 % seedType = rng('shuffle', 'combRecursive');
 priority = false;
 
 transientCutOffLength = 0;
+
+
+% new input parameters
+t_off = 0;
+setappdata(0,'t_off',t_off);
+
+
+spawnType = 0; % 0 - random; 1 - phased
+setappdata(0,'spawnType',spawnType);
+
+
 swapRate = 0;
 %%
 
-density = 0.05;
+density = 0.03;
 
-n = 4;
+n = 10;
 nCars = [n; n];
 
 road.Length = round(nCars/density);  % length is rounded so need to correct the value of density
@@ -49,7 +60,7 @@ density = nCars./road.Length;
 
 %%
 iIteration = 0;
-if plotFlag == 0
+if plotFlag == 0 || t_off > 0
     f = waitbar(0,'','Name','Running simulation',...
         'CreateCancelBtn','setappdata(gcbf,''canceling'',1)');
     setappdata(f,'canceling',0);

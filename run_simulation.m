@@ -45,25 +45,25 @@ cleanupObj = onCleanup(@cleanMeUp);
 if plotFlag
     drawRate = getappdata(0,'drawRAte');
 end
-
+t_off = getappdata(0,'t_off');
 for iIteration = 1:nIterations
     % update time
     t = t_rng(iIteration);
-    
-%     if iIteration == 235
-%         HorizontalArm.allCars(1).BT_plot_flag = 1;
-%     end
 
     for iCar = 1:HorizontalArm.numCars
         HorizontalArm.allCarsStates(1,iCar) = HorizontalArm.allCars(iCar).pose(1);
         HorizontalArm.allCarsStates(2,iCar) = HorizontalArm.allCars(iCar).velocity;
+        HorizontalArm.allCarsStates(3,iCar) = HorizontalArm.allCars(iCar).acceleration;
+        HorizontalArm.allCars(iCar).store_state_data(t,HorizontalArm.allCarsStates(:,iCar));
     end
     for jCar = 1:VerticalArm.numCars
         VerticalArm.allCarsStates(1,jCar) = VerticalArm.allCars(jCar).pose(1);
         VerticalArm.allCarsStates(2,jCar) = VerticalArm.allCars(jCar).velocity;
+        VerticalArm.allCarsStates(3,jCar) = VerticalArm.allCars(jCar).acceleration;
+        VerticalArm.allCars(jCar).store_state_data(t,VerticalArm.allCarsStates(:,jCar));
     end
     % draw cars
-    if plotFlag && t > transientCutOffLength
+    if plotFlag && t >= transientCutOffLength && t > t_off
         junc.draw_all_cars(HorizontalArm,VerticalArm,iIteration,transientCutOffLength)
         if drawRate
             drawnow limitrate
@@ -112,20 +112,7 @@ for iIteration = 1:nIterations
             check_for_negative_velocity( VerticalArm.allCars(jCar),dt);
         end
     end
-    % define the length of storage data for all cars
-    for iCar = 1:HorizontalArm.numCars
-%         HorizontalArm.allCarsStates(1,iCar) = HorizontalArm.allCars(iCar).pose(1);
-%         HorizontalArm.allCarsStates(2,iCar) = HorizontalArm.allCars(iCar).velocity;
-        HorizontalArm.allCarsStates(3,iCar) = HorizontalArm.allCars(iCar).acceleration;
-        HorizontalArm.allCars(iCar).store_state_data(t,HorizontalArm.allCarsStates(:,iCar));
-    end
-    for jCar = 1:VerticalArm.numCars
-%         VerticalArm.allCarsStates(1,jCar) = VerticalArm.allCars(jCar).pose(1);
-%         VerticalArm.allCarsStates(2,jCar) = VerticalArm.allCars(jCar).velocity;
-        VerticalArm.allCarsStates(3,jCar) = VerticalArm.allCars(jCar).acceleration;
-        VerticalArm.allCars(jCar).store_state_data(t,VerticalArm.allCarsStates(:,jCar));
-    end
-    
+
     % Move all the cars along the road
     count_emegrency_breaks(HorizontalArm);
     count_emegrency_breaks(VerticalArm);
@@ -135,7 +122,7 @@ for iIteration = 1:nIterations
     VerticalArm.move_all_cars(t,dt,iIteration,nIterations,HorizontalArm,roadDims.Length(2))
     
     
-    if plotFlag == 0 && mod(iIteration,36) == 0
+    if plotFlag == 0 && mod(iIteration,36) == 0 || t < t_off
         % Update waitbar and message
         f = findall(0,'type','figure','tag','TMWWaitbar');
         if getappdata(0,'simType') == 0
