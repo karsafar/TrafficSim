@@ -71,7 +71,8 @@ classdef Junction < handle
                 xBox = xLimit([1 1 2 2 1]);
                 yBox = yLimit([1 2 2 1 1]);
                 
-                fill(obj.junctionPlotHandle,xBox,yBox,[0.5 0.5 0.5])
+                % roadPlotHanlde - handle for each individual road  
+                roadPlotHanlde(i) = fill(obj.junctionPlotHandle,xBox,yBox,[0.5 0.5 0.5]);
             end
             x1=-roadDimensions.Width(1)/2;
             x2=roadDimensions.Width(1)/2;
@@ -79,8 +80,19 @@ classdef Junction < handle
             y2=roadDimensions.Width(1)/2;
             x = [x1, x2, x2, x1, x1];
             y = [y1, y1, y2, y2, y1];
-            plot(obj.junctionPlotHandle,x, y,'k');
+           
+            % juncBoxhandle - handle for junction box
+            juncBoxhandle = plot(obj.junctionPlotHandle,x, y,'k');
 
+            %RoadOrJunctionFlag - flag determins if plotting junction or single road
+            % True - plot just road; False - plot full junction
+            RoadOrJunctionFlag = getappdata(0,'RoadOrJunctionFlag');
+             
+            if RoadOrJunctionFlag
+                roadPlotHanlde(2).Visible = 'Off';
+                juncBoxhandle.Visible = 'Off';
+            end
+                                
             if isempty(allAxesInFigure)
                 iDimension = [2.16 4.4 2.75];
                 carRectangle = [ 0 0; iDimension(2) 0; iDimension(2) iDimension(1); 0 iDimension(1)]-...
