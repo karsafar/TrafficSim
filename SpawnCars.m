@@ -23,9 +23,13 @@ classdef SpawnCars < handle
                 obj.numCars = sum(everyCarNum);
                 FixedSeed = SpawnData{2};
                 carTypes = SpawnData{3};
-%                  obj.randomSpawn(everyCarNum,carTypes,FixedSeed,dt)
-                %%
-                obj.controlled_spacing_spawn(everyCarNum,carTypes,FixedSeed,dt)
+                
+                spawnType = getappdata(0,'spawnType');
+                if spawnType == 0
+                    obj.randomSpawn(everyCarNum,carTypes,FixedSeed,dt)
+                else
+                    obj.controlled_spacing_spawn(everyCarNum,carTypes,FixedSeed,dt)
+                end
             end
         end
         
