@@ -6,7 +6,7 @@ classdef IdmModel < Car & matlab.mixin.Heterogeneous
     properties (SetAccess = public)
         idmAcceleration = NaN
         s = NaN
-        a = 1.5;
+        a = 1;
         b = 1.5;
         timeGap  = 1.6;
     end
@@ -21,7 +21,17 @@ classdef IdmModel < Car & matlab.mixin.Heterogeneous
         function calculate_idm_accel(obj,roadLength)
 
             gap = obj.Prev.pose(1) - obj.pose(1);
-            obj.s = gap + (gap <= 0)*roadLength;
+            if gap > 0
+                % following car is ahead
+                obj.s = gap;
+            elseif gap == 0
+                % no cars to follow
+                obj.s = inf; 
+            else
+                % following car is behind  !!! ONLY FOR RING-ROAD CASE !!!! 
+                obj.s = gap + roadLength;
+            end
+            
             
             dV = (obj.velocity - obj.Prev.velocity);
             
