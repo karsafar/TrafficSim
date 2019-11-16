@@ -22,7 +22,7 @@ function varargout = microSim(varargin)
 
 % Edit the above text to modify the response to help UI
 
-% Last Modified by GUIDE v2.5 18-Sep-2018 22:30:52
+% Last Modified by GUIDE v2.5 14-Nov-2019 20:14:27
 
 % Begin initialization code - DO NOT EDIT
 
@@ -400,6 +400,8 @@ function handles = pushbutton2_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton2 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+testNamingBox_Callback(handles.testNamingBox,eventdata,handles);
+
 if handles.loadFlag == 0
     handles = uibuttongroup2_ButtonDownFcn(handles.uibuttongroup2, eventdata, handles);
     handles = uibuttongroup6_ButtonDownFcn(handles.uibuttongroup6, eventdata, handles);
@@ -500,10 +502,14 @@ for iIteration = handles.iIteration:nIterations
     for iCar = 1:HorizontalArm.numCars
         HorizontalArm.allCarsStates(1,iCar) = HorizontalArm.allCars(iCar).pose(1);
         HorizontalArm.allCarsStates(2,iCar) = HorizontalArm.allCars(iCar).velocity;
+        HorizontalArm.allCarsStates(3,iCar) = HorizontalArm.allCars(iCar).acceleration;
+        HorizontalArm.allCars(iCar).store_state_data(t,HorizontalArm.allCarsStates(:,iCar));
     end
     for jCar = 1:VerticalArm.numCars
         VerticalArm.allCarsStates(1,jCar) = VerticalArm.allCars(jCar).pose(1);
         VerticalArm.allCarsStates(2,jCar) = VerticalArm.allCars(jCar).velocity;
+        VerticalArm.allCarsStates(3,jCar) = VerticalArm.allCars(jCar).acceleration;
+        VerticalArm.allCars(jCar).store_state_data(t,VerticalArm.allCarsStates(:,jCar));
     end
     
     % draw cars
@@ -553,15 +559,15 @@ for iIteration = handles.iIteration:nIterations
 %         VerticalArm.allCarsStates(3,jCar) = VerticalArm.allCars(jCar).acceleration;
     end
     
-    % define the length of storage data for all cars
-    for iCar = 1:HorizontalArm.numCars
-        HorizontalArm.allCarsStates(3,iCar) = HorizontalArm.allCars(iCar).acceleration;
-        HorizontalArm.allCars(iCar).store_state_data(t,HorizontalArm.allCarsStates(:,iCar));
-    end
-    for jCar = 1:VerticalArm.numCars
-        VerticalArm.allCarsStates(3,jCar) = VerticalArm.allCars(jCar).acceleration;
-        VerticalArm.allCars(jCar).store_state_data(t,VerticalArm.allCarsStates(:,jCar));
-    end
+%     % define the length of storage data for all cars
+%     for iCar = 1:HorizontalArm.numCars
+%         HorizontalArm.allCarsStates(3,iCar) = HorizontalArm.allCars(iCar).acceleration;
+%         HorizontalArm.allCars(iCar).store_state_data(t,HorizontalArm.allCarsStates(:,iCar));
+%     end
+%     for jCar = 1:VerticalArm.numCars
+%         VerticalArm.allCarsStates(3,jCar) = VerticalArm.allCars(jCar).acceleration;
+%         VerticalArm.allCars(jCar).store_state_data(t,VerticalArm.allCarsStates(:,jCar));
+%     end
     
     count_emegrency_breaks(HorizontalArm);
     count_emegrency_breaks(VerticalArm);
@@ -610,7 +616,12 @@ nCars(2) = VerticalArm.numCars;
 density = roadDims.Length./nCars';
 t_rng = handles.t_rng;
 road = roadDims;
-save('Unit-test-1.mat',...
+
+Test_Name = getappdata(0,'file_name');
+
+fileName = sprintf('%s.mat',Test_Name);
+
+save(fileName,...
     'carTypes',...
     'nCars',...
     'allCarsNumArray_H',...
@@ -1471,6 +1482,8 @@ function pushbutton7_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % construct two arms of the junction objects
+testNamingBox_Callback(handles.testNamingBox,eventdata,handles);
+
 handles = pushbutton2_Callback(handles.pushbutton2, eventdata, handles);
 guidata(hObject,handles);
 
@@ -1869,3 +1882,41 @@ function updateRateGroup_CreateFcn(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 set(findall(hObject, '-property', 'enable'), 'enable', 'on');
+
+
+% --- Executes on button press in vertical_arm_visibility.
+function vertical_arm_visibility_Callback(hObject, eventdata, handles)
+% hObject    handle to vertical_arm_visibility (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+RoadOrJunctionFlag = get(hObject,'Value');
+
+setappdata(0,'RoadOrJunctionFlag',RoadOrJunctionFlag);
+
+% Hint: get(hObject,'Value') returns toggle state of vertical_arm_visibility
+
+
+
+function testNamingBox_Callback(hObject, eventdata, handles)
+% hObject    handle to testNamingBox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of testNamingBox as text
+%        str2double(get(hObject,'String')) returns contents of testNamingBox as a double
+file_name = get(hObject,'String');
+setappdata(0,'file_name',file_name)
+guidata(hObject,handles);
+
+% --- Executes during object creation, after setting all properties.
+function testNamingBox_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to testNamingBox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
