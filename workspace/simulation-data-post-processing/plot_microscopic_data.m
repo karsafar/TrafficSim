@@ -103,19 +103,19 @@ junction.flowChange = mean([eastArm.flowChange;northArm.flowChange]);
 
 figure()
 ax1 = axes;
-plot(ax1,t_rng,northArm.flowChange,'r-','LineWidth',2)
+plot(ax1,t_rng,northArm.flowChange,'b-','LineWidth',2)
 xlabel(ax1,'Time (s)')
 ylabel(ax1,'Flow (veh/s)')
 
 figure()
 ax2 = axes;
-plot(ax2,t_rng,eastArm.flowChange,'g-','LineWidth',2)
+plot(ax2,t_rng,eastArm.flowChange,'r-','LineWidth',2)
 xlabel(ax2,'Time (s)')
 ylabel(ax2,'Flow (veh/s)')
 
 figure()
 ax3 = axes;
-plot(ax3,t_rng,junction.flowChange,'b-','LineWidth',2)
+plot(ax3,t_rng,junction.flowChange,'g-','LineWidth',2)
 xlabel(ax3,'Time (s)')
 ylabel(ax3,'Flow (veh/s)')
 
@@ -368,7 +368,7 @@ else
 end
 % legend(ax,'West-East Arm Flow','South-North Arm Flow','Junction Variance')
 
-legend(ax,'Junction Variance')
+legend(ax,'Junction Average Speed Variance')
 end
 
 function split_trajectory_profiles(sim,transCut,t_rng,nIterations)
