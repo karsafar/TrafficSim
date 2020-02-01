@@ -22,7 +22,7 @@ function varargout = microSim(varargin)
 
 % Edit the above text to modify the response to help UI
 
-% Last Modified by GUIDE v2.5 14-Nov-2019 20:14:27
+% Last Modified by GUIDE v2.5 18-Nov-2019 18:30:48
 
 % Begin initialization code - DO NOT EDIT
 
@@ -400,7 +400,9 @@ function handles = pushbutton2_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton2 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+pause(3)
 testNamingBox_Callback(handles.testNamingBox,eventdata,handles);
+spawn_type_Callback(handles.spawn_type,eventdata,handles);
 
 if handles.loadFlag == 0
     handles = uibuttongroup2_ButtonDownFcn(handles.uibuttongroup2, eventdata, handles);
@@ -456,7 +458,7 @@ else
     VerticalArm = handles.VerticalArm;
 end
 % plot the junction
-junc = Junction(roadDims, plotFlag);
+junc = Junction(roadDims, plotFlag,nIterations);
 
 if plotFlag == 0
     f = waitbar(0,'','Name','Running simulation',...
@@ -471,12 +473,12 @@ set(handles.pushbutton3,'userdata',0);
 % define the length of storage data for all cars
 for iCar = 1:HorizontalArm.numCars
 %     HorizontalArm.allCars(iCar).History = NaN(4,nIterations);
-    HorizontalArm.allCars(iCar).History = single(NaN(4,nIterations));
+    HorizontalArm.allCars(iCar).History = NaN(3,nIterations,'single');
 
 end
 for jCar = 1:VerticalArm.numCars
 %     VerticalArm.allCars(jCar).History = NaN(4,nIterations);
-    VerticalArm.allCars(jCar).History = single(NaN(4,nIterations));
+    VerticalArm.allCars(jCar).History = NaN(3,nIterations,'single');
 end
 
 transientCutOffLength = 0;
@@ -528,7 +530,7 @@ for iIteration = handles.iIteration:nIterations
         VerticalArm.allCars,...
         HorizontalArm.numCars,...
         VerticalArm.numCars,...
-        plotFlag,t);
+        plotFlag,t,iIteration);
     
     % calculate IDM acceleration
     for iCar = 1:HorizontalArm.numCars
@@ -540,18 +542,17 @@ for iIteration = handles.iIteration:nIterations
     
     % Itersection Collision Avoidance (ICA)
     for iCar = 1:HorizontalArm.numCars
-        if t > transientCutOffLength
-            HorizontalArm.allCars(iCar).decide_acceleration(VerticalArm,roadDims.Length(1),t,dt);
+        if t >= transientCutOffLength
+            HorizontalArm.allCars(iCar).decide_acceleration(VerticalArm,roadDims.Length(1),t,dt,iIteration);
         else
             HorizontalArm.allCars(iCar).acceleration = HorizontalArm.allCars(iCar).idmAcceleration;
             check_for_negative_velocity( HorizontalArm.allCars(iCar),dt);
         end
 %         HorizontalArm.allCarsStates(3,iCar) = HorizontalArm.allCars(iCar).acceleration;
-        
     end
     for jCar = 1:VerticalArm.numCars
-        if t > transientCutOffLength
-            VerticalArm.allCars(jCar).decide_acceleration(HorizontalArm,roadDims.Length(2),t,dt);
+        if t >= transientCutOffLength
+            VerticalArm.allCars(jCar).decide_acceleration(HorizontalArm,roadDims.Length(2),t,dt,iIteration);
         else
             VerticalArm.allCars(jCar).acceleration = VerticalArm.allCars(jCar).idmAcceleration;
             check_for_negative_velocity( VerticalArm.allCars(jCar),dt);
@@ -1483,6 +1484,7 @@ function pushbutton7_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 % construct two arms of the junction objects
 testNamingBox_Callback(handles.testNamingBox,eventdata,handles);
+spawn_type_Callback(handles.spawn_type,eventdata,handles);
 
 handles = pushbutton2_Callback(handles.pushbutton2, eventdata, handles);
 guidata(hObject,handles);
@@ -1920,3 +1922,18 @@ function testNamingBox_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in spawn_type.
+function spawn_type_Callback(hObject, eventdata, handles)
+% hObject    handle to spawn_type (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% 0 - random; 1 - phased
+if get(hObject,'Value')
+    spawnType = 1;
+else
+    spawnType = 0;
+end
+setappdata(0,'spawnType',spawnType);
+% Hint: get(hObject,'Value') returns toggle state of spawn_type

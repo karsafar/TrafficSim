@@ -32,7 +32,7 @@ setappdata(0,'spawnType',spawnType);
 swapRate = 0;
 %%
 
-density = 0.03;
+density = 0.05;
 
 n = 10;
 nCars = [n; n];

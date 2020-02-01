@@ -18,14 +18,16 @@ VerticalArm = roadTypes{2}([{carTypes},90,roadDims,priority],ArmV);
 
 clear ArmH ArmV
 % plot the junction
-junc = Junction(roadDims, plotFlag);
+junc = Junction(roadDims, plotFlag,nIterations);
 
 % define the length of storage data for all cars
 for iCar = 1:HorizontalArm.numCars
-    HorizontalArm.allCars(iCar).History = single(NaN(4,nIterations));
+    HorizontalArm.allCars(iCar).History = NaN(3,nIterations,'single');
+    HorizontalArm.allCars(iCar).bbStore = zeros(numel(HorizontalArm.allCars(iCar).actStore),nIterations,'int8');
 end
 for jCar = 1:VerticalArm.numCars
-    VerticalArm.allCars(jCar).History = single(NaN(4,nIterations));
+    VerticalArm.allCars(jCar).History = NaN(3,nIterations,'single');
+    VerticalArm.allCars(jCar).bbStore = zeros(numel(VerticalArm.allCars(jCar).actStore),nIterations,'int8');
 end
 
 % define transient length
@@ -73,13 +75,13 @@ for iIteration = 1:nIterations
     end
     
     % check for collision
-    if t > transientCutOffLength
+    if t >= transientCutOffLength
         junc.collision_check(...
             HorizontalArm.allCars,...
             VerticalArm.allCars,...
             HorizontalArm.numCars,...
             VerticalArm.numCars,...
-            plotFlag,t);
+            plotFlag,t,iIteration);
     end
     % save whole simulation data if collision
     %     if junc.collisionFlag
@@ -97,16 +99,16 @@ for iIteration = 1:nIterations
     
     % Itersection Collision Avoidance (ICA)
     for iCar = 1:HorizontalArm.numCars
-        if t > transientCutOffLength 
-            HorizontalArm.allCars(iCar).decide_acceleration(VerticalArm,roadDims.Length(1),t,dt);
+        if t >= transientCutOffLength 
+            HorizontalArm.allCars(iCar).decide_acceleration(VerticalArm,roadDims.Length(1),t,dt,iIteration);
         else
             HorizontalArm.allCars(iCar).acceleration = HorizontalArm.allCars(iCar).idmAcceleration;
-            check_for_negative_velocity( HorizontalArm.allCars(iCar),dt);
+            check_for_negative_velocity(HorizontalArm.allCars(iCar),dt);
         end
     end
     for jCar = 1:VerticalArm.numCars
-        if t > transientCutOffLength
-            VerticalArm.allCars(jCar).decide_acceleration(HorizontalArm,roadDims.Length(2),t,dt);
+        if t >= transientCutOffLength
+            VerticalArm.allCars(jCar).decide_acceleration(HorizontalArm,roadDims.Length(2),t,dt,iIteration);
         else
             VerticalArm.allCars(jCar).acceleration = VerticalArm.allCars(jCar).idmAcceleration;
             check_for_negative_velocity( VerticalArm.allCars(jCar),dt);

@@ -20,8 +20,6 @@ classdef ActionNode < LeafNode
             obj.bb_copy = varargin{3};
         end
         function outputArg = tick(obj,parentOutput)
-            %tick Summary of this method goes here
-            %   Detailed explanation goes here
             if parentOutput == 1
                 outputArg = 1;
                 obj.set_value()
@@ -31,9 +29,13 @@ classdef ActionNode < LeafNode
             obj.output = outputArg;
         end
         function set_value(obj)
-            nm1 = obj.name1;
+%             nm1 = obj.name1;
             nm2 = obj.name2;
-            obj.bb_copy.(nm1) = obj.bb_copy.(nm2);
+%             obj.bb_copy.(nm1) = obj.bb_copy.(nm2);
+            tempBB = obj.bb_copy; 
+%             tempBB = setfield(tempBB,nm1,tempBB.(nm2));
+            tempBB.A = tempBB.(nm2);
+%             obj.bb_copy = tempBB;
         end
         function plot_tree(obj,rank)
             obj.plotRankArray = rank;

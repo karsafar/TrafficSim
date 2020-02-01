@@ -10,6 +10,9 @@ classdef BlackBoard < handle & dynamicprops
             obj.(name) = value;
 %             obj.arrayDoublicate = [obj.arrayDoublicate; value];
         end
+        function set_props(obj,prop,val)
+            obj.(prop) = val;
+        end
     end
     
 end

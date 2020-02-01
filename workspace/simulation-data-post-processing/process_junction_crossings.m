@@ -134,7 +134,7 @@ for idx = 1:length(data)
 end
 
 % tic  
-f2 = figure('visible', 'off');
+f2 = figure('visible', 'on');
 ax3 = axes;
 xlim(ax3,[0.015 0.15])
 ylim(ax3,[0 3000])
@@ -153,7 +153,7 @@ for ii = 1:size(orderedPlatoons,1)
 %             platoonY(ii,i) = platoonY(ii,i-1)+temp(i);
         end
     end
-% %     h = line(ax3,[numCars(1,ii)*ones(1,numel(temp))./500; numCars(1,ii)*ones(1,numel(temp))./500],temp1,'LineWidth',8);
+%     h = line(ax3,[numCars(1,ii)*ones(1,numel(temp))./500; numCars(1,ii)*ones(1,numel(temp))./500],temp1,'LineWidth',8);
 
     h = plot(ax3,[density(1,ii)*ones(1,numel(temp)); density(1,ii)*ones(1,numel(temp))],temp1,'LineWidth',4);
     set(h,{'Color'},num2cell([colourArray(ii).density(:,1),colourArray(ii).density(:,2),colourArray(ii).density(:,3)],2));
@@ -168,7 +168,7 @@ end
 % h = plot(ax3,platoonX,platoonY,'.','LineWidth',4);
 % toc
 % f2.Visible = 'on';
-ylabel('Junction Capacity Q (veh/hour)','FontSize',16)
+ylabel('Junction Capacity Q (veh/hr)','FontSize',16)
 xlabel('Density \rho (veh/m)','FontSize',16)
 lgd = legend([h_tem],{'North Arm Crossing','East Arm Crossing'},'location','northeast');
 
@@ -203,9 +203,9 @@ xlim(ax3,[0.015 0.15])
 ylim(ax3,[0 3000])
 xticks(ax3,0.02:0.01:0.144)
 
-f2.Renderer='Painters';
-saveas(f2,'b-random-35-sym-capacity.eps','epsc');
-close(f2)
+% f2.Renderer='Painters';
+% saveas(f2,'b-random-35-sym-capacity.eps','epsc');
+% close(f2)
 return
 
 %%

@@ -42,11 +42,18 @@ plot_speed_variance(sim,velArrayEast,velArrayNorth,t_rng(transCut+1:end),(nItera
 
 split_trajectory_profiles(sim,transCut,t_rng(transCut+1:end),(nIterations-transCut))
 
+
+%% saving figure as a PDF
+% xlim([1000 1500])
+fig = gcf;
+fig.PaperPositionMode = 'auto';
+fig.PaperPosition;
+fig_pos = fig.PaperPosition;
+fig.PaperSize = [fig_pos(3) fig_pos(4)];
+% print(fig,'/Users/robot/cross_sim/workspace/Chapter03-data/junction-flow-change-sym-1-vel-0-no-warm-up-002','-dpdf','-r0','-bestfit')
+print(fig,'/Users/robot/cross_sim/workspace/Chapter02-data/test-simulations-type-A/n_cars_vs_road_length_prescription/junction/junc_30_cars_1500_m_0_02_zoomed','-dpdf','-r0','-bestfit')
+
 %%
-
-
-
-
 
 % %% Time-Displacement
 % 
@@ -95,30 +102,46 @@ function plot_flow_change(velArrayEast,velArrayNorth,density,t_rng,nIterations)
 meanVelArrayEast = mean(velArrayEast,1);
 meanVelArrayNorth = mean(velArrayNorth,1);
 
+if numel(density) == 1
+    density(2) = density(1);
+end
 for i = 1:nIterations
     eastArm.flowChange(i) = density(1)*meanVelArrayEast(i);
     northArm.flowChange(i) = density(2)*meanVelArrayNorth(i);
 end
 junction.flowChange = mean([eastArm.flowChange;northArm.flowChange]);
+% 
+% figure()
+% ax1 = axes;
+% plot(ax1,t_rng,northArm.flowChange,'b-','LineWidth',2)
+% xlabel(ax1,'Time (s)')
+% ylabel(ax1,'Flow (veh/s)')
+% 
+% figure()
+% ax2 = axes;
+% plot(ax2,t_rng,eastArm.flowChange,'r-','LineWidth',2)
+% xlabel(ax2,'Time (s)')
+% ylabel(ax2,'Flow (veh/s)')
+% 
+% figure()
+% ax3 = axes;
+% plot(ax3,t_rng,junction.flowChange,'g-','LineWidth',2)
+% xlabel(ax3,'Time (s)')
+% ylabel(ax3,'Flow (veh/s)')
 
 figure()
-ax1 = axes;
-plot(ax1,t_rng,northArm.flowChange,'b-','LineWidth',2)
-xlabel(ax1,'Time (s)')
-ylabel(ax1,'Flow (veh/s)')
-
-figure()
-ax2 = axes;
-plot(ax2,t_rng,eastArm.flowChange,'r-','LineWidth',2)
-xlabel(ax2,'Time (s)')
-ylabel(ax2,'Flow (veh/s)')
-
-figure()
-ax3 = axes;
-plot(ax3,t_rng,junction.flowChange,'g-','LineWidth',2)
-xlabel(ax3,'Time (s)')
-ylabel(ax3,'Flow (veh/s)')
-
+ax4 = axes;
+plot(ax4,t_rng,eastArm.flowChange*3600,'r-',...
+         t_rng,northArm.flowChange*3600,'b-',...
+         t_rng,junction.flowChange*3600,'g-','LineWidth',2)
+xlabel(ax4,'Time (s)')
+ylabel(ax4,'Flow Change (veh/hr)')
+xlim([1000 1500])
+ylim([0 max(max(eastArm.flowChange*3600),max(northArm.flowChange*3600))])
+legend('East-bound Arm Flow','North-bound Arm Flow','Junction Flow');
+e = diff(northArm.flowChange*3600);
+n = diff(eastArm.flowChange*3600);
+j = diff(junction.flowChange*3600);
 end
 %{
 %% occupancy pre-junction
@@ -214,7 +237,7 @@ function plot_spatiotemporal_profiles(sim,transCut,t_rng,nIterations,d)
     set(ax1,'FontSize',14)
 %     title(ax1,'East Arm')
     xlabel(ax1,'Time (s)')
-    ylabel(ax1,'Position (m)')
+    ylabel(ax1,'Displacement (m)')
     hold(ax1,'on');
     grid(ax1,'on');
     
@@ -239,6 +262,9 @@ function plot_spatiotemporal_profiles(sim,transCut,t_rng,nIterations,d)
     
        
     sz = 4;
+    X(Y> 2.825) = NaN;
+    Z(Y> 2.825) = NaN;
+    Y(Y> 2.825) = NaN;
     scatter(ax1,X,Y,sz,Z,'filled');
     
 %     return
@@ -251,7 +277,7 @@ function plot_spatiotemporal_profiles(sim,transCut,t_rng,nIterations,d)
     set(ax2,'FontSize',14)
 %     title(ax2,'North Arm')
     xlabel(ax2,'Time (s)')
-    ylabel(ax2,'Position (m)')
+    ylabel(ax2,'Displacement (m)')
     hold(ax2,'on');
     grid(ax2,'on');
     axis(ax2,[transCut/10 t_rng(nIterations) sim.vertArm.startPoint sim.vertArm.endPoint] )
@@ -282,7 +308,12 @@ function plot_spatiotemporal_profiles(sim,transCut,t_rng,nIterations,d)
 %     shading interp
     % plot the trajectories
 %     scatter(ax1,X,Y,sz,Z,'filled');
-    scatter(ax2,X1,Y1,sz,Z1,'filled');
+    X1(Y1> 2.825) = NaN;
+    Z1(Y1> 2.825) = NaN;
+    Y1(Y1> 2.825) = NaN;
+%     scatter(ax2,X1,Y1,sz,Z1,'filled');
+    scatter(ax1,X1,-Y1,sz,Z1,'filled');
+
 %     xlim(ax2,[transientCutOffLength t_rng(nIterations)])
 %     pause(1)
 %     toc
@@ -375,7 +406,7 @@ function split_trajectory_profiles(sim,transCut,t_rng,nIterations)
 figure()
 ax = axes;
 xlabel(ax,'Time (s)')
-ylabel(ax,'Position (m)')
+ylabel(ax,'Displacement (m)')
 hold(ax,'on');
 x1 = 0;
 x2 = t_rng(nIterations);
@@ -406,9 +437,9 @@ for i = 1:2
         end
         for j = 1:numel(idx)-1
             if i == 1
-                plot(ax,t_Car(idx(j)+1:idx(j+1)), d_Car(idx(j)+1:idx(j+1)),'b-','LineWidth',2)
+                plot(ax,t_Car(idx(j)+1:6:idx(j+1)), d_Car(idx(j)+1:6:idx(j+1)),'b-','LineWidth',2)
             else
-                plot(ax,t_Car(idx(j)+1:idx(j+1)), d_Car(idx(j)+1:idx(j+1)),'r-','LineWidth',2)
+                plot(ax,t_Car(idx(j)+1:6:idx(j+1)), d_Car(idx(j)+1:6:idx(j+1)),'r-','LineWidth',2)
             end
             k = k+1;
         end

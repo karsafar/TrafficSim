@@ -29,7 +29,8 @@ classdef SelectorNode < CompositeNode
                 Children = obj.Children;
                 for i = 1:obj.numChildren
                     %                 NodeState = [NodeState,Children(i).tick(outputArg)];
-                    NodeState = Children(i).tick(outputArg);
+                    iChild = Children(i);
+                    NodeState = iChild.tick(outputArg);
                     if NodeState(end) == 1
                         %                     obj.output = NodeState(i);
                         %                     outputArg = NodeState;

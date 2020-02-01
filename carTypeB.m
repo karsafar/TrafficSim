@@ -380,8 +380,8 @@ classdef carTypeB < AutonomousCar
                 d_in = s_in - s;
                 d_out = s_out - s;
             elseif s >= s_out
-                d_in = s_in - s - roadLength;
-                d_out = s_out - s - roadLength;
+                d_in = s_in - (s - roadLength);
+                d_out = s_out - (s - roadLength);
             elseif s > s_in && s < s_out
                 d_in = 0;
                 d_out = s_out - s;
