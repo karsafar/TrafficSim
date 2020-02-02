@@ -246,14 +246,15 @@ classdef carTypeA < IdmModel
                 t_in_next(t_in_next== t_in_op) = 1e5;
                 
                 % 1 - enough gap to go ahead of competing car
+                t_min = 2; % 2 seconds gap acceptance rule
                 if s > s_in && s < s_out
                     isEnoughGapAhead = 1;
                 else
-                    isEnoughGapAhead = (t_in_op > obj.t_out_self);
+                    isEnoughGapAhead = (t_in_op - obj.t_out_self) >= t_min;
                 end
                 
                 % 1 - enough gap between current leaving and next car entering junction
-                isEnoughGapBehind = (obj.t_in_self > t_out_op) && (t_in_next > obj.t_out_self);
+                isEnoughGapBehind = (obj.t_in_self > t_out_op) && (t_in_next - obj.t_out_self)>=t_min;
                 
                 
                 

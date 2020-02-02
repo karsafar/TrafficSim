@@ -46,6 +46,8 @@ classdef SpawnCars < handle
                 new_car.acceleration = SpawnData{iCar,4};
                 new_car.priority = SpawnData{iCar,6};
                 new_car.maximumVelocity = SpawnData{iCar,7};
+                UpdateRate = dt*randi(1,1)
+                new_car.UpdateRate = UpdateRate;
                 obj.allCars = [obj.allCars new_car];
                 if iCar  > 1
                     insertAfter(obj.allCars(iCar),obj.allCars(iCar-1));
@@ -92,9 +94,10 @@ classdef SpawnCars < handle
                     end
                 end
                 
-                
-                s_in = -obj.roadWidth/2-(Car.dimension(3)+(Car.dimension(2) - Car.dimension(3))/2);
-                s_out = obj.roadWidth/2+(Car.dimension(2) - Car.dimension(3))/2;
+                % start and end of the junction with added tolerance to avoid collision 
+                spaceTolerance = 0.000001;
+                s_in = -obj.roadWidth/2-(Car.dimension(3)+(Car.dimension(2) - Car.dimension(3))/2)-spaceTolerance;
+                s_out = obj.roadWidth/2+(Car.dimension(2) - Car.dimension(3))/2+spaceTolerance;
                 for iCar = 1:obj.numCars
                     allCarsPoseArray(iCar:end) = allCarsPoseArray(iCar:end)+deltaD(iCar);
                 end                
@@ -116,6 +119,8 @@ classdef SpawnCars < handle
                     if everyCarNum(i) > 0
                         for j = 1:everyCarNum(i)
                              new_car = carTypes{i}(obj.roadOrientation, obj.roadStart,obj.roadWidth,dt);
+                             UpdateRate = dt*randi(2,1);
+                             new_car.UpdateRate = UpdateRate;
 %                              new_car.velocity = 5 + (7-5).*rand(1,1);
                             allCarsArray = [allCarsArray new_car];
                         end
@@ -162,6 +167,8 @@ classdef SpawnCars < handle
                     if everyCarNum(i) > 0
                         for j = 1:everyCarNum(i)
                             new_car = carTypes{i}(obj.roadOrientation, obj.roadStart,obj.roadWidth,dt);
+                            UpdateRate = dt*randi(1,1);
+                            new_car.UpdateRate = UpdateRate;
                             allCarsArray = [allCarsArray; new_car];
 %                             allCarsArray(end).velocity = 4.841;
                         end
