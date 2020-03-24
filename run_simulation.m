@@ -51,7 +51,12 @@ t_off = getappdata(0,'t_off');
 for iIteration = 1:nIterations
     % update time
     t = t_rng(iIteration);
-
+    
+    % Hand-of-God
+    if iIteration >= 200 && iIteration <= 250
+        HorizontalArm.allCars(1).velocity = 0;
+    end
+    
     for iCar = 1:HorizontalArm.numCars
         HorizontalArm.allCarsStates(1,iCar) = HorizontalArm.allCars(iCar).pose(1);
         HorizontalArm.allCarsStates(2,iCar) = HorizontalArm.allCars(iCar).velocity;
@@ -65,7 +70,7 @@ for iIteration = 1:nIterations
         VerticalArm.allCars(jCar).store_state_data(t,VerticalArm.allCarsStates(:,jCar));
     end
     % draw cars
-    if plotFlag && t >= transientCutOffLength && t > t_off
+    if plotFlag && t >= transientCutOffLength && t >= t_off
         junc.draw_all_cars(HorizontalArm,VerticalArm,iIteration,transientCutOffLength)
         if drawRate
             drawnow limitrate
@@ -99,7 +104,7 @@ for iIteration = 1:nIterations
     
     % Itersection Collision Avoidance (ICA)
     for iCar = 1:HorizontalArm.numCars
-        if t >= transientCutOffLength 
+        if t >= transientCutOffLength
             HorizontalArm.allCars(iCar).decide_acceleration(VerticalArm,roadDims.Length(1),t,dt,iIteration);
         else
             HorizontalArm.allCars(iCar).acceleration = HorizontalArm.allCars(iCar).idmAcceleration;
@@ -108,6 +113,9 @@ for iIteration = 1:nIterations
     end
     for jCar = 1:VerticalArm.numCars
         if t >= transientCutOffLength
+            if t > 18.6 && t < 18.8 && jCar == 17
+                1
+            end  
             VerticalArm.allCars(jCar).decide_acceleration(HorizontalArm,roadDims.Length(2),t,dt,iIteration);
         else
             VerticalArm.allCars(jCar).acceleration = VerticalArm.allCars(jCar).idmAcceleration;
@@ -137,8 +145,8 @@ for iIteration = 1:nIterations
             return
         end
     end
-
 end
+%% store data before exiting run loop
 sim.horizArm = HorizontalArm;
 sim.vertArm = VerticalArm;
 sim.crossOrder = junc.crossOrder;

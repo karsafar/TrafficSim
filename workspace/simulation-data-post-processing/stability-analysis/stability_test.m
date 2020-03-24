@@ -20,14 +20,16 @@ k = densitypoints(vel,s0,l,v0,T,delta);
 
 instabVec = [];
 i = 0.1:0.025:1.1;
+
 % i = [0.2 0.6 1 1.5 3.5 ];
-colArray = {'r','m','g','b','c'};
+colArray = {'b','m','g','b','c'};
 idx = 0;
 % plot(k,zeros(1,n),'k--' ,'LineWidth',2)
 % hold on
 % xlim([0.015 0.15])
 % ylim([-1 3.5])
 % xticks(0.02:0.01:0.144)
+i = 1;
 for a = i
     % syms a s0 v0 T b delta s dv v l
     syms f(h,dv,v)
@@ -67,29 +69,33 @@ for a = i
     temp = double(lambda_2(h,dv,vel));
     % temp1 = double(lambdaSign(h,dv,v));
     idx = idx+1;
-%     plot(k,temp,'-','Color',colArray{idx}, 'LineWidth',2)
-%     hold on
-%     grid on
+    %%
+    plot(k,temp,'-','Color',colArray{idx}, 'LineWidth',2)
+    hold on
+    grid off
 %     plot(k,temp1,'g', 'LineWidth',2)
-%     plot(k,zeros(1,n),'-','Color',[0.5 0.5 0.5 ],'LineWidth',2)
+    plot(k,zeros(1,n),'--','Color',[0.5 0.5 0.5 ],'LineWidth',1)
 %     xlabel('Density \rho (veh/m)','FontSize',14)
 %     ylabel('\lambda_2','FontSize',14)
 %     
     
-    P = InterX([k;temp],[k;zeros(1,n)]);
-    idxZero = (P(1,:)+P(2,:) ~= 0);
-    P(:,(idxZero == 0)) = []
+%% 
+
+%     P = InterX([k;temp],[k;zeros(1,n)]);
+%     idxZero = (P(1,:)+P(2,:) ~= 0);
+%     P(:,(idxZero == 0)) = []
     
 %     plot(P(1,1),P(2,1),'*','Color','k');
     % axis([0 max(k) min(temp) max(0.1,max(temp))]);
     % axis equal
     
-    if isempty(P)
-        instabVec = [instabVec;NaN];
-    else
-        instabVec = [instabVec; P(1,1)];
-    end
+%     if isempty(P)
+%         instabVec = [instabVec;NaN];
+%     else
+%         instabVec = [instabVec; P(1,1)];
+%     end
 end
+%%
 dispname = [{'\lambda_2 = 0'}]
 for a = i
     dispname = [dispname {sprintf('a_{IDM} = %s m/s^2',num2str(a))}];
