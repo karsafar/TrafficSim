@@ -59,23 +59,23 @@ classdef carTypeA < IdmModel
             obj.bb.add_item('Zero',0);
             obj.bb.add_item('frontCarPassedJunction',false);
             
-%             obj.bbValues.A                      = obj.bb.A;
-%             obj.bbValues.Afollow                = obj.bb.Afollow;
-%             obj.bbValues.AemergStop             = obj.bb.AemergStop;
-%             obj.bbValues.AjuncStop              = obj.bb.AjuncStop;
-%             obj.bbValues.Aahead                 = obj.bb.Aahead;
-%             obj.bbValues.canPassAhead           = obj.bb.canPassAhead;
-%             obj.bbValues.canPassBehind          = obj.bb.canPassBehind;
-%             obj.bbValues.distToJunc             = obj.bb.distToJunc;
-%             obj.bbValues.comfDistToJunc         = obj.bb.comfDistToJunc;
-%             obj.bbValues.minStopDistToJunc      = obj.bb.minStopDistToJunc;
-%             obj.bbValues.futureMinGap           = obj.bb.futureMinGap;
-%             obj.bbValues.futureGap              = obj.bb.futureGap;
-%             obj.bbValues.CarsOpposite           = obj.bb.CarsOpposite;
-%             obj.bbValues.backOffTime            = obj.bb.backOffTime;
-%             obj.bbValues.t                      = obj.bb.t;
-%             obj.bbValues.isDeadlock             = obj.bb.isDeadlock;
-%             obj.bbValues.frontCarPassedJunction = obj.bb.frontCarPassedJunction;
+            obj.bbValues.A                      = obj.bb.A;
+            obj.bbValues.Afollow                = obj.bb.Afollow;
+            obj.bbValues.AemergStop             = obj.bb.AemergStop;
+            obj.bbValues.AjuncStop              = obj.bb.AjuncStop;
+            obj.bbValues.Aahead                 = obj.bb.Aahead;
+            obj.bbValues.canPassAhead           = obj.bb.canPassAhead;
+            obj.bbValues.canPassBehind          = obj.bb.canPassBehind;
+            obj.bbValues.distToJunc             = obj.bb.distToJunc;
+            obj.bbValues.comfDistToJunc         = obj.bb.comfDistToJunc;
+            obj.bbValues.minStopDistToJunc      = obj.bb.minStopDistToJunc;
+            obj.bbValues.futureMinGap           = obj.bb.futureMinGap;
+            obj.bbValues.futureGap              = obj.bb.futureGap;
+            obj.bbValues.CarsOpposite           = obj.bb.CarsOpposite;
+            obj.bbValues.backOffTime            = obj.bb.backOffTime;
+            obj.bbValues.t                      = obj.bb.t;
+            obj.bbValues.isDeadlock             = obj.bb.isDeadlock;
+            obj.bbValues.frontCarPassedJunction = obj.bb.frontCarPassedJunction;
             
             %% 'Follow Front Car' Tree
             obj.cond1 = ConditionNode(obj.bb.CarsOpposite == 0,'CarsOpposite == 0');
@@ -158,14 +158,6 @@ classdef carTypeA < IdmModel
                 selfDistOutOfJunc = s_out - s + (s>s_out)*roadLength;
                 
                 %% assign junction acceleration
-                % potentially remove the condition and just use IDM as the
-                % same result is produced either way
-%                 if s < s_out
-%                     calculate_junc_accel(obj,roadLength);
-%                     pass_ahead_accel = obj.juncAccel;
-%                 else
-%                     pass_ahead_accel = obj.idmAcceleration;
-%                 end
                 pass_ahead_accel = obj.idmAcceleration;
                 
                 %% Future space gap
@@ -230,34 +222,37 @@ classdef carTypeA < IdmModel
                 v_comp = oppositeRoad.allCarsStates(2,ind);
                 a_comp = oppositeRoad.allCarsStates(3,ind);
                 
-                randVal = rand();
-                noiseRate = 0.05;
+%                 randVal = rand();
+%                 noiseRate = 0.05;
 %                 posNoiseRate = 2*s_comp*noiseRate*randVal - s_comp*noiseRate;
-                velNoiseRate = 2*v_comp*noiseRate*randVal - v_comp*noiseRate;
+%                 velNoiseRate = 2*v_comp*noiseRate*randVal - v_comp*noiseRate;
 %                 accelNoiseRate = 2*a_comp*noiseRate*randVal - a_comp*noiseRate;
-                [t_in_op, t_out_op] = calculate_t_in_and_out(obj,a_comp,v_comp+velNoiseRate,s_comp,t,oppositeRoad.Length,tol_op);
-%                 [t_in_op, t_out_op] = calculate_t_in_and_out(obj,a_comp,v_comp,s_comp,t,oppositeRoad.Length,tol_op);
+%                 [t_in_op, t_out_op] = calculate_t_in_and_out(obj,a_comp,v_comp+velNoiseRate,s_comp,t,oppositeRoad.Length,tol_op);
+                [t_in_op, t_out_op] = calculate_t_in_and_out(obj,a_comp,v_comp,s_comp,t,oppositeRoad.Length,tol_op);
 
                 % next car after competing car t_in and t_out
                 s_comp_next = oppositeCars(ind).Next.pose(1);
                 v_comp_next = oppositeCars(ind).Next.velocity;
                 a_comp_next = oppositeCars(ind).Next.History(3,round(t/dt+1));
                 [t_in_next, ~] = calculate_t_in_and_out(obj,a_comp_next,v_comp_next,s_comp_next,t,oppositeRoad.Length,tol_op);
-                t_in_next(t_in_next== t_in_op) = 1e5;
+                t_in_next(t_in_next == t_in_op && oppositeRoad.numCars == 1) = 1e5;
                 
                 % 1 - enough gap to go ahead of competing car
-                t_min = 2; % 2 seconds gap acceptance rule
+                t_min = 0; % 2 seconds gap acceptance rule
                 if s > s_in && s < s_out
                     isEnoughGapAhead = 1;
                 else
-                    isEnoughGapAhead = (t_in_op - obj.t_out_self) >= t_min;
+                    isEnoughGapAhead = (t_in_op-t_min > obj.t_in_self);
                 end
                 
                 % 1 - enough gap between current leaving and next car entering junction
-                isEnoughGapBehind = (obj.t_in_self > t_out_op) && (t_in_next - obj.t_out_self)>=t_min;
-                
-                
-                
+                isEnoughGapBehind = (obj.t_in_self > t_out_op) && (t_in_next-t_min > obj.t_out_self);
+
+                %% %%%%%%%%
+%                 aheadGap = (t_in_op -2 - obj.t_out_self);
+
+%                 sprintf('cross ahead gap is %f',aheadGap)
+                %% %%%%%%%%
                 % 1 - passed, 0 - not passed
                 isFrontCarPassedJunction = (obj.Prev.pose(1) == s || obj.Prev.pose(1) > obj.Prev.ownDistfromRearToBack  || obj.Prev.pose(1) < s);
                 
@@ -343,27 +338,31 @@ classdef carTypeA < IdmModel
             %% assign BT output to acceleration
             randVal = rand();
             noiseRate = 0;
-            bbAccel = blackBorad.A;
-            bbAccel = bbAccel + 2*bbAccel*noiseRate*randVal - bbAccel*noiseRate;
-            obj.acceleration = bbAccel;
+            if oppositeRoad.numCars > 0
+                bbAccel = blackBorad.A;
+                bbAccel = bbAccel + 2*bbAccel*noiseRate*randVal - bbAccel*noiseRate;
+                obj.acceleration = bbAccel;
+            else
+                obj.acceleration = obj.idmAcceleration;
+            end
             
-%             obj.bbValues.A(end+1)                      = obj.bb.A;
-%             obj.bbValues.Afollow(end+1)                = obj.bb.Afollow;
-%             obj.bbValues.AemergStop(end+1)             = obj.bb.AemergStop;
-%             obj.bbValues.AjuncStop(end+1)              = obj.bb.AjuncStop;
-%             obj.bbValues.Aahead(end+1)                 = obj.bb.Aahead;
-%             obj.bbValues.canPassAhead(end+1)           = obj.bb.canPassAhead;
-%             obj.bbValues.canPassBehind(end+1)          = obj.bb.canPassBehind;
-%             obj.bbValues.distToJunc(end+1)             = obj.bb.distToJunc;
-%             obj.bbValues.comfDistToJunc(end+1)         = obj.bb.comfDistToJunc;
-%             obj.bbValues.minStopDistToJunc(end+1)      = obj.bb.minStopDistToJunc;
-%             obj.bbValues.futureMinGap(end+1)           = obj.bb.futureMinGap;
-%             obj.bbValues.futureGap(end+1)              = obj.bb.futureGap;
-%             obj.bbValues.CarsOpposite(end+1)           = obj.bb.CarsOpposite;
-%             obj.bbValues.backOffTime(end+1)            = obj.bb.backOffTime;
-%             obj.bbValues.t(end+1)                      = obj.bb.t;
-%             obj.bbValues.isDeadlock(end+1)             = obj.bb.isDeadlock;
-%             obj.bbValues.frontCarPassedJunction(end+1) = obj.bb.frontCarPassedJunction;
+            obj.bbValues.A(end+1)                      = obj.bb.A;
+            obj.bbValues.Afollow(end+1)                = obj.bb.Afollow;
+            obj.bbValues.AemergStop(end+1)             = obj.bb.AemergStop;
+            obj.bbValues.AjuncStop(end+1)              = obj.bb.AjuncStop;
+            obj.bbValues.Aahead(end+1)                 = obj.bb.Aahead;
+            obj.bbValues.canPassAhead(end+1)           = obj.bb.canPassAhead;
+            obj.bbValues.canPassBehind(end+1)          = obj.bb.canPassBehind;
+            obj.bbValues.distToJunc(end+1)             = obj.bb.distToJunc;
+            obj.bbValues.comfDistToJunc(end+1)         = obj.bb.comfDistToJunc;
+            obj.bbValues.minStopDistToJunc(end+1)      = obj.bb.minStopDistToJunc;
+            obj.bbValues.futureMinGap(end+1)           = obj.bb.futureMinGap;
+            obj.bbValues.futureGap(end+1)              = obj.bb.futureGap;
+            obj.bbValues.CarsOpposite(end+1)           = obj.bb.CarsOpposite;
+            obj.bbValues.backOffTime(end+1)            = obj.bb.backOffTime;
+            obj.bbValues.t(end+1)                      = obj.bb.t;
+            obj.bbValues.isDeadlock(end+1)             = obj.bb.isDeadlock;
+            obj.bbValues.frontCarPassedJunction(end+1) = obj.bb.frontCarPassedJunction;
             
             
             %%
