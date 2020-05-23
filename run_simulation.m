@@ -52,10 +52,10 @@ for iIteration = 1:nIterations
     % update time
     t = t_rng(iIteration);
     
-    % Hand-of-God
-    if iIteration >= 200 && iIteration <= 250
-        HorizontalArm.allCars(1).velocity = 0;
-    end
+%     % Hand-of-God
+%     if iIteration >= 200 && iIteration <= 250
+%         HorizontalArm.allCars(1).velocity = 0;
+%     end
     
     for iCar = 1:HorizontalArm.numCars
         HorizontalArm.allCarsStates(1,iCar) = HorizontalArm.allCars(iCar).pose(1);
@@ -113,9 +113,6 @@ for iIteration = 1:nIterations
     end
     for jCar = 1:VerticalArm.numCars
         if t >= transientCutOffLength
-            if t > 18.6 && t < 18.8 && jCar == 17
-                1
-            end  
             VerticalArm.allCars(jCar).decide_acceleration(HorizontalArm,roadDims.Length(2),t,dt,iIteration);
         else
             VerticalArm.allCars(jCar).acceleration = VerticalArm.allCars(jCar).idmAcceleration;

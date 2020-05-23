@@ -42,3 +42,11 @@ parallel_density_range_4\.m
 workspace/crossing-regimes-data-analysis/
 
 workspace/
+/@microSim/Single_Arm/TwoScenarios.eps
+/@microSim/Single_Arm/TwoScenarios.pdf
+/@microSim/Single_Arm/flowDensity.pdf
+/@microSim/Single_Arm/spatioTest20Veh.eps
+/@microSim/Single_Arm/spatioTest20Veh.pdf
+/@microSim/Single_Arm/spatioTest30Veh.eps
+/@microSim/Single_Arm/spatioTest30Veh.pdf
+*.pdf

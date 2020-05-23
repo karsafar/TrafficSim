@@ -457,7 +457,7 @@ else
     VerticalArm = handles.VerticalArm;
 end
 % plot the junction
-junc = Junction(roadDims, plotFlag);
+junc = Junction(roadDims, plotFlag,nIterations);
 
 if plotFlag == 0
     f = waitbar(0,'','Name','Running simulation',...
@@ -471,13 +471,12 @@ set(handles.pushbutton3,'userdata',0);
 
 % define the length of storage data for all cars
 for iCar = 1:HorizontalArm.numCars
-%     HorizontalArm.allCars(iCar).History = NaN(4,nIterations);
-    HorizontalArm.allCars(iCar).History = single(NaN(4,nIterations));
-
+    HorizontalArm.allCars(iCar).History = NaN(3,nIterations,'single');
+    HorizontalArm.allCars(iCar).bbStore = zeros(numel(HorizontalArm.allCars(iCar).actStore),nIterations,'int8');
 end
 for jCar = 1:VerticalArm.numCars
-%     VerticalArm.allCars(jCar).History = NaN(4,nIterations);
-    VerticalArm.allCars(jCar).History = single(NaN(4,nIterations));
+    VerticalArm.allCars(jCar).History = NaN(3,nIterations,'single');
+    VerticalArm.allCars(jCar).bbStore = zeros(numel(VerticalArm.allCars(jCar).actStore),nIterations,'int8');
 end
 
 transientCutOffLength = 0;
@@ -529,7 +528,7 @@ for iIteration = handles.iIteration:nIterations
         VerticalArm.allCars,...
         HorizontalArm.numCars,...
         VerticalArm.numCars,...
-        plotFlag,t);
+        plotFlag,t,iIteration);
     
     % calculate IDM acceleration
     for iCar = 1:HorizontalArm.numCars
@@ -541,8 +540,8 @@ for iIteration = handles.iIteration:nIterations
     
     % Itersection Collision Avoidance (ICA)
     for iCar = 1:HorizontalArm.numCars
-        if t > transientCutOffLength
-            HorizontalArm.allCars(iCar).decide_acceleration(VerticalArm,roadDims.Length(1),t,dt);
+        if t >= transientCutOffLength
+            HorizontalArm.allCars(iCar).decide_acceleration(VerticalArm,roadDims.Length(1),t,dt,iIteration);
         else
             HorizontalArm.allCars(iCar).acceleration = HorizontalArm.allCars(iCar).idmAcceleration;
             check_for_negative_velocity( HorizontalArm.allCars(iCar),dt);
@@ -551,8 +550,8 @@ for iIteration = handles.iIteration:nIterations
         
     end
     for jCar = 1:VerticalArm.numCars
-        if t > transientCutOffLength
-            VerticalArm.allCars(jCar).decide_acceleration(HorizontalArm,roadDims.Length(2),t,dt);
+        if t >= transientCutOffLength
+            VerticalArm.allCars(jCar).decide_acceleration(HorizontalArm,roadDims.Length(2),t,dt,iIteration);
         else
             VerticalArm.allCars(jCar).acceleration = VerticalArm.allCars(jCar).idmAcceleration;
             check_for_negative_velocity( VerticalArm.allCars(jCar),dt);

@@ -20,16 +20,16 @@ end
 velArrayEast = NaN(sim.horizArm.numCars,(nIterations-transCut));
 velArrayNorth = NaN(sim.vertArm.numCars,(nIterations-transCut));
 for iCar = 1:sim.horizArm.numCars
-    velArrayEast(iCar,:) = sim.horizArm.allCars(iCar).History(3,transCut+1:end);
+    velArrayEast(iCar,:) = sim.horizArm.allCars(iCar).History(2,transCut+1:end);
 end
 for iCar = 1:sim.vertArm.numCars
-    velArrayNorth(iCar,:) = sim.vertArm.allCars(iCar).History(3,transCut+1:end);
+    velArrayNorth(iCar,:) = sim.vertArm.allCars(iCar).History(2,transCut+1:end);
 end
 
 
 %% Spatiotenporal Velocity Profiles
 
-d = 2; % density on points in scatter plot
+d = 1; % density on points in scatter plot
 plot_spatiotemporal_profiles(sim,transCut,t_rng(transCut+1:end),(nIterations-transCut),d)
 
 
@@ -58,7 +58,8 @@ fig.PaperPosition;
 fig_pos = fig.PaperPosition;
 fig.PaperSize = [fig_pos(3) fig_pos(4)];
 % print(fig,'/Users/robot/cross_sim/workspace/Chapter03-data/junction-flow-change-sym-1-vel-0-no-warm-up-002','-dpdf','-r0','-bestfit')
-print(fig,'/Users/robot/cross_sim/workspace/Chapter02-data/test-simulations-type-A/n_cars_vs_road_length_prescription/junction/junc_30_cars_1500_m_0_02_zoomed','-dpdf','-r0','-bestfit')
+% print(fig,'/Users/robot/cross_sim/workspace/Chapter02-data/test-simulations-type-A/n_cars_vs_road_length_prescription/junction/junc_30_cars_1500_m_0_02_zoomed','-dpdf','-r0','-bestfit')
+print(fig,'/Users/robot/cross_sim/@microSim/Single_Arm/TwoScenarios','-dpdf','-r0','-bestfit')
 
 %%
 
@@ -214,6 +215,10 @@ function plot_spatiotemporal_profiles(sim,transCut,t_rng,nIterations,d)
 
     maxVelocity = 13;
     for iCar = 1:sim.horizArm.numCars
+        %     X = [X sim.horizArm.carHistory(iCar).History(1,1:d:end)];
+        %     Y = [Y sim.horizArm.carHistory(iCar).History(2,1:d:end)];
+        %     Z = [Z sim.horizArm.carHistory(iCar).History(3,1:d:end)];
+        %
         X = [X t_rng(1:d:end)];
         Y = [Y sim.horizArm.allCars(iCar).History(1,1:d:end)];
         Z = [Z sim.horizArm.allCars(iCar).History(2,1:d:end)];
@@ -223,24 +228,28 @@ function plot_spatiotemporal_profiles(sim,transCut,t_rng,nIterations,d)
     Y1 = [];
     Z1 = [];
     for iCar = 1:sim.vertArm.numCars
+        %     X1 = [X1 sim.vertArm.carHistory(iCar).History(1,1:d:end)];
+        %     Y1 = [Y1 sim.vertArm.carHistory(iCar).History(2,1:d:end)];
+        %     Z1 = [Z1 sim.vertArm.carHistory(iCar).History(3,1:d:end)];
+        %
         X1 = [X1 t_rng(1:d:end)];
         Y1 = [Y1 sim.vertArm.allCars(iCar).History(1,1:d:end)];
         Z1 = [Z1 sim.vertArm.allCars(iCar).History(2,1:d:end)];
     end
     
 %     ax1 = subplot(2,1,1);
-    figure(1);
+    figure()
     ax1 = axes;
     
     
-%     set(ax1);
+    set(ax1)
 %     title(ax1,'East Arm')
-    xlabel(ax1,'Time (s)');
-    ylabel(ax1,'Displacement ($\mathrm{m}$)');
+    xlabel(ax1,'Time ($\mathrm{s}$')
+    ylabel(ax1,'Displacement ($\mathrm{m}$)')
     hold(ax1,'on');
     grid(ax1,'on');
     
-    axis(ax1,[transCut/10 t_rng(nIterations) sim.horizArm.startPoint sim.horizArm.endPoint] );
+    axis(ax1,[transCut/10 t_rng(nIterations) sim.horizArm.startPoint sim.horizArm.endPoint] )
 %     xlim(ax1,[transientCutOffLength t_rng(nIterations)])
     
     caxis manual
@@ -253,47 +262,44 @@ function plot_spatiotemporal_profiles(sim,transCut,t_rng,nIterations,d)
     y = [y1, y1, y2, y2, y1];
     % axis(ax1,[0 t_rng(nIterations) sim.horizArm.startPoint sim.horizArm.endPoint] )
     c = colorbar(ax1);
-    set(c,'YTick',(1:2:maxVelocity));
+    set(c,'YTick',(1:2:maxVelocity))
     c.Label.Interpreter = 'latex';
     c.TickLabelInterpreter = 'latex';
     c.Label.String = 'Velocity ($\mathrm{m/s}$)';
-%     c.Label.FontSize = 14;
+    c.Label.FontSize = 22;
     colormap(flipud(jet));
+%     patch(ax1,x,y,[0.5 0.5 0.5],'EdgeColor','None'); 
     
        
     sz = 4;
-    X(Y> 2.825) = NaN;
-    Z(Y> 2.825) = NaN;
-    Y(Y> 2.825) = NaN;
+%     X(Y> sim.horizArm.allCars(1).s_out) = NaN;
+%     Z(Y> sim.horizArm.allCars(1).s_out) = NaN;
+%     Y(Y> sim.horizArm.allCars(1).s_out) = NaN;
     scatter(ax1,X,Y,sz,Z,'filled');
-%     patch(ax1,x,y,[0.5 0.5 0.5],'EdgeColor','k','FaceColor','None');
-    h1 = patch(ax1,x,y,[0.5 0.5 0.5],'EdgeColor','None');
-    h1.FaceAlpha = 0.5;
-%     return
+    
+     return
     
     
     %%%%%%%%%%%%%% South-North Arm %%%%%%%%%%%%%%
 %     ax2 = subplot(2,1,2);
-    f1 = figure(2);
+    figure()
     ax2 = axes;
-    f1.Visible = 'off';
-%     set(ax2);
+    set(ax2,'FontSize',14)
 %     title(ax2,'North Arm')
-    xlabel(ax2,'Time ($\mathrm{s}$');
-    ylabel(ax2,'Displacement ($\mathrm{m}$)');
+    xlabel(ax2,'Time (s)')
+    ylabel(ax2,'Displacement (m)')
     hold(ax2,'on');
     grid(ax2,'on');
-    axis(ax2,[transCut/10 t_rng(nIterations) sim.vertArm.startPoint sim.vertArm.endPoint] );
+    axis(ax2,[transCut/10 t_rng(nIterations) sim.vertArm.startPoint sim.vertArm.endPoint] )
     
-    caxis manual;
+    caxis manual
     caxis([0 maxVelocity]);
     c = colorbar(ax2);
-    set(c,'YTick',(1:2:maxVelocity));
-    c.Label.Interpreter = 'latex';
-    c.TickLabelInterpreter = 'latex';
-    c.Label.String = 'Velocity ($\mathrm{m/s}$)';
-%     c.Label.FontSize = 14;
+    set(c,'YTick',(1:2:maxVelocity))
+    c.Label.String = 'Velocity (m/s)';
+    c.Label.FontSize = 14;
     colormap(flipud(jet));
+    patch(ax2,x,y,[0.5 0.5 0.5],'EdgeColor','None');
 
 %     figure
 %     ddt = delaunayTriangulation(double(X1'),double(Y1')) ;
@@ -312,13 +318,15 @@ function plot_spatiotemporal_profiles(sim,transCut,t_rng,nIterations,d)
 %     shading interp
     % plot the trajectories
 %     scatter(ax1,X,Y,sz,Z,'filled');
-    X1(Y1> 2.825) = NaN;
-    Z1(Y1> 2.825) = NaN;
-    Y1(Y1> 2.825) = NaN;
-%     scatter(ax2,X1,Y1,sz,Z1,'filled');
+
+
+    X1(Y1> sim.horizArm.allCars(1).s_out) = NaN;
+    Z1(Y1> sim.horizArm.allCars(1).s_out) = NaN;
+    Y1(Y1> sim.horizArm.allCars(1).s_out) = NaN;
     scatter(ax1,X1,-Y1,sz,Z1,'filled');
-    h2 = patch(ax1,x,y,[0.5 0.5 0.5],'EdgeColor','None');
-    h2.FaceAlpha = 0.5;
+%     scatter(ax2,X1,Y1,sz,Z1,'filled');
+
+
 
 %     xlim(ax2,[transientCutOffLength t_rng(nIterations)])
 %     pause(1)
@@ -337,10 +345,10 @@ function plot_aggregated_flow(sim,transCut,density,t_rng,nIterations)
 velArrayEast = NaN(sim.horizArm.numCars,nIterations);
 velArrayNorth = NaN(sim.vertArm.numCars,nIterations);
 for iCar = 1:sim.horizArm.numCars
-    velArrayEast(iCar,:) = sim.horizArm.allCars(iCar).History(2,transCut+1:end);
+    velArrayEast(iCar,:) = sim.horizArm.allCars(iCar).History(3,transCut+1:end);
 end
 for iCar = 1:sim.vertArm.numCars
-    velArrayNorth(iCar,:) = sim.vertArm.allCars(iCar).History(2,transCut+1:end);
+    velArrayNorth(iCar,:) = sim.vertArm.allCars(iCar).History(3,transCut+1:end);
 end
 meanVelArrayEast = mean(velArrayEast,1);
 meanVelArrayNorth = mean(velArrayNorth,1);
@@ -368,21 +376,15 @@ figure()
 ax = axes;
 % title(ax3,'Demand')
 xlabel(ax,'Time (s)')
-ylabel(ax,'Flow (veh/hr)')
+ylabel(ax,'Flow (veh/s)')
 hold(ax,'on');
 grid(ax,'on');
-tLength = 3600;
-plot(ax,t_rng,flow.WestEast*tLength,'r-','LineWidth',2)
-plot(ax,t_rng,flow.SouthNorth*tLength,'b-','LineWidth',2)
-[k,q, v] = fundamentaldiagram();
-flowVal = q(abs(k-density(1))<0.00001);
-plot(ax,t_rng,flowVal(1)*ones(1,nIterations)*tLength,'k--','LineWidth',1)
-xlim([0 3600])
+plot(ax,t_rng,flow.WestEast,'LineWidth',2)
+% plot(ax,t_rng,flow.SouthNorth,'LineWidth',1)
 % plot(ax,t_rng,flowDifference,'-b','LineWidth',2)
 % axis(ax,[0 t_rng(nIterations) 0 max(max(flow.WestEast),max(flow.SouthNorth))])
 % legend(ax,'West-East Arm Flow','South-North Arm Flow','Junction Flow','Location','southwest')
-
-legend(ax,'Eastbound arm flow','Northbound arm flow','Steady-state flow at density $\rho=0.02\,\mathrm{veh/m}$','Location','northeast')
+legend(ax,'Junction Demand')
 end
 
 function plot_speed_variance(sim,velArrayEast,velArrayNorth,t_rng,nIterations)
@@ -397,7 +399,7 @@ figure()
 ax = axes;
 % title(ax,'Speed Variance')
 xlabel(ax,'Time (s)')
-ylabel(ax,'Variance $\sigma^{2}\,(m^{2}/s^{2})$)')
+ylabel(ax,'Variance \sigma^{2} (m^{2}/s^{2})')
 hold(ax,'on');
 grid(ax,'on');
 % plot(ax,t_rng,varianceEast,'LineWidth',1)
@@ -438,8 +440,8 @@ for i = 1:2
     k = 1;
     for iCar = 1:arm.numCars
         
-        t_Car  = arm.allCars(iCar).History(1,transCut+1:end);
-        d_Car  = arm.allCars(iCar).History(2,transCut+1:end);
+        t_Car  = t_rng(1,transCut+1:end);
+        d_Car  = arm.allCars(iCar).History(1,transCut+1:end);
         
         idx = find(d_Car>=arm.endPoint);
         idx = [0,idx,nIterations];

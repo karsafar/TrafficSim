@@ -26,7 +26,7 @@ turnTakinglengths = max(cum_count,[],2);
 [k,q, v] = fundamentaldiagram();
 maxCrosses = 2*q*t_rng(end);
 nCars = 10:2:30;
-for i = 1:21
+for i = 1:51
     iCar = nCars(i);
     [a,idx] = ismember(round(dens(1,i),5),round(k,5));
     normData(i,:) = turnTakinglengths(i,:)./maxCrosses(idx);
@@ -53,17 +53,18 @@ hold on
 plot(ax3,k_new,q*3600,'-','Color',[0.5 0.5 0.5 ],'LineWidth',2,'DisplayName','Findamental Diagram of Single Arm')
 % view([90 -90])
 
-
+%%
+ax3 = axes;
 xRange = dens(1,:);
-boxplot(ax3,turnTakinglengths',xRange)
+boxplot(ax3,turnTakinglengths'*10,xRange)
 ylabel('Capacity Q (veh/hr)','FontSize',14)
 xlabel('Density \rho (veh/m)','FontSize',14)
-xticks('auto')
-xticklabels({'0.022','0.026','0.030','0.034','0.038','0.042','0.046','0.050','0.054','0.058'})
+% xticks('auto')
+% xticklabels({'0.022','0.026','0.030','0.034','0.038','0.042','0.046','0.050','0.054','0.058'})
 
 % % xticks(1:1:20)
 % xticklabels(string([0.02:0.01:0.06]))
 grid on
 hold on
-ylim([0 3000])
+% ylim([0 3000])
 

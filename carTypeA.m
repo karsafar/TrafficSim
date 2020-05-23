@@ -53,29 +53,29 @@ classdef carTypeA < IdmModel
             obj.bb.add_item('futureMinGap',0);
             obj.bb.add_item('futureGap',1e5);
             obj.bb.add_item('CarsOpposite',true);
-            obj.bb.add_item('backOffTime',false);
+            obj.bb.add_item('backOffTime',-1);
             obj.bb.add_item('t',0);
             obj.bb.add_item('isDeadlock',false);
             obj.bb.add_item('Zero',0);
             obj.bb.add_item('frontCarPassedJunction',false);
             
-            obj.bbValues.A                      = obj.bb.A;
-            obj.bbValues.Afollow                = obj.bb.Afollow;
-            obj.bbValues.AemergStop             = obj.bb.AemergStop;
-            obj.bbValues.AjuncStop              = obj.bb.AjuncStop;
-            obj.bbValues.Aahead                 = obj.bb.Aahead;
-            obj.bbValues.canPassAhead           = obj.bb.canPassAhead;
-            obj.bbValues.canPassBehind          = obj.bb.canPassBehind;
-            obj.bbValues.distToJunc             = obj.bb.distToJunc;
-            obj.bbValues.comfDistToJunc         = obj.bb.comfDistToJunc;
-            obj.bbValues.minStopDistToJunc      = obj.bb.minStopDistToJunc;
-            obj.bbValues.futureMinGap           = obj.bb.futureMinGap;
-            obj.bbValues.futureGap              = obj.bb.futureGap;
-            obj.bbValues.CarsOpposite           = obj.bb.CarsOpposite;
-            obj.bbValues.backOffTime            = obj.bb.backOffTime;
-            obj.bbValues.t                      = obj.bb.t;
-            obj.bbValues.isDeadlock             = obj.bb.isDeadlock;
-            obj.bbValues.frontCarPassedJunction = obj.bb.frontCarPassedJunction;
+            obj.bbValues.A                      = [];
+            obj.bbValues.Afollow                = [];
+            obj.bbValues.AemergStop             = [];
+            obj.bbValues.AjuncStop              = [];
+            obj.bbValues.Aahead                 = [];
+            obj.bbValues.canPassAhead           = [];
+            obj.bbValues.canPassBehind          = [];
+            obj.bbValues.distToJunc             = [];
+            obj.bbValues.comfDistToJunc         = [];
+            obj.bbValues.minStopDistToJunc      = [];
+            obj.bbValues.futureMinGap           = [];
+            obj.bbValues.futureGap              = [];
+            obj.bbValues.CarsOpposite           = [];
+            obj.bbValues.backOffTime            = [];
+            obj.bbValues.t                      = [];
+            obj.bbValues.isDeadlock             = [];
+            obj.bbValues.frontCarPassedJunction = [];
             
             %% 'Follow Front Car' Tree
             obj.cond1 = ConditionNode(obj.bb.CarsOpposite == 0,'CarsOpposite == 0');
@@ -170,10 +170,10 @@ classdef carTypeA < IdmModel
                 if s < s_out  && ~isnan(obj.t_out_self) && obj.Prev.pose(1) ~= s
                     sPrev = obj.Prev.pose(1);
                     vPrev = obj.Prev.velocity;
-                    if sPrev > s_in
-                        futureGap = (sPrev + vPrev*(obj.t_out_self-(t+dt))) - s_out;
+                    if sPrev > s %sPrev > s_in
+                        futureGap = (sPrev + max(0,vPrev*(obj.t_out_self-(t+dt)))) - s_out;
                     elseif sPrev < s_in && sPrev < s
-                        futureGap = (sPrev + roadLength + vPrev*(obj.t_out_self-(t+dt))) - s_out;
+                        futureGap = (sPrev + roadLength + max(0,vPrev*(obj.t_out_self-(t+dt)))) - s_out;
                     else
                         futureGap = 0;
                     end
@@ -242,7 +242,7 @@ classdef carTypeA < IdmModel
                 if s > s_in && s < s_out
                     isEnoughGapAhead = 1;
                 else
-                    isEnoughGapAhead = (t_in_op-t_min > obj.t_in_self);
+                    isEnoughGapAhead = (t_in_op-t_min > obj.t_out_self);
                 end
                 
                 % 1 - enough gap between current leaving and next car entering junction
@@ -255,7 +255,7 @@ classdef carTypeA < IdmModel
                 %% %%%%%%%%
                 % 1 - passed, 0 - not passed
                 isFrontCarPassedJunction = (obj.Prev.pose(1) == s || obj.Prev.pose(1) > obj.Prev.ownDistfromRearToBack  || obj.Prev.pose(1) < s);
-                
+                 
                 %% Update values of the Blackboard
                 
                 
@@ -273,15 +273,16 @@ classdef carTypeA < IdmModel
                 blackBorad.CarsOpposite = any(oppositeDistToJunc > 0);
                 timeDiff = blackBorad.backOffTime - t;
                 % 1 - if both cars stopped; 0 - if either or both move
-                if timeDiff < 0
-                    if (abs(v) < 0.01 && abs(selfDistToJunc) < 1 &&...
-                            abs(oppositeCars(ind).velocity) < 0.01 && abs(s_op(ind)-obj.s_in) < 1)
+                if timeDiff < -1e-5
+                    if (abs(v) < 1e-10 && abs(selfDistToJunc) < 0.1001 &&...
+                            abs(oppositeCars(ind).velocity) < 1e-10 && abs(s_op(ind)-obj.s_in) < 0.1001)
                         blackBorad.isDeadlock = true;
-                        blackBorad.backOffTime = t + (randi(21)-1)/(1/dt);
+                        blackBorad.backOffTime = t + (randi(51)-1)/(1/dt);
                         
                     end
-                elseif timeDiff == 0
+                elseif (abs(timeDiff) < 5e-2) || (abs(oppositeCars(ind).velocity) > 0.5 && blackBorad.isDeadlock)
                     blackBorad.isDeadlock = false;
+                    blackBorad.backOffTime = -1;
                 end
                 blackBorad.t = t;
                 blackBorad.frontCarPassedJunction = isFrontCarPassedJunction;
@@ -384,13 +385,13 @@ classdef carTypeA < IdmModel
                 d_out = crossingEnd - s;
             end
             
-            if  nargin == 7
+            if  nargin == 7 % includes error tolerance for comp vehice 
                 % opposite car time gap
                 t_in = d_in/v + t;
                 t_out = d_out/v + t;
             else
                 % self time gap
-                if obj.tol < abs(a)
+                if abs(v) < 0.3 % 2 time steps vehicle uses accel to enter junction  
                     v_f_in = min(obj.maximumVelocity,sqrt(max(0,v^2 + 2*a*d_in)));
                     v_f_out = min(obj.maximumVelocity,sqrt(max(0,v^2 + 2*a*d_out)));
                     
@@ -403,27 +404,21 @@ classdef carTypeA < IdmModel
             end
         end
         function calculate_junc_accel(obj,varargin)
-            %             roadLength = varargin{1};
-%             if nargin == 2
-%                 stop_flag = 0;
-%                 junc_flag = 0;
-%                 emerg_flag = 0;
-%             else
-            if varargin{2} == 1
+            if varargin{2} == 1     % emergency stop at junction
                 stop_flag = 1;
                 junc_flag = 0;
                 emerg_flag = 0;
-            elseif varargin{2} == 2
+            elseif varargin{2} == 2 % normal junction stop
                 stop_flag = 0;
                 junc_flag = 1;
                 emerg_flag = 0;
-            else
+            else                    % emergency stop if not in junction
                 stop_flag = 0;
                 junc_flag = 0;
                 emerg_flag = 1;
             end
             
-            if stop_flag || junc_flag
+            if stop_flag || junc_flag 
                 s = obj.s_in - obj.pose(1);
                 dV = obj.velocity;
             elseif obj.leaderFlag == 0
@@ -436,17 +431,12 @@ classdef carTypeA < IdmModel
             
             intelligentBreaking = obj.velocity*obj.timeGap + (obj.velocity*dV)/(2*sqrt(obj.a*obj.b));
             
-            %             if stop_flag ||  junc_flag
-            %                 s_star = 0.1 + max(0,intelligentBreaking);
-            %             else
-            %                 s_star = obj.minimumGap + max(0,intelligentBreaking);
-            %             end
-            %
-            if stop_flag
-                s_star = 1 + max(0,intelligentBreaking);
-            elseif junc_flag
-                s_star = 0.5 + max(0,intelligentBreaking);
-            else
+
+            if stop_flag % emergency stop at junction
+                s_star = 0.1 + max(0,intelligentBreaking);
+            elseif junc_flag % normal stop at junction
+                s_star = 0.1 + max(0,intelligentBreaking);
+            else % emergency stop if not in junction
                 s_star = obj.minimumGap + max(0,intelligentBreaking);
             end
             
@@ -457,24 +447,17 @@ classdef carTypeA < IdmModel
             
             obj.juncAccel = obj.a*(1 - (velDif)^obj.delta - (s_star/s)^2);
             
+            % use lennard-jones if exceeded a_feas_min = 9 m/s^2
             if obj.juncAccel < obj.a_feas_min
                 if (emerg_flag || stop_flag)
                     obj.juncAccel = -Lennard_Jones(s ,obj.a_feas_min);
                 else
+                    % BT logic excludes this from happening
+                    % !! Test if ever get here !!
                     obj.juncAccel =  obj.a_feas_min;
                 end
             end
-            
-%             % 'r' is gap 's'
-%             if obj.a < 1.5
-%                 lennardJones = 1*((0.3/s)^6-(.25/s)^6);
-%             else
-%                 lennardJones = 1*((0.3/s)^6-(.25/s)^6);
-%             end
-%             if obj.juncAccel < obj.a_feas_min
-%                 obj.juncAccel = obj.a_feas_min-lennardJones;
-%             end
-            
+
         end
     end
 end

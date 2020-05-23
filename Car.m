@@ -60,8 +60,20 @@ classdef Car < dlnode & matlab.mixin.Copyable
         function move_car(obj,dt)
             vel_prev = obj.velocity;
             vel_new = vel_prev + obj.acceleration*dt;
-            obj.velocity = vel_new;
-            obj.pose(1) = obj.pose(1) + 0.5*(vel_prev + vel_new)*dt;
+            % removes velocity oscillations near zero
+            if vel_new > 1e-5
+                obj.velocity = vel_new;
+            else
+                obj.velocity = 0;
+            end
+            
+            % prevents ever-reducing movements when near stopped 
+            if vel_new > 1e-5
+                obj.pose(1) = obj.pose(1) + 0.5*(vel_prev + vel_new)*dt;
+            elseif vel_new < eps && obj.acceleration < 0
+                obj.acceleration = 0;
+            end
+            
         end
         function update_velocity(obj,dt)
             obj.velocity = obj.velocity + 0.5*(obj.tempAccel+obj.acceleration)*dt;
@@ -80,7 +92,9 @@ classdef Car < dlnode & matlab.mixin.Copyable
         end
         function check_for_negative_velocity(obj,dt)
             if (obj.velocity + obj.acceleration*dt) < 0
-                if obj.velocity == 0
+                % prevents velocity from getting into negative and
+                % oscillations near zero
+                if obj.velocity < 1e-5
                     obj.acceleration = 0;
                 else
                     obj.acceleration = - obj.velocity/dt;
