@@ -60,20 +60,21 @@ classdef Car < dlnode & matlab.mixin.Copyable
         function move_car(obj,dt)
             vel_prev = obj.velocity;
             vel_new = vel_prev + obj.acceleration*dt;
+            
             % removes velocity oscillations near zero
-            if vel_new > 1e-5
+            v_tol = 3e-2;
+            if vel_new > v_tol
                 obj.velocity = vel_new;
             else
                 obj.velocity = 0;
             end
             
-            % prevents ever-reducing movements when near stopped 
-            if vel_new > 1e-5
-                obj.pose(1) = obj.pose(1) + 0.5*(vel_prev + vel_new)*dt;
-            elseif vel_new < eps && obj.acceleration < 0
+            % don't update position if acceleration is negative near zero
+            if obj.velocity < v_tol && obj.acceleration <= 0
                 obj.acceleration = 0;
+            else
+                obj.pose(1) = obj.pose(1) + 0.5*(vel_prev + vel_new)*dt;
             end
-            
         end
         function update_velocity(obj,dt)
             obj.velocity = obj.velocity + 0.5*(obj.tempAccel+obj.acceleration)*dt;
@@ -91,17 +92,13 @@ classdef Car < dlnode & matlab.mixin.Copyable
 %             assert(obj.acceleration >=(obj.a_feas_min - tolerance) && obj.acceleration <= (tolerance + obj.a_max) ,'Acceleration contraints are violated');            
         end
         function check_for_negative_velocity(obj,dt)
+            
             if (obj.velocity + obj.acceleration*dt) < 0
-                % prevents velocity from getting into negative and
-                % oscillations near zero
-                if obj.velocity < 1e-5
-                    obj.acceleration = 0;
-                else
-                    obj.acceleration = - obj.velocity/dt;
-                end
+                obj.acceleration = - obj.velocity/dt;
             elseif (obj.velocity + obj.acceleration*dt) > obj.maximumVelocity
                 obj.acceleration = (obj.maximumVelocity - obj.velocity)/dt;
             end
+            
         end
     end
 end

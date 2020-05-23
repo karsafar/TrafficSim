@@ -391,7 +391,7 @@ classdef carTypeA < IdmModel
                 t_out = d_out/v + t;
             else
                 % self time gap
-                if abs(v) < 0.3 % 2 time steps vehicle uses accel to enter junction  
+                if abs(v) <= 0.5 % 5 time steps vehicle uses accel to enter junction  
                     v_f_in = min(obj.maximumVelocity,sqrt(max(0,v^2 + 2*a*d_in)));
                     v_f_out = min(obj.maximumVelocity,sqrt(max(0,v^2 + 2*a*d_out)));
                     
@@ -412,7 +412,7 @@ classdef carTypeA < IdmModel
                 stop_flag = 0;
                 junc_flag = 1;
                 emerg_flag = 0;
-            else                    % emergency stop if not in junction
+            else                    % emergency stop without colliding with lead-car
                 stop_flag = 0;
                 junc_flag = 0;
                 emerg_flag = 1;
@@ -445,8 +445,12 @@ classdef carTypeA < IdmModel
                 velDif = 1;
             end
             
-            obj.juncAccel = obj.a*(1 - (velDif)^obj.delta - (s_star/s)^2);
-            
+            % don't move closer to junction if already stopped near it
+            if obj.acceleration == 0 && obj.velocity == 0 && s<0.2
+                obj.juncAccel
+            else
+                obj.juncAccel = obj.a*(1 - (velDif)^obj.delta - (s_star/s)^2);
+            end
             % use lennard-jones if exceeded a_feas_min = 9 m/s^2
             if obj.juncAccel < obj.a_feas_min
                 if (emerg_flag || stop_flag)
