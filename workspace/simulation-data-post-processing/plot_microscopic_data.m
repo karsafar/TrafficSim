@@ -268,7 +268,7 @@ function plot_spatiotemporal_profiles(sim,transCut,t_rng,nIterations,d)
     scatter(ax1,X,Y,sz,Z,'filled');
 %     patch(ax1,x,y,[0.5 0.5 0.5],'EdgeColor','k','FaceColor','None');
     h1 = patch(ax1,x,y,[0.5 0.5 0.5],'EdgeColor','None');
-    h1.FaceAlpha = 0.5;
+    h1.FaceAlpha = 0.4;
 %     return
     
     
@@ -318,7 +318,7 @@ function plot_spatiotemporal_profiles(sim,transCut,t_rng,nIterations,d)
 %     scatter(ax2,X1,Y1,sz,Z1,'filled');
     scatter(ax1,X1,-Y1,sz,Z1,'filled');
     h2 = patch(ax1,x,y,[0.5 0.5 0.5],'EdgeColor','None');
-    h2.FaceAlpha = 0.5;
+    h2.FaceAlpha = 0.4;
 
 %     xlim(ax2,[transientCutOffLength t_rng(nIterations)])
 %     pause(1)

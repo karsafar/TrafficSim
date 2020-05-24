@@ -191,7 +191,7 @@ classdef carTypeA < IdmModel
                 
                 %% Min stop gap
                 % 8 inputs. find out if this is the best way
-                minStopDistGapToJunc = calc_safe_gap(obj.a,obj.b,v,v0,obj.timeGap,0,obj.delta,obj.a_min);
+                minStopDistGapToJunc = calc_safe_gap(obj.a,obj.b,v,v0,obj.timeGap,0,obj.delta,obj.a_feas_min);
                 
                 %% longic for junc stop
                 calculate_junc_accel(obj,roadLength,2)
@@ -447,7 +447,7 @@ classdef carTypeA < IdmModel
             
             % don't move closer to junction if already stopped near it
             if obj.acceleration == 0 && obj.velocity == 0 && s<0.2
-                obj.juncAccel
+                obj.juncAccel = 0;
             else
                 obj.juncAccel = obj.a*(1 - (velDif)^obj.delta - (s_star/s)^2);
             end
