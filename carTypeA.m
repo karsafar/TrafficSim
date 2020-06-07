@@ -238,7 +238,7 @@ classdef carTypeA < IdmModel
                 t_in_next(t_in_next == t_in_op && oppositeRoad.numCars == 1) = 1e5;
                 
                 % 1 - enough gap to go ahead of competing car
-                t_min = 0; % 2 seconds gap acceptance rule
+                t_min = getappdata(0,'t_min'); % 2 seconds gap acceptance rule
                 if s > s_in && s < s_out
                     isEnoughGapAhead = 1;
                 else
