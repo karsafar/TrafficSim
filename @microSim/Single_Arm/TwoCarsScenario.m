@@ -18,14 +18,13 @@ t = tiledlayout(3,1);
 xlabel(t,'Time (s)','Interpreter','latex','FontSize',22)
 
 xA = 0; xB = t_rng(end);
-yA = road.Start(1); yB = 10;
+yA = road.Start(1)-5; yB = road.End(1)+5;
 
 % plot displacements
 % Tile 3
 nexttile(t)
 plot(t_rng, singleRoad.allCars(1).History(1,:),'r-*',...
-     t_rng, singleRoad.allCars(2).History(1,:),'g-^',...
-     t_rng, singleRoad.allCars(3).History(1,:),'b-o','LineWidth',1)
+     t_rng, singleRoad.allCars(2).History(1,:),'b-o','LineWidth',1)
 % xlabel('Time (s)', 'FontSize',20,'Interpreter','latex')
 ylabel('Displacement ($\mathrm{m}$)')
 hold on
@@ -40,7 +39,7 @@ hold on
 xlim([xA xB])
 ylim([yA yB])
 
-lgd = legend('Vehicle 1','Vehicle 2','Vehicle 3','Location','northoutside','Orientation','horizontal');
+lgd = legend('Vehicle 1','Vehicle 2','Location','northoutside','Orientation','horizontal');
 
 
 
@@ -48,8 +47,7 @@ lgd = legend('Vehicle 1','Vehicle 2','Vehicle 3','Location','northoutside','Orie
 % Tile 2
 nexttile(t)
 plot(t_rng, singleRoad.allCars(1).History(2,:),'r-*',...
-     t_rng, singleRoad.allCars(2).History(2,:),'g-^',...
-     t_rng, singleRoad.allCars(3).History(2,:),'b-o','LineWidth',1)
+     t_rng, singleRoad.allCars(2).History(2,:),'b-o','LineWidth',1)
 % xlabel('Time (s)', 'FontSize',20,'Interpreter','latex')
 ylabel('Velocity ($\mathrm{m/s}$)')
 hold on
@@ -68,8 +66,7 @@ xlim([xA xB])
 % Tile 1
 nexttile(t)
 plot(t_rng, singleRoad.allCars(1).History(3,:),'r-*',...
-     t_rng, singleRoad.allCars(2).History(3,:),'g-^',...
-     t_rng, singleRoad.allCars(3).History(3,:),'b-o','LineWidth',1)
+     t_rng, singleRoad.allCars(2).History(3,:),'b-o','LineWidth',1)
 
 % xlabel('Time (s)', 'FontSize',20,'Interpreter','latex')
 ylabel('Acceleration ($\mathrm{m/s^2}$)')
@@ -124,7 +121,7 @@ fig.PaperPosition;
 fig_pos = fig.PaperPosition;
 fig.PaperSize = [fig_pos(3) fig_pos(4)];
 % print(fig,'/Users/robot/cross_sim/workspace/Chapter02-data/test-simulations-type-A/n_cars_vs_road_length_prescription/no_junction/IDM_verification/Accel_emerg_stop','-dpdf','-r0','-bestfit')
-print(fig,'3CarsStop','-dpdf','-r0','-bestfit')
+print(fig,'TwoCarsScenario','-dpdf','-r0','-bestfit')
 
 %% create an array of actions taken every time step by each car
 function actArray = act_mat2array(arm,n)

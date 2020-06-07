@@ -27,15 +27,25 @@ for iCar = 1:sim.vertArm.numCars
 end
 
 
-%% Spatiotenporal Velocity Profiles
+% Spatiotenporal Velocity Profiles
 
-d = 2; % density on points in scatter plot
+d = 1; % density on points in scatter plot
 plot_spatiotemporal_profiles(sim,transCut,t_rng(transCut+1:end),(nIterations-transCut),d)
 
+% saving figure as a PDF
+% xlim([1000 1500])
+fig = gcf;
+fig.PaperPositionMode = 'auto';
+fig.PaperPosition;
+fig_pos = fig.PaperPosition;
+fig.PaperSize = [fig_pos(3) fig_pos(4)];
+% print(fig,'/Users/robot/cross_sim/workspace/Chapter03-data/junction-flow-change-sym-1-vel-0-no-warm-up-002','-dpdf','-r0','-bestfit')
+% print(fig,'/Users/robot/cross_sim/workspace/Chapter02-data/test-simulations-type-A/n_cars_vs_road_length_prescription/junction/junc_30_cars_1500_m_0_02_zoomed','-dpdf','-r0','-bestfit')
+print(fig,'rand004-6min-a-05','-dpdf','-r0','-bestfit')
 
 %% flow change
 
-plot_flow_change(velArrayEast,velArrayNorth,density,t_rng(transCut+1:end),(nIterations-transCut))
+% plot_flow_change(velArrayEast,velArrayNorth,density,t_rng(transCut+1:end),(nIterations-transCut))
 
 %% Flow
 
@@ -47,19 +57,10 @@ plot_speed_variance(sim,velArrayEast,velArrayNorth,t_rng(transCut+1:end),(nItera
 
 %% Time-Displacement
 
-split_trajectory_profiles(sim,transCut,t_rng(transCut+1:end),(nIterations-transCut))
+% split_trajectory_profiles(sim,transCut,t_rng(transCut+1:end),(nIterations-transCut))
 
 
-%% saving figure as a PDF
-% xlim([1000 1500])
-fig = gcf;
-fig.PaperPositionMode = 'auto';
-fig.PaperPosition;
-fig_pos = fig.PaperPosition;
-fig.PaperSize = [fig_pos(3) fig_pos(4)];
-% print(fig,'/Users/robot/cross_sim/workspace/Chapter03-data/junction-flow-change-sym-1-vel-0-no-warm-up-002','-dpdf','-r0','-bestfit')
-print(fig,'/Users/robot/cross_sim/workspace/Chapter02-data/test-simulations-type-A/n_cars_vs_road_length_prescription/junction/junc_30_cars_1500_m_0_02_zoomed','-dpdf','-r0','-bestfit')
-
+%
 %%
 
 % %% Time-Displacement
@@ -149,7 +150,6 @@ legend('East-bound Arm Flow','North-bound Arm Flow','Junction Flow');
 e = diff(northArm.flowChange*3600);
 n = diff(eastArm.flowChange*3600);
 j = diff(junction.flowChange*3600);
-end
 %{
 %% occupancy pre-junction
 numNaN = sum(isnan(sim.horizArm.averageVelocityHistory));
@@ -201,6 +201,7 @@ grid('on');
 plot(t_rng,East.Occupancy,'-r','LineWidth',1)
 plot(t_rng,North.Occupancy,'-b','LineWidth',1)
 %}
+end
 function plot_spatiotemporal_profiles(sim,transCut,t_rng,nIterations,d)
 %%%%%%%%%%%%%% West-East Arm %%%%%%%%%%%%%%
 % for i = 1:48
@@ -363,9 +364,10 @@ flow.SouthNorth = density(2)*cumulativeAverage(2,:);
 
 flowDifference = abs(flow.WestEast + flow.SouthNorth)/2;
 
-figure()
+figure(3)
 % ax3 = subplot(2,1,1);
 ax = axes;
+cla(ax)
 % title(ax3,'Demand')
 xlabel(ax,'Time (s)')
 ylabel(ax,'Flow (veh/hr)')
@@ -378,11 +380,12 @@ plot(ax,t_rng,flow.SouthNorth*tLength,'b-','LineWidth',2)
 flowVal = q(abs(k-density(1))<0.00001);
 plot(ax,t_rng,flowVal(1)*ones(1,nIterations)*tLength,'k--','LineWidth',1)
 xlim([0 3600])
+ylim([0 flowVal(1)*tLength+100])
 % plot(ax,t_rng,flowDifference,'-b','LineWidth',2)
 % axis(ax,[0 t_rng(nIterations) 0 max(max(flow.WestEast),max(flow.SouthNorth))])
 % legend(ax,'West-East Arm Flow','South-North Arm Flow','Junction Flow','Location','southwest')
 
-legend(ax,'Eastbound arm flow','Northbound arm flow','Steady-state flow at density $\rho=0.02\,\mathrm{veh/m}$','Location','northeast')
+legend(ax,'Eastbound arm flow','Northbound arm flow','Steady-state flow at density $\rho=0.04\,\mathrm{veh/m}$','Location','southeast')
 end
 
 function plot_speed_variance(sim,velArrayEast,velArrayNorth,t_rng,nIterations)
@@ -397,21 +400,21 @@ figure()
 ax = axes;
 % title(ax,'Speed Variance')
 xlabel(ax,'Time (s)')
-ylabel(ax,'Variance $\sigma^{2}\,(m^{2}/s^{2})$)')
+ylabel(ax,'Speed variance $\sigma^{2}\,(\mathrm{m^{2}/s^{2}})$')
 hold(ax,'on');
 grid(ax,'on');
-% plot(ax,t_rng,varianceEast,'LineWidth',1)
-% plot(ax,t_rng,varianceNorth,'LineWidth',1)
-plot(ax,t_rng,varianceJunciton,'LineWidth',2)
+plot(ax,t_rng,varianceEast,'r-*','LineWidth',1)
+plot(ax,t_rng,varianceNorth,'b-o','LineWidth',1)
+% plot(ax,t_rng,varianceJunciton,'LineWidth',2)
 
 if max(max(varianceEast),max(varianceNorth)) > 0
     axis(ax,[0 t_rng(nIterations) 0 max(max(varianceEast),max(varianceNorth))])
 else
     xlim(ax,[0 t_rng(nIterations)])
 end
-% legend(ax,'West-East Arm Flow','South-North Arm Flow','Junction Variance')
+legend(ax,'Eastbound arm variance','Northbound arm variance')
 
-legend(ax,'Junction Average Speed Variance')
+% legend(ax,'Junction Average Speed Variance')
 end
 
 function split_trajectory_profiles(sim,transCut,t_rng,nIterations)
@@ -466,6 +469,7 @@ end
 
 
 %% ---!!!! I don't need this !!!!---
+%{
 function plot_individual_profiles(sim,nIterations)
 %% plot individual car profiles 
 i = 1;
@@ -562,3 +566,4 @@ end
 legend([h1,h2],'East Arm','North Arm')
 axis(ax,[0 t_rng(nIterations) sim.vertArm.startPoint sim.vertArm.endPoint] )
 end
+%}

@@ -59,7 +59,8 @@ fig_pos = fig.PaperPosition;
 fig.PaperSize = [fig_pos(3) fig_pos(4)];
 % print(fig,'/Users/robot/cross_sim/workspace/Chapter03-data/junction-flow-change-sym-1-vel-0-no-warm-up-002','-dpdf','-r0','-bestfit')
 % print(fig,'/Users/robot/cross_sim/workspace/Chapter02-data/test-simulations-type-A/n_cars_vs_road_length_prescription/junction/junc_30_cars_1500_m_0_02_zoomed','-dpdf','-r0','-bestfit')
-print(fig,'/Users/robot/cross_sim/@microSim/Single_Arm/TwoScenarios','-dpdf','-r0','-bestfit')
+% print(fig,'/Users/robot/cross_sim/@microSim/Single_Arm/TwoScenarios','-dpdf','-r0','-bestfit')
+print(fig,'randArm4cars003dens1hourFLow','-dpdf','-r0','-bestfit')
 
 %%
 
@@ -139,17 +140,22 @@ junction.flowChange = mean([eastArm.flowChange;northArm.flowChange]);
 
 figure()
 ax4 = axes;
-plot(ax4,t_rng,eastArm.flowChange*3600,'r-',...
-         t_rng,northArm.flowChange*3600,'b-',...
-         t_rng,junction.flowChange*3600,'g-','LineWidth',2)
-xlabel(ax4,'Time (s)')
-ylabel(ax4,'Flow Change (veh/hr)')
-xlim([1000 1500])
-ylim([0 max(max(eastArm.flowChange*3600),max(northArm.flowChange*3600))])
-legend('East-bound Arm Flow','North-bound Arm Flow','Junction Flow');
-e = diff(northArm.flowChange*3600);
-n = diff(eastArm.flowChange*3600);
-j = diff(junction.flowChange*3600);
+% plot(ax4,t_rng,eastArm.flowChange*3600,'r-',...
+%          t_rng,northArm.flowChange*3600,'b-',...
+%          t_rng,junction.flowChange*3600,'g-','LineWidth',2)
+% xlabel(ax4,'Time (s)')
+% ylabel(ax4,'Flow Change (veh/hr)')
+% xlim([1000 1500])
+% ylim([0 max(max(eastArm.flowChange*3600),max(northArm.flowChange*3600))])
+% legend('East-bound Arm Flow','North-bound Arm Flow','Junction Flow');
+% e = diff(northArm.flowChange*3600);
+% n = diff(eastArm.flowChange*3600);
+% j = diff(junction.flowChange*3600);
+plot(ax4,t_rng,eastArm.flowChange*max(t_rng),'b-','LineWidth',1)
+xlabel(ax4,'Time $(\mathrm{s})$')
+ylabel(ax4,'Flow change $(\mathrm{veh/hr})$')
+xlim([0 max(t_rng)])
+ylim([0 max(eastArm.flowChange*max(t_rng))+100])  
 end
 %{
 %% occupancy pre-junction
@@ -238,21 +244,20 @@ function plot_spatiotemporal_profiles(sim,transCut,t_rng,nIterations,d)
     end
     
 %     ax1 = subplot(2,1,1);
-    figure()
+    figure();
     ax1 = axes;
     
     
-    set(ax1)
+%     set(ax1);
 %     title(ax1,'East Arm')
-    xlabel(ax1,'Time ($\mathrm{s}$')
-    ylabel(ax1,'Displacement ($\mathrm{m}$)')
     hold(ax1,'on');
-    grid(ax1,'on');
+    box(ax1,'on')
+%     grid(ax1,'on');
     
-    axis(ax1,[transCut/10 t_rng(nIterations) sim.horizArm.startPoint sim.horizArm.endPoint] )
+    axis(ax1,[transCut/10 t_rng(nIterations) sim.horizArm.startPoint sim.horizArm.endPoint] );
 %     xlim(ax1,[transientCutOffLength t_rng(nIterations)])
     
-    caxis manual
+    caxis manual;
     caxis([0 maxVelocity]);
     x1 = transCut/10;
     x2 = t_rng(nIterations);
@@ -262,7 +267,7 @@ function plot_spatiotemporal_profiles(sim,transCut,t_rng,nIterations,d)
     y = [y1, y1, y2, y2, y1];
     % axis(ax1,[0 t_rng(nIterations) sim.horizArm.startPoint sim.horizArm.endPoint] )
     c = colorbar(ax1);
-    set(c,'YTick',(1:2:maxVelocity))
+    set(c,'YTick',(1:2:maxVelocity));
     c.Label.Interpreter = 'latex';
     c.TickLabelInterpreter = 'latex';
     c.Label.String = 'Velocity ($\mathrm{m/s}$)';
@@ -276,7 +281,8 @@ function plot_spatiotemporal_profiles(sim,transCut,t_rng,nIterations,d)
 %     Z(Y> sim.horizArm.allCars(1).s_out) = NaN;
 %     Y(Y> sim.horizArm.allCars(1).s_out) = NaN;
     scatter(ax1,X,Y,sz,Z,'filled');
-    
+    xlabel(ax1,'Time ($\mathrm{s}$)');
+    ylabel(ax1,'Displacement ($\mathrm{m}$)');
      return
     
     
@@ -345,10 +351,10 @@ function plot_aggregated_flow(sim,transCut,density,t_rng,nIterations)
 velArrayEast = NaN(sim.horizArm.numCars,nIterations);
 velArrayNorth = NaN(sim.vertArm.numCars,nIterations);
 for iCar = 1:sim.horizArm.numCars
-    velArrayEast(iCar,:) = sim.horizArm.allCars(iCar).History(3,transCut+1:end);
+    velArrayEast(iCar,:) = sim.horizArm.allCars(iCar).History(2,transCut+1:end);
 end
 for iCar = 1:sim.vertArm.numCars
-    velArrayNorth(iCar,:) = sim.vertArm.allCars(iCar).History(3,transCut+1:end);
+    velArrayNorth(iCar,:) = sim.vertArm.allCars(iCar).History(2,transCut+1:end);
 end
 meanVelArrayEast = mean(velArrayEast,1);
 meanVelArrayNorth = mean(velArrayNorth,1);
@@ -375,16 +381,19 @@ figure()
 % ax3 = subplot(2,1,1);
 ax = axes;
 % title(ax3,'Demand')
-xlabel(ax,'Time (s)')
-ylabel(ax,'Flow (veh/s)')
-hold(ax,'on');
-grid(ax,'on');
-plot(ax,t_rng,flow.WestEast,'LineWidth',2)
+% hold(ax,'on');
+% grid(ax,'on');
+plot(ax,t_rng,flow.WestEast*max(t_rng),'b-','LineWidth',1)
+xlabel(ax,'Time $(\mathrm{s})$')
+ylabel(ax,'Flow $(\mathrm{veh/hr})$')
+xlim([0 max(t_rng)])
+ylim([0 max(flow.WestEast*max(t_rng))+100])  
+
 % plot(ax,t_rng,flow.SouthNorth,'LineWidth',1)
 % plot(ax,t_rng,flowDifference,'-b','LineWidth',2)
 % axis(ax,[0 t_rng(nIterations) 0 max(max(flow.WestEast),max(flow.SouthNorth))])
 % legend(ax,'West-East Arm Flow','South-North Arm Flow','Junction Flow','Location','southwest')
-legend(ax,'Junction Demand')
+% legend(ax,'Junction Demand')
 end
 
 function plot_speed_variance(sim,velArrayEast,velArrayNorth,t_rng,nIterations)
@@ -398,22 +407,25 @@ varianceJunciton = (varianceEast + varianceNorth)./2;
 figure()
 ax = axes;
 % title(ax,'Speed Variance')
-xlabel(ax,'Time (s)')
-ylabel(ax,'Variance \sigma^{2} (m^{2}/s^{2})')
-hold(ax,'on');
-grid(ax,'on');
-% plot(ax,t_rng,varianceEast,'LineWidth',1)
+
+plot(ax,t_rng,varianceEast,'b-','LineWidth',1)
+xlim([0 max(t_rng)])
+ylim([-0.1 max(varianceEast)])
+xlabel(ax,'Time $(\mathrm{s})$')
+ylabel(ax,'Speed variance $\sigma^2 (\mathrm{m^2/s^2})$')
+% hold(ax,'on');
+% grid(ax,'on');
 % plot(ax,t_rng,varianceNorth,'LineWidth',1)
-plot(ax,t_rng,varianceJunciton,'LineWidth',2)
+% plot(ax,t_rng,varianceJunciton,'LineWidth',1)
 
 if max(max(varianceEast),max(varianceNorth)) > 0
-    axis(ax,[0 t_rng(nIterations) 0 max(max(varianceEast),max(varianceNorth))])
+    axis(ax,[0 t_rng(nIterations) -0.1 max(max(varianceEast),max(varianceNorth))])
 else
     xlim(ax,[0 t_rng(nIterations)])
 end
 % legend(ax,'West-East Arm Flow','South-North Arm Flow','Junction Variance')
 
-legend(ax,'Junction Average Speed Variance')
+% legend(ax,'Junction Average Speed Variance')
 end
 
 function split_trajectory_profiles(sim,transCut,t_rng,nIterations)

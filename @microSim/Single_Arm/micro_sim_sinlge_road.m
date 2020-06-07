@@ -499,6 +499,13 @@ for iIteration = handles.iIteration:nIterations
     % update time
     t = handles.t_rng(iIteration);
     
+    if t == 10
+%         HorizontalArm.allCars(1).velocity = 0;
+        HorizontalArm.allCars(1).targetVelocity = 13;
+%     elseif t == 10
+%         HorizontalArm.allCars(1).targetVelocity = 13;
+    end
+    
     for iCar = 1:HorizontalArm.numCars
         HorizontalArm.allCarsStates(1,iCar) = HorizontalArm.allCars(iCar).pose(1);
         HorizontalArm.allCarsStates(2,iCar) = HorizontalArm.allCars(iCar).velocity;

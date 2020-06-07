@@ -52,9 +52,11 @@ for iIteration = 1:nIterations
     % update time
     t = t_rng(iIteration);
     
-%     % Hand-of-God
-%     if iIteration >= 200 && iIteration <= 250
-%         HorizontalArm.allCars(1).velocity = 0;
+%     % Hand-of-God Disturbances
+%     if t == 1800
+%         for iCar = 1:HorizontalArm.numCars
+%         HorizontalArm.allCars(iCar).targetVelocity = 6.5;
+%         end
 %     end
     
     for iCar = 1:HorizontalArm.numCars
