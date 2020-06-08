@@ -6,9 +6,9 @@ classdef IdmModel < Car & matlab.mixin.Heterogeneous
     properties (SetAccess = public)
         idmAcceleration = NaN
         s = NaN
-        a = 1
-        b = 1.5
-        timeGap  = 1.6 
+        a = getappdata(0,'a_idm');
+        b = 1.5;
+        timeGap  = 1.6;
     end
     properties (Access = public)
         targetVelocity = 13
@@ -17,7 +17,6 @@ classdef IdmModel < Car & matlab.mixin.Heterogeneous
     methods
         function obj = IdmModel(varargin)
             obj = obj@Car(varargin);
-            obj.a = getappdata(0,'maxIdmAccel');
         end
         function calculate_idm_accel(obj,roadLength)
 
