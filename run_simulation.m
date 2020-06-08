@@ -48,6 +48,22 @@ if plotFlag
     drawRate = getappdata(0,'drawRAte');
 end
 t_off = getappdata(0,'t_off');
+
+% minimum gap acceptance
+minTimeGap = getappdata(0,'time_gap_dist'); 
+% maximum deceleration
+a_feas_min = getappdata(0,'MinFeasibleDecel');
+
+% set min gap and max decel
+for iCar = 1:HorizontalArm.numCars
+    HorizontalArm.allCars(iCar).minTimeGap = minTimeGap(iCar);
+    HorizontalArm.allCars(iCar).a_feas_min = a_feas_min(iCar);
+end
+for jCar = 1:VerticalArm.numCars
+    VerticalArm.allCars(jCar).minTimeGap = minTimeGap(iCar+jCar);
+    VerticalArm.allCars(jCar).a_feas_min = a_feas_min(iCar+jCar);
+end
+
 for iIteration = 1:nIterations
     % update time
     t = t_rng(iIteration);

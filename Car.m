@@ -12,7 +12,7 @@ classdef Car < dlnode & matlab.mixin.Copyable
         acceleration = 0.0
         a_max = 3.5
         a_min = -3.5
-        a_feas_min = getappdata(0,'a_feas_min')
+        a_feas_min = -9
         History = []
         historyIndex = 1.0
         leaderFlag = true
