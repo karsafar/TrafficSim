@@ -2,83 +2,96 @@ clear
 close all
 clc
 
-% setup the simulator 
+%% Name the output file
+fnm = sprintf('Density0-1FourCars.mat')
+
+%% define types road and car objects available for simulations
 roadTypes = {@LoopRoad @FiniteRoad};
 carTypes = {@IdmModel, @HdmModel, @carTypeA, @carTypeB, @carTypeC, @carTypeA_old};
 
-plotFlag = false;
-setappdata(0,'drawRAte',1);
+%% set-up flags
+spawnType = 0; % 0 - random; 1 - phased
 
+timeDistFlag = 0; % 1 - is a distribution; 0 - is fixed 
+
+accelFlag = 0;% 1-mix arms; 2 - random arms; 0 - fixed arms
+
+plotFlag = 1; % 0 - don't plot sim, 1- plot sim
+
+singleArmFlag = 0;% 1 - stops plotting north arm, 0 - normal junction plotting
+
+drawRateFlag = 1; % 1 - fast moving objects, 0 - slow moving objects
+
+priority = 0;% 1- east arm has priority, 0 - no priority
+
+selectRoadTypes = [1 1]; % 1-loopToad; 2-finiteRoad
+
+%% simulation resolution
 runTime = 600; % sec
 dt = 0.1;
 nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;
 t_rng = 0:dt:runTime;
 
+%% randomnes of initial positions of vehicles
 fixedSeed = [1 2];
 % seedType = rng('shuffle', 'combRecursive');
-priority = false;
 
+% length of time when junction crossing logic is not used
 transientCutOffLength = 0;
+
+% set movement speed of vehicles
+setappdata(0,'drawRAte',drawRateFlag);
 
 % set a_idm value 
 a_idm = 1.5; %(m/s^2)
 setappdata(0,'maxIdmAccel',a_idm);
 
-% new input parameters
-t_off = 0;
+% don't draw simulation for a given time t_off
+t_off = 0; 
 setappdata(0,'t_off',t_off);
 
-
-spawnType = 0; % 0 - random; 1 - phased
+% initial position and velocity of vehicles
 setappdata(0,'spawnType',spawnType);
 
-
+% [0-1] chance of swap
 swapRate = 0;
-%%
 
-% density = 0.0148;
-density(1) = 0.01;
-density(2) = 0.01;
-
-% Name the output file
-fnm = sprintf('time-gap-variation/rand0010-10min.mat')
+%% density setup
+n_d = 0.05;
+density(1) = n_d; % east arm density
+density(2) = n_d; % north arm density
 
 % dens = 0.002:0.001:0.13;
 % for density = dens
-n = 30;
-nCars(1) = n;
-nCars(2) = n;
+n = 4;
+nCars(1) = n; % east arm num cars
+nCars(2) = n; % north arm num cars
 
-% time gap setup
-distFlag = 1; % 1 - is a distribution; 0 - is fixed 
-if distFlag
-    pd = makedist('Normal','mu',2,'sigma',0.5); % time gap with mean 2 seconds
-    pd = truncate(pd,0,4); % distribution truncated at 0 and 4 seconds
+%% time gap setup
+if timeDistFlag
+    pd = makedist('Uniform','upper',3,'lower',1); % time gap with mean 2 seconds
     timeGapDist = random(pd,2*n,1); % (s)
 else
-    timeGapDist = 2*ones(2*n,1); % (s)
+    timeGapDist = 1*ones(2*n,1); % (s)
 end
 setappdata(0,'time_gap_dist',timeGapDist);
 
-% set maximum feasible decelearion
-mix = 0;% 1-mix arms; 2 - random arms; 0 - fixed arms
-if mix > 0
-    pd = makedist('Normal','mu',-9,'sigma',2); % maximum deceleration with mean -9 m/s^2
-    pd = truncate(pd,-13,-5); % distribution truncated at -13 and -5 m/s^2
-    if mix == 1
+%% set maximum feasible decelearion
+if accelFlag > 0
+    pd = makedist('Uniform','upper',-5,'lower',-13); % maximum deceleration with mean -9 m/s^2
+    if accelFlag == 1
         a_feas_min = random(pd,n,1); % (m/s^2)
         a_feas_min = [a_feas_min; -9*ones(n,1)]; % (m/s^2)
-    elseif mix == 2
+    elseif accelFlag == 2
         a_feas_min = random(pd,2*n,1); % (m/s^2)
     end
-elseif mix == 0
-    a_feas_min = -9*ones(2*n,1); % % (m/s^2)
+elseif accelFlag == 0
+    a_feas_min = -9*ones(2*n,1); % (m/s^2)
 end
-
 setappdata(0,'MinFeasibleDecel',a_feas_min);
 
-% road parameters
+%%  road parameters and density correction
 road.Length = round(nCars./density);  % length is rounded so need to correct the value of density
 half_length = road.Length/2;
 road.Start = [-half_length(:,1); -half_length(:,2)];
@@ -97,16 +110,17 @@ errMess2 = sprintf('North road density has to be <= %.4f', maxDen(2));
 assert(maxDen(1)>=density(1),errMess1);
 assert(maxDen(2)>=density(2),errMess2);
 
-
+% correctedd density according to road length
 density = nCars./road.Length;
 
+%% junction or single road simulations
+setappdata(0,'RoadOrJunctionFlag',singleArmFlag);
+if singleArmFlag
+    density(2) = 0;
+    nCars(2) = 0;
+end
 
-% 1 - stops plotting north arm, 0 - normal junction plotting
-setappdata(0,'RoadOrJunctionFlag',0);
-% density(2) = 0;
-% nCars(2) = 0;
-
-
+%% if phased start, generate equilibrium velocities
 if spawnType
     [k,q,v,~] = fundamentaldiagram();
     stpSz = 10;
@@ -119,10 +133,9 @@ if spawnType
     end
     setappdata(0,'v_euil',vi);
 end
-% end
 
 
-%%
+%% wait bar plotting 
 iIteration = 0;
 if plotFlag == 0 || t_off > 0
     f = waitbar(0,'','Name','Running simulation',...
@@ -130,13 +143,17 @@ if plotFlag == 0 || t_off > 0
     setappdata(f,'canceling',0);
     waitbar(0,f,sprintf('%d percent out of %d iterations',round(iIteration*100/nIterations),nIterations))
 end
-%single simulation flag 
+
+%% single simulation flag 
 setappdata(0,'simType',0);
 
+%% penetration rations of vehicles 
 carTypeRatios = [0 0 1 0 0 0; 0 0 1 0 0 0];
 % carTypeRatios = [0 0 0 1 0 0; 0 0 0 1 0 0];
 % carTypeRatios = [0 0 0 1 0 0; 1 0 0 0 0 0];
 
+
+%% convert penetration ratio into number of cars of each type
 allCarsNumArray_H = zeros(1,numel(carTypes));
 allCarsNumArray_V = zeros(1,numel(carTypes));
 for j = 1:numel(carTypes)
@@ -149,9 +166,7 @@ for j = 1:numel(carTypes)
     end
 end
 
-% 1-loopToad; 2-finiteRoad
-selectRoadTypes = [1 1];
-
+%% generate car objects array for each arm
 if selectRoadTypes(1) == 1
     Arm.H = SpawnCars([{allCarsNumArray_H},fixedSeed(1),{carTypes}],'horizontal',road.Start(1),road.End(1),road.Width(1),dt,nIterations);
 else
@@ -165,7 +180,7 @@ else
     Arm.V = [{carTypeRatios(2,:)},spawnRate,fixedSeed(2),dt,nIterations];
 end
 
-% control random process
+%% control random process
 rng('shuffle', 'combRecursive');
 
 tic
@@ -192,9 +207,7 @@ if plotFlag == 0
     delete(f)
 end
 
-% return
 %% save the simulation results
-% save(['test-' num2str(19) '.mat'],...
 save(fullfile(fnm),...
     'carTypeRatios',...
     'carTypes',...

@@ -29,7 +29,7 @@ end
 
 %% Spatiotenporal Velocity Profiles
 
-d = 1; % density on points in scatter plot
+d = 2; % density on points in scatter plot
 plot_spatiotemporal_profiles(sim,transCut,t_rng(transCut+1:end),(nIterations-transCut),d)
 
 
@@ -60,8 +60,8 @@ fig.PaperSize = [fig_pos(3) fig_pos(4)];
 % print(fig,'/Users/robot/cross_sim/workspace/Chapter03-data/junction-flow-change-sym-1-vel-0-no-warm-up-002','-dpdf','-r0','-bestfit')
 % print(fig,'/Users/robot/cross_sim/workspace/Chapter02-data/test-simulations-type-A/n_cars_vs_road_length_prescription/junction/junc_30_cars_1500_m_0_02_zoomed','-dpdf','-r0','-bestfit')
 % print(fig,'/Users/robot/cross_sim/@microSim/Single_Arm/TwoScenarios','-dpdf','-r0','-bestfit')
-print(fig,'randArm4cars003dens1hourFLow','-dpdf','-r0','-bestfit')
-
+print(fig,'Density0-05FourCars','-dpdf','-r0','-bestfit')
+close all
 %%
 
 % %% Time-Displacement
@@ -273,7 +273,7 @@ function plot_spatiotemporal_profiles(sim,transCut,t_rng,nIterations,d)
     c.Label.String = 'Velocity ($\mathrm{m/s}$)';
     c.Label.FontSize = 22;
     colormap(flipud(jet));
-%     patch(ax1,x,y,[0.5 0.5 0.5],'EdgeColor','None'); 
+    patch(ax1,x,y,[0.5 0.5 0.5],'EdgeColor','None'); 
     
        
     sz = 4;

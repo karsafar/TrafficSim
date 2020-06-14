@@ -39,7 +39,7 @@ idx = 0;
 % xticks(0.02:0.01:0.144)
 % i = 1;
 for a = i
-    % syms a s0 v0 T b delta s dv v l
+%     % syms a s0 v0 T b delta s dv v l
     syms f(h,dv,v)
     
     f(h,dv,v) = a*(1 - (v/v0)^delta - ((s0+T*v-(v*dv)/(2*sqrt(a*b)))/(h-l))^2);
@@ -245,13 +245,13 @@ dvv = NaN(nCars(1),nIterations);
 vv = NaN(nCars(1),nIterations);
 for iCar = 1:nCars(1)
     for j = 1:nIterations
-        ss(iCar,j) = sim.horizArm.allCars(iCar).Prev.History(2,j) - sim.horizArm.allCars(iCar).History(2,j);
+        ss(iCar,j) = sim.horizArm.allCars(iCar).Prev.History(1,j) - sim.horizArm.allCars(iCar).History(1,j);
         if ss(iCar,j) < 0
             ss(iCar,j) = road.Length(1) + ss(iCar,j);
         end
     end
-    dvv(iCar,:) = sim.horizArm.allCars(iCar).Prev.History(3,:) - sim.horizArm.allCars(iCar).History(3,:);
-    vv(iCar,:) = sim.horizArm.allCars(iCar).History(3,:);
+    dvv(iCar,:) = sim.horizArm.allCars(iCar).Prev.History(2,:) - sim.horizArm.allCars(iCar).History(2,:);
+    vv(iCar,:) = sim.horizArm.allCars(iCar).History(2,:);
 end
 
 

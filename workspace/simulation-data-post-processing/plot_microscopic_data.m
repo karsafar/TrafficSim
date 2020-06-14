@@ -29,9 +29,9 @@ end
 
 % Spatiotenporal Velocity Profiles
 
-d = 1; % density on points in scatter plot
+d = 2; % density on points in scatter plot
 plot_spatiotemporal_profiles(sim,transCut,t_rng(transCut+1:end),(nIterations-transCut),d)
-pause(2)
+pause(1)
 % saving figure as a PDF
 % xlim([1000 1500])
 fig = gcf;
@@ -41,7 +41,7 @@ fig_pos = fig.PaperPosition;
 fig.PaperSize = [fig_pos(3) fig_pos(4)];
 % print(fig,'/Users/robot/cross_sim/workspace/Chapter03-data/junction-flow-change-sym-1-vel-0-no-warm-up-002','-dpdf','-r0','-bestfit')
 % print(fig,'/Users/robot/cross_sim/workspace/Chapter02-data/test-simulations-type-A/n_cars_vs_road_length_prescription/junction/junc_30_cars_1500_m_0_02_zoomed','-dpdf','-r0','-bestfit')
-print(fig,'rand0030-20min-t-min-1','-dpdf','-r0','-bestfit')
+print(fig,'non-symmetric-arms-diff','-dpdf','-r0','-bestfit')
 close all
 %% flow change
 
