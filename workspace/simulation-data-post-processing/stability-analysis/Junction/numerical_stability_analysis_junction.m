@@ -4,14 +4,14 @@ close all
 
 %% 
 % load data in the loop
-d = dir('a_idm_*.mat');
-Number_mat = length(d);
+% d = dir('a_idm_*.mat');
+% Number_mat = length(d);
 numCars = [];
 a_val = {'0_5','0_75','1','1_5'};
-for i = 1:Number_mat
+for i = 1:4
     fnm = sprintf('a_idm_%s',a_val{i});
     setUp = sprintf('a_idm_%s_junction',a_val{i});
-    load(fullfile(fnm))   
+    load(fullfile('random',fnm))   
     for j = 1:numel(data)
         numCrosses(i,j) = numel(data(j).crossCount);
     end
@@ -28,9 +28,6 @@ for i = 1:Number_mat
     lgd = legend;
     lgd.Location = 'northoutside';
     lgd.NumColumns = 2;
-    %% Instability border lines (sim vs analyt)
-    % plot the crossings
-    plot(density(1,:),numCrosses(i,:),'r*','LineWidth',1,'DisplayName','Random Set-up')
     % plot assymptote
     Yasymptote = 0:max(ylim);
     if i < 4
@@ -41,8 +38,18 @@ for i = 1:Number_mat
         elseif i == 3
             Xassimptote = ones(1,numel(Yasymptote))*0.0620; % for a_idm = 1
         end
-        plot(Xassimptote,Yasymptote,'k--','LineWidth',1,'DisplayName','Instability point')
+        plot(Xassimptote,Yasymptote,'k--','LineWidth',1,'DisplayName','Instability threshold')
     end
+        %% Instability border lines (sim vs analyt)
+    % plot the crossings
+    plot(density(1,:),numCrosses(i,:),'r*','LineWidth',1,'DisplayName','Random set-up')
+
+    load(fullfile('phased',fnm))   
+    for j = 1:numel(data)
+        numCrosses(i,j) = numel(data(j).crossCount);
+    end
+    plot(density(1,:),numCrosses(i,:),'bo','LineWidth',1,'DisplayName','Phased set-up')
+
     fig = gcf;
     fig.PaperPositionMode = 'auto';
     fig.PaperPosition;

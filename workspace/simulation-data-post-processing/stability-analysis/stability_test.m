@@ -28,7 +28,7 @@ s = gappoints(vel,s0,l,v0,T,delta);
 k = densitypoints(vel,s0,l,v0,T,delta);
 instabVec = [];
 
-i = [0.5 1.0 1.5 2.0 ];
+i = [0.5 0.75 1.0 1.5];
 colArray = {'m','b','g','c'};
 dotArray = {'-s','-^','-o','-*'};
 idx = 0;
@@ -37,7 +37,8 @@ idx = 0;
 % xlim([0.015 0.15])
 % ylim([-1 3.5])
 % xticks(0.02:0.01:0.144)
-% i = 1;
+% colArray = {'g'};
+% i = 0.75;
 for a = i
 %     % syms a s0 v0 T b delta s dv v l
     syms f(h,dv,v)
@@ -82,8 +83,8 @@ for a = i
     hold on
     grid off
 %     plot(k,temp1,'g', 'LineWidth',2)
-    xlabel('Density $\rho \mathrm{(veh/m)}$')
-    ylabel('Solution $\lambda_2$')
+    xlabel('Density $\rho\,\mathrm{(veh/m)}$')
+    ylabel(' $\lambda_2$')
     xlim([0 max(k)])    
 %% 
 
@@ -103,11 +104,13 @@ for a = i
     end
 end
 plot(k,zeros(1,n),'--','Color',[0.5 0.5 0.5 ],'LineWidth',1)
-
-lgd = legend({strjoin({'$\mathrm{Parameter}\,a = $',sprintf('%0.1f',i(1)),'$\mathrm{m/s^2}$'}),...
-    strjoin({'$\mathrm{Parameter}\,a = $',sprintf('%0.1f',i(2)),'$\mathrm{m/s^2}$'}),...
-    strjoin({'$\mathrm{Parameter}\,a = $',sprintf('%0.1f',i(3)),'$\mathrm{m/s^2}$'}),...
-    strjoin({'$\mathrm{Parameter}\,a = $',sprintf('%0.1f',i(4)),'$\mathrm{m/s^2}$'}),'$\lambda_2 = 0$'});
+% plot(P(1,1),P(2,1),'*','Color','r','LineWidth',4);
+% lgd = legend({'$\lambda_2\,\mathrm{solutions}$','$\lambda_2 = 0$','Instability threshold~$\rho = 0.062\,\mathrm{veh/m}$'});
+%
+lgd = legend({strjoin({'$a = $',sprintf('%0.2f',i(1)),'$\mathrm{m/s^2}$'}),...
+    strjoin({'$a = $',sprintf('%0.2f',i(2)),'$\mathrm{m/s^2}$'}),...
+    strjoin({'$a = $',sprintf('%0.2f',i(3)),'$\mathrm{m/s^2}$'}),...
+    strjoin({'$a = $',sprintf('%0.2f',i(4)),'$\mathrm{m/s^2}$'}),'$\lambda_2 = 0$'});
 
 
 %% Plot the stability edge line
@@ -190,14 +193,16 @@ end
 % dispname = [dispname {sprintf('$a_{\mathrm{IDM}} = 1 m/s^2$')}];
 % lgd = legend(dispname);
 % lgd = legend('$\lambda_2 = 0$','$a_{\mathrm{IDM}} = 1 m/s^2$');
-
-plot(instabVec,i, 'LineWidth',2)
+%%
+instabVec = instabVec(~isnan(instabVec));
+plot(instabVec,i(1:numel(instabVec)),'b-','LineWidth',1)
 ylabel('Acceleration parameter $a\,\mathrm{(m/s^2)}$')
 xlabel('Density $\rho$ (veh/m)')
-text(0.06,0.6,'Unstable region','FontSize',22,'Color','r')
-text(0.03,1.1,'Stable region','FontSize',22,'Color','g')
+text(0.04,0.3,'Unstable region','FontSize',30,'Color','r')
+text(0.02,1.1,'Stable region','FontSize',30,'Color','g')
 legend('Stability threshold')
-xlim([min(instabVec) max(instabVec)])
+xlim([min(instabVec) max(instabVec)+0.001])
+% xlim([min(instabVec) 0.16])
 ylim([0 2])
 
 

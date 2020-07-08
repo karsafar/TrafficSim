@@ -3,7 +3,7 @@ close all
 clc
 
 %% Name the output file
-fnm = sprintf('Density0-1FourCars.mat')
+fnm = sprintf('spatioTest10Veh.mat')
 
 %% define types road and car objects available for simulations
 roadTypes = {@LoopRoad @FiniteRoad};
@@ -16,9 +16,9 @@ timeDistFlag = 0; % 1 - is a distribution; 0 - is fixed
 
 accelFlag = 0;% 1-mix arms; 2 - random arms; 0 - fixed arms
 
-plotFlag = 1; % 0 - don't plot sim, 1- plot sim
+plotFlag = 0; % 0 - don't plot sim, 1- plot sim
 
-singleArmFlag = 0;% 1 - stops plotting north arm, 0 - normal junction plotting
+singleArmFlag = 1;% 1 - stops plotting north arm, 0 - normal junction plotting
 
 drawRateFlag = 1; % 1 - fast moving objects, 0 - slow moving objects
 
@@ -27,7 +27,7 @@ priority = 0;% 1- east arm has priority, 0 - no priority
 selectRoadTypes = [1 1]; % 1-loopToad; 2-finiteRoad
 
 %% simulation resolution
-runTime = 600; % sec
+runTime = 3600; % sec
 dt = 0.1;
 nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;
@@ -44,7 +44,7 @@ transientCutOffLength = 0;
 setappdata(0,'drawRAte',drawRateFlag);
 
 % set a_idm value 
-a_idm = 1.5; %(m/s^2)
+a_idm = 1; %(m/s^2)
 setappdata(0,'maxIdmAccel',a_idm);
 
 % don't draw simulation for a given time t_off
@@ -58,13 +58,13 @@ setappdata(0,'spawnType',spawnType);
 swapRate = 0;
 
 %% density setup
-n_d = 0.05;
+n_d = 0.001;
 density(1) = n_d; % east arm density
 density(2) = n_d; % north arm density
 
 % dens = 0.002:0.001:0.13;
 % for density = dens
-n = 4;
+n = 5;
 nCars(1) = n; % east arm num cars
 nCars(2) = n; % north arm num cars
 
@@ -73,7 +73,7 @@ if timeDistFlag
     pd = makedist('Uniform','upper',3,'lower',1); % time gap with mean 2 seconds
     timeGapDist = random(pd,2*n,1); % (s)
 else
-    timeGapDist = 1*ones(2*n,1); % (s)
+    timeGapDist = 2*ones(2*n,1); % (s)
 end
 setappdata(0,'time_gap_dist',timeGapDist);
 
@@ -112,7 +112,8 @@ assert(maxDen(2)>=density(2),errMess2);
 
 % correctedd density according to road length
 density = nCars./road.Length;
-
+density(2) = 0;
+nCars(2) = 0;
 %% junction or single road simulations
 setappdata(0,'RoadOrJunctionFlag',singleArmFlag);
 if singleArmFlag

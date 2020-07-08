@@ -17,7 +17,9 @@ classdef IdmModel < Car & matlab.mixin.Heterogeneous
     methods
         function obj = IdmModel(varargin)
             obj = obj@Car(varargin);
-            obj.a = getappdata(0,'maxIdmAccel');
+            if ~isempty(getappdata(0,'maxIdmAccel'))
+                obj.a = getappdata(0,'maxIdmAccel');
+            end
         end
         function calculate_idm_accel(obj,roadLength)
 

@@ -6,10 +6,10 @@ clear
 d = dir('test-*.mat');
 Number_mat = length(d);
 numCars = [];
-for i = 1:Number_mat
+for i = 1:130
     %% load simualation
     fnm = sprintf('test-%s',num2str(i));
-    load(fullfile(fnm),'sim')
+    load(fullfile(fnm))
     
 
     % East Arm
@@ -18,11 +18,11 @@ for i = 1:Number_mat
     arm_E = sim.horizArm;
     
     for iCar = 1:arm_E.numCars
-        timeCar = arm_E.allCars(iCar).History(1,:);
-        diff_in_out_E(iCar).time = diff(timeCar(arm_E.allCars(iCar).History(2,:)>=arm_E.endPoint));
+        diff_in_out_E(iCar).time = diff(t_rng(arm_E.allCars(iCar).History(1,:)>=arm_E.endPoint));
         r_E = [r_E, diff_in_out_E(iCar).time];
     end
-    
+    rE(i) = numel(r_E);
+
     
     % North Arm
     diff_in_out_N = [];
@@ -30,11 +30,10 @@ for i = 1:Number_mat
     arm_N = sim.vertArm;
 
     for iCar = 1:arm_N.numCars
-        timeCar = arm_N.allCars(iCar).History(1,:);
-        diff_in_out_N(iCar).time = diff(timeCar(arm_N.allCars(iCar).History(2,:)>=arm_N.endPoint));
+        diff_in_out_N(iCar).time = diff(t_rng(arm_N.allCars(iCar).History(1,:)>=arm_N.endPoint));
         r_N = [r_N, diff_in_out_N(iCar).time];
     end
-    
+    rN(i) = numel(r_N);
     
     %% Mean
     m_E = mean(r_E);
@@ -45,13 +44,12 @@ for i = 1:Number_mat
     
     %% Fairness Metric
     nCrosses = numel(r_E) + numel(r_N);
-    R_E = numel(r_E)/nCrosses;
-    R_N = numel(r_N)/nCrosses;
+    R_E(i) = numel(r_E)/nCrosses;
+    R_N(i) = numel(r_N)/nCrosses;
     
     % Global utility of the juncton
-    F(i) = min(m_E*R_E,m_N*R_N)/max(m_E*R_E,m_N*R_N)
-    
-    
+    F(i) = min(m_E*R_E(i),m_N*R_N(i))/max(m_E*R_E(i),m_N*R_N(i))
+
     
     i
 end

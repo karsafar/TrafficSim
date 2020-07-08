@@ -7,9 +7,10 @@ close all
 d = dir('a_idm_*.mat');
 Number_mat = length(d);
 numCars = [];
-a_val = {'0_5','1','1_5','2'};
+a_val = {'0_5','0_75','1','1_5'};
 for i = 1:Number_mat
     fnm = sprintf('a_idm_%s',a_val{i});
+    setUp = sprintf('a_idm_%s_junction_phased',a_val{i});
     load(fullfile(fnm))   
     for j = 1:numel(data)
         numCrosses(i,j) = numel(data(j).crossCount);
@@ -17,23 +18,27 @@ for i = 1:Number_mat
     
     %% Plot Fundamental Diagram
     xlabel('Density $\rho\,(\mathrm{veh/m})$')
-    ylabel('Flow at Junction Q  $(\mathrm{veh/hr})$')
+    ylabel('Flow Q  $(\mathrm{veh/hr})$')
     hold on
     grid on
     box on
     [k,q,v] = fundamentaldiagram();
-    plot(k,2*q*3600,'k-','LineWidth',2,'DisplayName','Fundamental diagram of a junction')
-    plot(k,q*3600,'-','Color',[0.5 0.5 0.5 ],'LineWidth',2,'DisplayName','Findamental diagram of a single arm')
+    plot(k,2*q*3600,'k-','LineWidth',2,'DisplayName','2x Fundamental diagram')
+    plot(k,q*3600,'-','Color',[0.5 0.5 0.5 ],'LineWidth',2,'DisplayName','Fundamental diagram')
     lgd = legend;
+    lgd.Location = 'northoutside';
+    lgd.NumColumns = 2;
     %% Instability border lines (sim vs analyt)
     % plot the crossings
-    plot(density(1,:),numCrosses(i,:),'r^','MarkerFaceColor','r','LineWidth',1,'DisplayName','Numerical simulations')
+    plot(density(1,:),numCrosses(i,:),'r^','MarkerFaceColor','r','LineWidth',1,'DisplayName','Simulations')
     % plot assymptote
     Yasymptote = 0:max(ylim);
-    if i < 3
+    if i < 4
         if i == 1
             Xassimptote = ones(1,numel(Yasymptote))*0.0416; % for a_idm = 0.5
         elseif i == 2
+            Xassimptote = ones(1,numel(Yasymptote))*0.04971; % for a_idm = 0.5
+        elseif i == 3
             Xassimptote = ones(1,numel(Yasymptote))*0.0620; % for a_idm = 1
         end
         plot(Xassimptote,Yasymptote,'k--','LineWidth',1,'DisplayName','Instability point')
@@ -43,8 +48,9 @@ for i = 1:Number_mat
     fig.PaperPosition;
     fig_pos = fig.PaperPosition;
     fig.PaperSize = [fig_pos(3) fig_pos(4)];
-    print(fig,fullfile(fnm),'-dpdf','-r0','-bestfit')
+    print(fig,fullfile(setUp),'-dpdf','-r0','-bestfit')
     close all
+    clear data 
 end 
 
 

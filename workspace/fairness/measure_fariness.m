@@ -22,8 +22,8 @@ xlabel(ax,'Time to get from Start to End (s)')
 hold on
 grid on
 for iCar = 1:arm.numCars
-    dispCar = arm.allCars(iCar).History(2,:);
-    timeCar = arm.allCars(iCar).History(1,:);
+    dispCar = arm.allCars(iCar).History(1,:);
+    timeCar = t_rng;
     in_out(iCar).time =  timeCar(dispCar>=arm.endPoint);
     diff_in_out(iCar).time = diff(in_out(iCar).time);
     %    plot(ax,diff_in_out(iCar).time,'b+')
@@ -51,8 +51,8 @@ hold on
 grid on
 
 for iCar = 1:arm1.numCars
-    dispCar = arm1.allCars(iCar).History(2,:);
-    timeCar = arm1.allCars(iCar).History(1,:);
+    dispCar = arm1.allCars(iCar).History(1,:);
+    timeCar = t_rng;
     in_out(iCar).time =  timeCar(dispCar>=arm1.endPoint);
     diff_in_out(iCar).time = diff(in_out(iCar).time);
     %    plot(ax,diff_in_out(iCar).time,'ro')

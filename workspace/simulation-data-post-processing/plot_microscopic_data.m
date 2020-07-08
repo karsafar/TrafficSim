@@ -8,7 +8,7 @@ set(0,'defaultTextInterpreter','latex');
 set(0,'defaultTextboxshapeInterpreter','latex');
 set(0,'defaultAxesFontSize',22);
 set(0,'defaultAxesFontName','Times New Roman');
-
+set(0, 'DefaultAxesBox', 'on');
 %%
 warmUp =  exist('transientCutOffLength');
 if warmUp
@@ -20,32 +20,37 @@ end
 velArrayEast = NaN(sim.horizArm.numCars,(nIterations-transCut));
 velArrayNorth = NaN(sim.vertArm.numCars,(nIterations-transCut));
 for iCar = 1:sim.horizArm.numCars
-    velArrayEast(iCar,:) = sim.horizArm.allCars(iCar).History(3,transCut+1:end);
+    velArrayEast(iCar,:) = sim.horizArm.allCars(iCar).History(2,transCut+1:end);
 end
 for iCar = 1:sim.vertArm.numCars
-    velArrayNorth(iCar,:) = sim.vertArm.allCars(iCar).History(3,transCut+1:end);
+    velArrayNorth(iCar,:) = sim.vertArm.allCars(iCar).History(2,transCut+1:end);
 end
+         
 
+%% Spatiotenporal Velocity Profiles
 
-% Spatiotenporal Velocity Profiles
-
-d = 2; % density on points in scatter plot
+d = 10; % density on points in scatter plot
 plot_spatiotemporal_profiles(sim,transCut,t_rng(transCut+1:end),(nIterations-transCut),d)
-pause(1)
-% saving figure as a PDF
+
+%% saving figure as a PDF
 % xlim([1000 1500])
+pause(2)
 fig = gcf;
 fig.PaperPositionMode = 'auto';
 fig.PaperPosition;
 fig_pos = fig.PaperPosition;
 fig.PaperSize = [fig_pos(3) fig_pos(4)];
+% print(fig,'randArm5cars001dens600sec','-dpdf','-r0','-bestfit')
+
 % print(fig,'/Users/robot/cross_sim/workspace/Chapter03-data/junction-flow-change-sym-1-vel-0-no-warm-up-002','-dpdf','-r0','-bestfit')
-% print(fig,'/Users/robot/cross_sim/workspace/Chapter02-data/test-simulations-type-A/n_cars_vs_road_length_prescription/junction/junc_30_cars_1500_m_0_02_zoomed','-dpdf','-r0','-bestfit')
-print(fig,'non-symmetric-arms-diff','-dpdf','-r0','-bestfit')
-close all
+% % print(fig,'/Users/robot/cross_sim/workspace/Chapter02-data/test-simulations-type-A/n_cars_vs_road_length_prescription/junction/junc_30_cars_1500_m_0_02_zoomed','-dpdf','-r0','-bestfit')
+%
+print(fig,'singleRunDensitySweepFlowRandSymm.pdf','-dpdf','-r0','-bestfit')
+% pause(3)
+% close all
 %% flow change
 
-% plot_flow_change(velArrayEast,velArrayNorth,density,t_rng(transCut+1:end),(nIterations-transCut))
+plot_flow_change(velArrayEast,velArrayNorth,density,t_rng(transCut+1:end),(nIterations-transCut))
 
 %% Flow
 
@@ -117,7 +122,7 @@ for i = 1:nIterations
     eastArm.flowChange(i) = density(1)*meanVelArrayEast(i);
     northArm.flowChange(i) = density(2)*meanVelArrayNorth(i);
 end
-junction.flowChange = mean([eastArm.flowChange;northArm.flowChange]);
+junction.flowChange = sum([eastArm.flowChange;northArm.flowChange]);
 % 
 % figure()
 % ax1 = axes;
@@ -139,17 +144,30 @@ junction.flowChange = mean([eastArm.flowChange;northArm.flowChange]);
 
 figure()
 ax4 = axes;
-plot(ax4,t_rng,eastArm.flowChange*3600,'r-',...
-         t_rng,northArm.flowChange*3600,'b-',...
-         t_rng,junction.flowChange*3600,'g-','LineWidth',2)
+tLength = 3600;
+plot(ax4,t_rng,eastArm.flowChange*tLength,'r*-','LineWidth',1)
+hold on
+plot(ax4,t_rng,northArm.flowChange*tLength,'bo-','LineWidth',1)
+plot(ax4,t_rng,junction.flowChange*tLength,'g-','LineWidth',2)
 xlabel(ax4,'Time (s)')
-ylabel(ax4,'Flow Change (veh/hr)')
-xlim([1000 1500])
-ylim([0 max(max(eastArm.flowChange*3600),max(northArm.flowChange*3600))])
-legend('East-bound Arm Flow','North-bound Arm Flow','Junction Flow');
-e = diff(northArm.flowChange*3600);
-n = diff(eastArm.flowChange*3600);
-j = diff(junction.flowChange*3600);
+ylabel(ax4,'Flow (veh/hr)')
+% xlim([1000 1500])
+% ylim([0 max(max(eastArm.flowChange*3600),max(northArm.flowChange*3600))])
+% legend('Eastbound Arm','North-bound Arm','Junction');
+
+
+[k,q, v] = fundamentaldiagram();
+flowVal = q(abs(k-density(1))<0.0001);
+plot(ax4,t_rng,flowVal(1)*ones(1,nIterations)*tLength,'k--','LineWidth',1)
+xlim([0 t_rng(end)])
+ylim([0 max(max(junction.flowChange),flowVal(1))*tLength+100])
+lgd = legend(ax4,'Eastbound arm','Northbound arm','Junction','Steady-state flow','Location','northoutside');
+lgd.NumColumns = 2;
+
+% 
+% e = diff(northArm.flowChange*3600);
+% n = diff(eastArm.flowChange*3600);
+% j = diff(junction.flowChange*3600);
 %{
 %% occupancy pre-junction
 numNaN = sum(isnan(sim.horizArm.averageVelocityHistory));
@@ -377,15 +395,16 @@ tLength = 3600;
 plot(ax,t_rng,flow.WestEast*tLength,'r-','LineWidth',2)
 plot(ax,t_rng,flow.SouthNorth*tLength,'b-','LineWidth',2)
 [k,q, v] = fundamentaldiagram();
-flowVal = q(abs(k-density(1))<0.00001);
+flowVal = q(abs(k-density(1))<0.0001);
 plot(ax,t_rng,flowVal(1)*ones(1,nIterations)*tLength,'k--','LineWidth',1)
-xlim([0 3600])
+xlim([0 t_rng(end)])
 ylim([0 flowVal(1)*tLength+100])
 % plot(ax,t_rng,flowDifference,'-b','LineWidth',2)
 % axis(ax,[0 t_rng(nIterations) 0 max(max(flow.WestEast),max(flow.SouthNorth))])
 % legend(ax,'West-East Arm Flow','South-North Arm Flow','Junction Flow','Location','southwest')
 
-legend(ax,'Eastbound arm flow','Northbound arm flow','Steady-state flow at density $\rho=0.04\,\mathrm{veh/m}$','Location','southeast')
+lgd = legend(ax,'Eastbound arm','Northbound arm','Steady-state flow','Location','northoutside');
+lgd.NumColumns=2;
 end
 
 function plot_speed_variance(sim,velArrayEast,velArrayNorth,t_rng,nIterations)
@@ -412,7 +431,7 @@ if max(max(varianceEast),max(varianceNorth)) > 0
 else
     xlim(ax,[0 t_rng(nIterations)])
 end
-legend(ax,'Eastbound arm variance','Northbound arm variance')
+legend(ax,'Eastbound arm','Northbound arm')
 
 % legend(ax,'Junction Average Speed Variance')
 end

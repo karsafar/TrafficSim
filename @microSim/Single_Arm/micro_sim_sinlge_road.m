@@ -22,7 +22,7 @@ function varargout = micro_sim_sinlge_road(varargin)
 
 % Edit the above text to modify the response to help UI
 
-% Last Modified by GUIDE v2.5 22-Nov-2019 17:37:51
+% Last Modified by GUIDE v2.5 24-Jun-2020 15:50:26
 
 % Begin initialization code - DO NOT EDIT
 
@@ -500,8 +500,8 @@ for iIteration = handles.iIteration:nIterations
     t = handles.t_rng(iIteration);
     
     if t == 10
-%         HorizontalArm.allCars(1).velocity = 0;
-        HorizontalArm.allCars(1).targetVelocity = 13;
+        HorizontalArm.allCars(1).velocity = 0;
+        HorizontalArm.allCars(1).targetVelocity = 0;
 %     elseif t == 10
 %         HorizontalArm.allCars(1).targetVelocity = 13;
     end
@@ -1943,3 +1943,11 @@ else
 end
 setappdata(0,'spawnType',spawnType);
 % Hint: get(hObject,'Value') returns toggle state of spawn_type
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over pushbutton2.
+function pushbutton2_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to pushbutton2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
