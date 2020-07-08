@@ -34,3 +34,9 @@ box_plot\.m
 plot data/test_real_time_plot\.m
 
 test_env\.m
+*.pdf
+*.png
+*.eps
+*.mov
+*.ps
+*.bmp
