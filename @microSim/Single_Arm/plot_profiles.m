@@ -14,7 +14,7 @@ singleRoad.allCars(3) = sim.horizArm.allCars(2);
 figure(1)
 singleRoad = sim.horizArm;
 
-t = tiledlayout(3,1);
+t = tiledlayout(4,1);
 xlabel(t,'Time (s)','Interpreter','latex','FontSize',22)
 
 xA = 0; xB = t_rng(end);

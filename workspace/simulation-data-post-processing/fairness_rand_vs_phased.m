@@ -62,7 +62,7 @@ for i = 1:numel(dens_rng)
 end
 
 %% Normilased Junction Flow (Single Simulations)
-% load('aggregatedCrossingData.mat')
+load('AggregatedDelays200Meter.mat')
 [k,q, v] = fundamentaldiagram();
 
 flow2NumCrosses = 3600;
@@ -87,11 +87,46 @@ xticklabels(string([0.01:0.01:0.07]))
 
 % ylabel('Normalised Junction Flow $\hat{Q}_{\Sigma}$ ')
 % xlabel('Density $\rho$ (veh/m)')
-%% Box plots of normalised flow over density sweep (Ensemble simulations)
+
+%% Gini coefficient line of phased scenario
+load('AggregatedDelays200Meters.mat')
+
+densNum = 70;
+
+Gini = [];
+for i = 1:densNum
+        
+    travelArrayEast = travelTimesEast(i,:);
+    travelArrayNorth = travelTimesNorth(i,:);
+    travelArray = [travelArrayEast(~isinf(travelArrayEast)) travelArrayNorth(~isinf(travelArrayNorth))];
+    travelArray(isnan(travelArray)) = [];
+    population = 1:numel(travelArray);
+    
+    delayArraySort = [0 sort(abs(travelArray),'Ascend')];
+    
+    delayArraySort = cumsum(delayArraySort);
+    delayCum = delayArraySort/delayArraySort(end);
+    x_rng = [0 population]/population(end);
+
+    
+    Gini(i) = 1-sum((delayCum(1:end-1)+delayCum(2:end)).*diff(x_rng));
+
+end
+
+
+
 ax3 = axes;
-xRange = round(dens(1,:),3);
-boxplot(ax3,(turnTakinglengths./(2*flow_rng)')',xRange)
-ylabel('Normalised Junction Flow $\hat{Q}_{\Sigma}$ ')
+hold on
+plot(ax3,Gini(1:70),'go-')
+% xticks('auto')
+% xticklabels(string([0.01:0.01:0.07]))
+legend('Phased set-up')
+%% Box plots of normalised flow over density sweep (Ensemble simulations)
+load('FlawAndFairnessEnsembles.mat')
+% ax3 = axes;
+xRange = round(density(1,:),3);
+boxplot(ax3,Gini',xRange)
+ylabel('Gini Coefficient $G$ ')
 xlabel('Density $\rho$ (veh/m)')
 xticks('auto')
 % xticklabels({'0.022','0.026','0.030','0.034','0.038','0.042','0.046','0.050','0.054','0.058'})
@@ -109,6 +144,6 @@ fig.PaperPositionMode = 'auto';
 fig.PaperPosition;
 fig_pos = fig.PaperPosition;
 fig.PaperSize = [fig_pos(3) fig_pos(4)];
-print(fig,'flow-random-ensembles-vs-phased-2-sec.pdf','-dpdf','-r0','-bestfit')
+print(fig,'fairness-random-ensembles-vs-phased-3-sec-accel-9.pdf','-dpdf','-r0','-bestfit')
 % pause(3)
 % close all

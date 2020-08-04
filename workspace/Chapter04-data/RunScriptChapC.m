@@ -3,22 +3,22 @@ close all
 clc
 
 %% Name the output file
-fnm = sprintf('spatioTest10Veh.mat')
+fnm = sprintf('a_junc_ahead_3.mat')
 
 %% define types road and car objects available for simulations
 roadTypes = {@LoopRoad @FiniteRoad};
 carTypes = {@IdmModel, @HdmModel, @carTypeA, @carTypeB, @carTypeC, @carTypeA_old};
 
 %% set-up flags
-spawnType = 0; % 0 - random; 1 - phased
+spawnType = 1; % 0 - random; 1 - phased
 
-timeDistFlag = 0; % 1 - is a distribution; 0 - is fixed 
+timeDistFlag = 0; % 1 - is a distribution; 0 - is fixed (2 seconds)
 
 accelFlag = 0;% 1-mix arms; 2 - random arms; 0 - fixed arms
 
-plotFlag = 0; % 0 - don't plot sim, 1- plot sim
+plotFlag = 1; % 0 - don't plot sim, 1- plot sim
 
-singleArmFlag = 1;% 1 - stops plotting north arm, 0 - normal junction plotting
+singleArmFlag = 0;% 1 - stops plotting north arm, 0 - normal junction plotting
 
 drawRateFlag = 1; % 1 - fast moving objects, 0 - slow moving objects
 
@@ -44,7 +44,7 @@ transientCutOffLength = 0;
 setappdata(0,'drawRAte',drawRateFlag);
 
 % set a_idm value 
-a_idm = 1; %(m/s^2)
+a_idm = 1.5; %(m/s^2)
 setappdata(0,'maxIdmAccel',a_idm);
 
 % don't draw simulation for a given time t_off
@@ -58,13 +58,13 @@ setappdata(0,'spawnType',spawnType);
 swapRate = 0;
 
 %% density setup
-n_d = 0.001;
+n_d = 0.130;
 density(1) = n_d; % east arm density
 density(2) = n_d; % north arm density
 
 % dens = 0.002:0.001:0.13;
 % for density = dens
-n = 5;
+n = 10;
 nCars(1) = n; % east arm num cars
 nCars(2) = n; % north arm num cars
 
@@ -112,8 +112,8 @@ assert(maxDen(2)>=density(2),errMess2);
 
 % correctedd density according to road length
 density = nCars./road.Length;
-density(2) = 0;
-nCars(2) = 0;
+% density(2) = 0;
+% nCars(2) = 0;
 %% junction or single road simulations
 setappdata(0,'RoadOrJunctionFlag',singleArmFlag);
 if singleArmFlag
@@ -124,13 +124,17 @@ end
 %% if phased start, generate equilibrium velocities
 if spawnType
     [k,q,v,~] = fundamentaldiagram();
-    stpSz = 10;
+%     stpSz = 10;
     vi = [0 0];
     if density(1) ~= 0
-        [ki(1),vi(1)] = polyxpoly(k(2:stpSz:end-1),v(2:stpSz:end-1),density(1)*ones(1,numel(v(2:stpSz:end-1))),v(2:stpSz:end-1));
+        v_temp = v(abs(k-density(1))<0.00005);
+        vi(1) = v_temp(1);
+%         [ki(1),vi(1)] = polyxpoly(k(2:stpSz:end-1),v(2:stpSz:end-1),density(1)*ones(1,numel(v(2:stpSz:end-1))),v(2:stpSz:end-1));
     end
     if density(2) ~= 0
-        [ki(2),vi(2)] = polyxpoly(k(2:stpSz:end-1),v(2:stpSz:end-1),density(2)*ones(1,numel(v(2:stpSz:end-1))),v(2:stpSz:end-1));
+        v_temp = v(abs(k-density(2))<0.00005);
+        vi(2) = v_temp(1);
+%         [ki(2),vi(2)] = polyxpoly(k(2:stpSz:end-1),v(2:stpSz:end-1),density(2)*ones(1,numel(v(2:stpSz:end-1))),v(2:stpSz:end-1));
     end
     setappdata(0,'v_euil',vi);
 end

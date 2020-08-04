@@ -29,7 +29,7 @@ end
 
 %% Spatiotenporal Velocity Profiles
 
-d = 10; % density on points in scatter plot
+d = 5; % density on points in scatter plot
 plot_spatiotemporal_profiles(sim,transCut,t_rng(transCut+1:end),(nIterations-transCut),d)
 
 %% saving figure as a PDF
@@ -45,7 +45,7 @@ fig.PaperSize = [fig_pos(3) fig_pos(4)];
 % print(fig,'/Users/robot/cross_sim/workspace/Chapter03-data/junction-flow-change-sym-1-vel-0-no-warm-up-002','-dpdf','-r0','-bestfit')
 % % print(fig,'/Users/robot/cross_sim/workspace/Chapter02-data/test-simulations-type-A/n_cars_vs_road_length_prescription/junction/junc_30_cars_1500_m_0_02_zoomed','-dpdf','-r0','-bestfit')
 %
-print(fig,'singleRunDensitySweepFlowRandSymm.pdf','-dpdf','-r0','-bestfit')
+print(fig,'conditionalProbabilities3SecGap.pdf','-dpdf','-r0','-bestfit')
 % pause(3)
 % close all
 %% flow change
@@ -288,7 +288,6 @@ function plot_spatiotemporal_profiles(sim,transCut,t_rng,nIterations,d)
 %     patch(ax1,x,y,[0.5 0.5 0.5],'EdgeColor','k','FaceColor','None');
     h1 = patch(ax1,x,y,[0.5 0.5 0.5],'EdgeColor','None');
     h1.FaceAlpha = 0.4;
-%     return
     
     
     %%%%%%%%%%%%%% South-North Arm %%%%%%%%%%%%%%

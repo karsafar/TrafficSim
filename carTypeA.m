@@ -159,8 +159,9 @@ classdef carTypeA < IdmModel
                 selfDistOutOfJunc = s_out - s + (s>s_out)*roadLength;
                 
                 %% assign junction acceleration
-                pass_ahead_accel = obj.idmAcceleration;
-                
+%                 pass_ahead_accel = obj.idmAcceleration;
+                calculate_junc_accel(obj,roadLength,3)
+                pass_ahead_accel = obj.juncAccel;
                 %% Future space gap
                 obj.juncExitVelocity = min(obj.maximumVelocity,sqrt(max(0,v^2+2*pass_ahead_accel*selfDistOutOfJunc)));
                 futureMinStopGap = calc_safe_gap(obj.a,obj.b,obj.juncExitVelocity,v0,obj.timeGap,obj.minimumGap,obj.delta,obj.a_min,1);
@@ -418,20 +419,31 @@ classdef carTypeA < IdmModel
                 emerg_flag = 1;
             end
             
-            if stop_flag || junc_flag 
+            
+            gap = obj.Prev.pose(1) - obj.pose(1);
+            if stop_flag || junc_flag
                 s = obj.s_in - obj.pose(1);
                 dV = obj.velocity;
-            elseif obj.leaderFlag == 0
-                s = obj.Prev.pose(1) - obj.pose(1)-obj.dimension(2);
+            elseif gap > 0
+                % following car is ahead
+                s = gap;
                 dV = (obj.velocity - obj.Prev.velocity);
+                
+            elseif gap == 0
+                % no cars to follow
+                s = inf;
+                dV = (obj.velocity - obj.Prev.velocity);
+                
             else
-                s = 1e5;
-                dV = 1e-5;
+                % following car is behind  !!! ONLY FOR RING-ROAD CASE !!!!
+                roadLength = varargin{1};
+                s = gap + roadLength;
+                dV = (obj.velocity - obj.Prev.velocity);
             end
             
             intelligentBreaking = obj.velocity*obj.timeGap + (obj.velocity*dV)/(2*sqrt(obj.a*obj.b));
             
-
+            
             if stop_flag % emergency stop at junction
                 s_star = 0.1 + max(0,intelligentBreaking);
             elseif junc_flag % normal stop at junction
@@ -449,7 +461,8 @@ classdef carTypeA < IdmModel
             if obj.acceleration == 0 && obj.velocity == 0 && s<0.2
                 obj.juncAccel = 0;
             else
-                obj.juncAccel = obj.a*(1 - (velDif)^obj.delta - (s_star/s)^2);
+%                 obj.juncAccel = obj.a*(1 - (velDif)^obj.delta - (s_star/s)^2);
+                obj.juncAccel = 3*(1 - (velDif)^obj.delta - (s_star/s)^2);
             end
             % use lennard-jones if exceeded a_feas_min = 9 m/s^2
             if obj.juncAccel < obj.a_feas_min
