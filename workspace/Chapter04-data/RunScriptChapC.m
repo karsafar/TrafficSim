@@ -16,6 +16,8 @@ timeDistFlag = 0; % 1 - is a distribution; 0 - is fixed (2 seconds)
 
 accelFlag = 0;% 1-mix arms; 2 - random arms; 0 - fixed arms
 
+accelAheadFlag = 0;% 1-mix arms; 2 - random arms; 0 - fixed arms
+
 plotFlag = 1; % 0 - don't plot sim, 1- plot sim
 
 singleArmFlag = 0;% 1 - stops plotting north arm, 0 - normal junction plotting
@@ -58,13 +60,13 @@ setappdata(0,'spawnType',spawnType);
 swapRate = 0;
 
 %% density setup
-n_d = 0.130;
+n_d = 0.014;
 density(1) = n_d; % east arm density
 density(2) = n_d; % north arm density
 
 % dens = 0.002:0.001:0.13;
 % for density = dens
-n = 10;
+n = 3;
 nCars(1) = n; % east arm num cars
 nCars(2) = n; % north arm num cars
 
@@ -75,7 +77,6 @@ if timeDistFlag
 else
     timeGapDist = 2*ones(2*n,1); % (s)
 end
-setappdata(0,'time_gap_dist',timeGapDist);
 
 %% set maximum feasible decelearion
 if accelFlag > 0
@@ -89,7 +90,36 @@ if accelFlag > 0
 elseif accelFlag == 0
     a_feas_min = -9*ones(2*n,1); % (m/s^2)
 end
+
+%% set maximum crossing acceleration
+if accelAheadFlag > 0
+    pd = makedist('Uniform','upper',1.2,'lower',1.8); % maximum crossing accel with mean 1.5 m/s^2
+    if accelAheadFlag == 1
+        a_ahead = random(pd,n,1); % (m/s^2)
+        a_ahead = [a_ahead; 1.5*ones(n,1)]; % (m/s^2)
+    elseif accelAheadFlag == 2
+        a_ahead = random(pd,2*n,1); % (m/s^2)
+    end
+elseif accelAheadFlag == 0
+    a_ahead = 1.5*ones(2*n,1); % (m/s^2)
+end
+
+
+%% set vehicle type parameters for run_simulation code
+
+% PassiveVehicle = [3 -5 1.2];
+% 
+% timeGapDist(1) = PassiveVehicle(1);
+% 
+% a_feas_min(1)  = PassiveVehicle(2);
+% 
+% a_ahead(1)     = PassiveVehicle(3);
+
+setappdata(0,'time_gap_dist',timeGapDist);
+
 setappdata(0,'MinFeasibleDecel',a_feas_min);
+
+setappdata(0,'MaxCrossAccel',a_ahead);
 
 %%  road parameters and density correction
 road.Length = round(nCars./density);  % length is rounded so need to correct the value of density

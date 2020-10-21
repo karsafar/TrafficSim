@@ -1,15 +1,8 @@
-clc
+% clc
 % clear
 close all
-set(0,'defaultAxesTickLabelInterpreter','latex'); 
-set(0,'defaultLegendInterpreter','latex');
-set(0,'defaultLegendFontName','Times New Roman');
-set(0,'defaultTextInterpreter','latex');
-set(0,'defaultTextboxshapeInterpreter','latex');
-set(0,'defaultAxesFontSize',22);
-set(0,'defaultAxesFontName','Times New Roman');
-set(0, 'DefaultAxesBox', 'on');
-%%
+
+%
 warmUp =  exist('transientCutOffLength');
 if warmUp
     transCut = transientCutOffLength*10;
@@ -27,27 +20,15 @@ for iCar = 1:sim.vertArm.numCars
 end
          
 
-%% Spatiotenporal Velocity Profiles
+% Spatiotenporal Velocity Profiles
 
 d = 5; % density on points in scatter plot
 plot_spatiotemporal_profiles(sim,transCut,t_rng(transCut+1:end),(nIterations-transCut),d)
 
-%% saving figure as a PDF
-% xlim([1000 1500])
-pause(2)
-fig = gcf;
-fig.PaperPositionMode = 'auto';
-fig.PaperPosition;
-fig_pos = fig.PaperPosition;
-fig.PaperSize = [fig_pos(3) fig_pos(4)];
-% print(fig,'randArm5cars001dens600sec','-dpdf','-r0','-bestfit')
+%% save the figure
+fileName = sprintf('Point5-east-27-north-3-low-capacity.pdf');
+savePDF(gcf,fileName)
 
-% print(fig,'/Users/robot/cross_sim/workspace/Chapter03-data/junction-flow-change-sym-1-vel-0-no-warm-up-002','-dpdf','-r0','-bestfit')
-% % print(fig,'/Users/robot/cross_sim/workspace/Chapter02-data/test-simulations-type-A/n_cars_vs_road_length_prescription/junction/junc_30_cars_1500_m_0_02_zoomed','-dpdf','-r0','-bestfit')
-%
-print(fig,'conditionalProbabilities3SecGap.pdf','-dpdf','-r0','-bestfit')
-% pause(3)
-% close all
 %% flow change
 
 plot_flow_change(velArrayEast,velArrayNorth,density,t_rng(transCut+1:end),(nIterations-transCut))
@@ -248,7 +229,7 @@ function plot_spatiotemporal_profiles(sim,transCut,t_rng,nIterations,d)
     end
     
 %     ax1 = subplot(2,1,1);
-    figure(1);
+    figure();
     ax1 = axes;
     
     
@@ -259,7 +240,7 @@ function plot_spatiotemporal_profiles(sim,transCut,t_rng,nIterations,d)
     hold(ax1,'on');
     grid(ax1,'on');
     
-    axis(ax1,[transCut/10 t_rng(nIterations) sim.horizArm.startPoint sim.horizArm.endPoint] );
+    axis(ax1,[transCut/10 t_rng(nIterations) min(sim.horizArm.startPoint,sim.vertArm.startPoint) max(sim.horizArm.endPoint,sim.vertArm.endPoint)] );
 %     xlim(ax1,[transientCutOffLength t_rng(nIterations)])
     
     caxis manual
@@ -301,7 +282,7 @@ function plot_spatiotemporal_profiles(sim,transCut,t_rng,nIterations,d)
     ylabel(ax2,'Displacement ($\mathrm{m}$)');
     hold(ax2,'on');
     grid(ax2,'on');
-    axis(ax2,[transCut/10 t_rng(nIterations) sim.vertArm.startPoint sim.vertArm.endPoint] );
+    axis(ax2,[transCut/10 t_rng(nIterations) min(sim.horizArm.startPoint,sim.vertArm.startPoint) max(sim.horizArm.endPoint,sim.vertArm.endPoint)] );
     
     caxis manual;
     caxis([0 maxVelocity]);
@@ -585,3 +566,24 @@ legend([h1,h2],'East Arm','North Arm')
 axis(ax,[0 t_rng(nIterations) sim.vertArm.startPoint sim.vertArm.endPoint] )
 end
 %}
+%% saving figure as a PDF
+function savePDF(fig,FileName)
+pause(3)
+fig.PaperPositionMode = 'auto';
+fig.PaperPosition;
+fig_pos = fig.PaperPosition;
+fig.PaperSize = [fig_pos(3) fig_pos(4)];
+
+% print(fig,'randArm5cars001dens600sec','-dpdf','-r0','-bestfit')
+
+% print(fig,'/Users/robot/cross_sim/workspace/Chapter03-data/junction-flow-change-sym-1-vel-0-no-warm-up-002','-dpdf','-r0','-bestfit')
+% % print(fig,'/Users/robot/cross_sim/workspace/Chapter02-data/test-simulations-type-A/n_cars_vs_road_length_prescription/junction/junc_30_cars_1500_m_0_02_zoomed','-dpdf','-r0','-bestfit')
+%
+% print(fig,'pareto-front-random-2-sec-accel-9.pdf','-dpdf','-r0','-bestfit')
+
+
+figuresFldr = fullfile('Figures',FileName);
+print(fig,figuresFldr,'-dpdf','-r0','-bestfit')
+% pause(3)
+close all
+end

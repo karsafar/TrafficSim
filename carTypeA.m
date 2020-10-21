@@ -20,6 +20,7 @@ classdef carTypeA < IdmModel
         
         t_in_self = 0
         t_out_self = 0
+        a_ahead = []
         minTimeGap = 0 % minimum time gap to cross junction 
         juncExitVelocity = NaN
     end
@@ -372,35 +373,35 @@ classdef carTypeA < IdmModel
         end
         function [t_in, t_out] = calculate_t_in_and_out(obj,a,v,s,t,roadLength,varargin)
             
-            crossingBegin = obj.s_in;
-            crossingEnd = obj.s_out;
+            crossingBegin   = obj.s_in;
+            crossingEnd     = obj.s_out;
             
             if s <= crossingBegin
-                d_in = crossingBegin - s;
-                d_out = crossingEnd - s;
+                d_in    = crossingBegin - s;
+                d_out   = crossingEnd - s;
             elseif s >= crossingEnd
-                d_in = crossingBegin - (s - roadLength);
-                d_out = crossingEnd - (s - roadLength);
+                d_in    = crossingBegin - (s - roadLength);
+                d_out   = crossingEnd - (s - roadLength);
             elseif s > crossingBegin && s < crossingEnd
-                d_in = 0;
-                d_out = crossingEnd - s;
+                d_in    = 0;
+                d_out   = crossingEnd - s;
             end
             
             if  nargin == 7 % includes error tolerance for comp vehice 
                 % opposite car time gap
-                t_in = d_in/v + t;
-                t_out = d_out/v + t;
+                t_in    = d_in/v + t;
+                t_out   = d_out/v + t;
             else
                 % self time gap
                 if abs(v) <= 0.5 % 5 time steps vehicle uses accel to enter junction  
-                    v_f_in = min(obj.maximumVelocity,sqrt(max(0,v^2 + 2*a*d_in)));
+                    v_f_in  = min(obj.maximumVelocity,sqrt(max(0,v^2 + 2*a*d_in)));
                     v_f_out = min(obj.maximumVelocity,sqrt(max(0,v^2 + 2*a*d_out)));
                     
-                    t_in = (-v + v_f_in)/a + t;
-                    t_out = (-v + v_f_out)/a + t;
+                    t_in    = (-v + v_f_in)/a + t;
+                    t_out   = (-v + v_f_out)/a + t;
                 else
-                    t_in = d_in/v + t;
-                    t_out = d_out/v + t;
+                    t_in    = d_in/v + t;
+                    t_out   = d_out/v + t;
                 end
             end
         end
@@ -420,25 +421,15 @@ classdef carTypeA < IdmModel
             end
             
             
-            gap = obj.Prev.pose(1) - obj.pose(1);
             if stop_flag || junc_flag
                 s = obj.s_in - obj.pose(1);
                 dV = obj.velocity;
-            elseif gap > 0
-                % following car is ahead
-                s = gap;
+            elseif obj.leaderFlag == 0
+                s = obj.Prev.pose(1) - obj.pose(1)-obj.dimension(2);
                 dV = (obj.velocity - obj.Prev.velocity);
-                
-            elseif gap == 0
-                % no cars to follow
-                s = inf;
-                dV = (obj.velocity - obj.Prev.velocity);
-                
-            else
-                % following car is behind  !!! ONLY FOR RING-ROAD CASE !!!!
-                roadLength = varargin{1};
-                s = gap + roadLength;
-                dV = (obj.velocity - obj.Prev.velocity);
+             else
+                s = 1e5;
+                dV = 1e-5;
             end
             
             intelligentBreaking = obj.velocity*obj.timeGap + (obj.velocity*dV)/(2*sqrt(obj.a*obj.b));
@@ -461,8 +452,11 @@ classdef carTypeA < IdmModel
             if obj.acceleration == 0 && obj.velocity == 0 && s<0.2
                 obj.juncAccel = 0;
             else
-%                 obj.juncAccel = obj.a*(1 - (velDif)^obj.delta - (s_star/s)^2);
-                obj.juncAccel = 3*(1 - (velDif)^obj.delta - (s_star/s)^2);
+                if isempty(obj.a_ahead) || obj.a_ahead == obj.a
+                    obj.juncAccel = obj.a*(1 - (velDif)^obj.delta - (s_star/s)^2);
+                else
+                    obj.juncAccel = obj.a_ahead*(1 - (velDif)^obj.delta - (s_star/s)^2);
+                end
             end
             % use lennard-jones if exceeded a_feas_min = 9 m/s^2
             if obj.juncAccel < obj.a_feas_min

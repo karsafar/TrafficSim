@@ -1,13 +1,6 @@
 clc
 % clear
 close all
-set(0,'defaultAxesTickLabelInterpreter','latex'); 
-set(0,'defaultLegendInterpreter','latex');
-set(0,'defaultLegendFontName','Times New Roman');
-set(0,'defaultTextInterpreter','latex');
-set(0,'defaultTextboxshapeInterpreter','latex');
-set(0,'defaultAxesFontSize',22);
-set(0,'defaultAxesFontName','Times New Roman');
 
 %%
 warmUp =  exist('transientCutOffLength');
