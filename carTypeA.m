@@ -387,12 +387,12 @@ classdef carTypeA < IdmModel
                 d_out   = crossingEnd - s;
             end
             
-            if  nargin == 7 % includes error tolerance for comp vehice 
+            if  nargin == 7 % includes error tolerance for competing vehice 
                 % opposite car time gap
                 t_in    = d_in/v + t;
                 t_out   = d_out/v + t;
             else
-                % self time gap
+                % ego-vehicle time gap
                 if abs(v) <= 0.5 % 5 time steps vehicle uses accel to enter junction  
                     v_f_in  = min(obj.maximumVelocity,sqrt(max(0,v^2 + 2*a*d_in)));
                     v_f_out = min(obj.maximumVelocity,sqrt(max(0,v^2 + 2*a*d_out)));

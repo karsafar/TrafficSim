@@ -10,7 +10,7 @@ roadTypes = {@LoopRoad @FiniteRoad};
 carTypes = {@IdmModel, @HdmModel, @carTypeA, @carTypeB, @carTypeC, @carTypeA_old};
 
 %% set-up flags
-spawnType = 1; % 0 - random; 1 - phased
+spawnType = 0; % 0 - random; 1 - phased
 
 timeDistFlag = 0; % 1 - is a distribution; 0 - is fixed (2 seconds)
 
@@ -243,7 +243,7 @@ if plotFlag == 0
 end
 
 %% save the simulation results
-save(fullfile(fnm),...
+save(fullfile('matFiles',fnm),...
     'carTypeRatios',...
     'carTypes',...
     'nCars',...
