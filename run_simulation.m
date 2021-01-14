@@ -13,8 +13,8 @@ function  [sim] = run_simulation(...
     dt)
 
 % construct two arms of the junction objects
-HorizontalArm = roadTypes{1}([{carTypes},0,roadDims,priority],ArmH);
-VerticalArm = roadTypes{2}([{carTypes},90,roadDims,priority],ArmV);
+HorizontalArm   = roadTypes{1}([{carTypes},0,roadDims,priority],ArmH);
+VerticalArm     = roadTypes{2}([{carTypes},90,roadDims,priority],ArmV);
 
 clear ArmH ArmV
 % plot the junction
@@ -63,11 +63,13 @@ for iCar = 1:HorizontalArm.numCars
     HorizontalArm.allCars(iCar).minTimeGap = minTimeGap(iCar);
     HorizontalArm.allCars(iCar).a_feas_min = a_feas_min(iCar);
     HorizontalArm.allCars(iCar).a_ahead = a_ahead(iCar);
+    HorizontalArm.allCars(iCar).behaviour_vec = [minTimeGap(iCar) a_feas_min(iCar) a_ahead(iCar)];
 end
 for jCar = 1:VerticalArm.numCars
     VerticalArm.allCars(jCar).minTimeGap = minTimeGap(iCar+jCar);
     VerticalArm.allCars(jCar).a_feas_min = a_feas_min(iCar+jCar);
     VerticalArm.allCars(jCar).a_ahead = a_ahead(iCar+jCar);
+    VerticalArm.allCars(jCar).behaviour_vec = [minTimeGap(iCar+jCar) a_feas_min(iCar+jCar) a_ahead(iCar+jCar)];
 end
 
 for iIteration = 1:nIterations

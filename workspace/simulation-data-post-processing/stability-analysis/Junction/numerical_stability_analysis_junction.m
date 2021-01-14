@@ -28,8 +28,9 @@ for i = 1:Number_mat
     plot(k,2*q*3600,'k-','LineWidth',2,'DisplayName','2x Fundamental diagram')
     plot(k,q*3600,'-','Color',[0.5 0.5 0.5 ],'LineWidth',2,'DisplayName','Fundamental diagram')
     lgd = legend;
-    lgd.Location = 'northoutside';
+%     lgd.Location = 'northoutside';
     lgd.NumColumns = 2;
+    lgd.FontSize = 24;
     
     %% physical limiting density
     x_val = [0.05952 0.05952];
@@ -47,10 +48,16 @@ for i = 1:Number_mat
         end
         plot(Xassimptote,Yasymptote,'k--','LineWidth',1,'DisplayName','Instability point')
     end
-    
-        %% Instability border lines (sim vs analyt)
+    %% no junction
+    fnm = sprintf('a_idm_%s',a_val{i});
+    setUp = sprintf('a_idm_%s_junction_no_junction',a_val{i});
+    load(fullfile('/Users/robot/cross_sim/workspace/simulation-data-post-processing/stability-analysis/JunctionVsNoJunction/noJunciton',fnm)) 
+    eastArm.density = round(eastArm.density,3);
+    plot(eastArm.density,eastArm.flow*3600,'g-o','LineWidth',1,'DisplayName','Single Road Flow')
+     %% Instability border lines (sim vs analyt)
     % plot the crossings
-    plot(density(1,:),numCrosses_rand(i,:),'r*','LineWidth',1,'DisplayName','Random Set-up')
+    density = round(density,3);
+    plot(density(1,:),numCrosses_rand(i,:),'r-*','LineWidth',1,'DisplayName','Random Set-up')
     
     %% phased
     load(fullfile('phased',fnm))   
@@ -59,8 +66,13 @@ for i = 1:Number_mat
     end
     %% Instability border lines (sim vs analyt)
     % plot the crossings
-    plot(density(1,:),numCrosses_phased(i,:),' bo','LineWidth',1,'DisplayName','Phased Set-up')
+    density = round(density,3);
+    plot(density(1,:),numCrosses_phased(i,:),' b-o','LineWidth',1,'DisplayName','Phased Set-up')
     
+    
+
+    xlim([0 0.14])
+    %% save plots
     fig = gcf;
     fig.PaperPositionMode = 'auto';
     fig.PaperPosition;

@@ -30,7 +30,7 @@ instabVec = [];
 
 i = [0.5 0.75 1.0 1.5];
 colArray = {'m','b','g','c'};
-dotArray = {'-s','-^','-o','-*'};
+dotArray = {'-','-','-','-'};
 idx = 0;
 % plot(k,zeros(1,n),'k--' ,'LineWidth',2)
 % hold on
@@ -38,7 +38,7 @@ idx = 0;
 % ylim([-1 3.5])
 % xticks(0.02:0.01:0.144)
 % colArray = {'g'};
-% i = 0.75;
+% i = 1;
 for a = i
 %     % syms a s0 v0 T b delta s dv v l
     syms f(h,dv,v)
@@ -105,14 +105,15 @@ for a = i
 end
 plot(k,zeros(1,n),'--','Color',[0.5 0.5 0.5 ],'LineWidth',1)
 % plot(P(1,1),P(2,1),'*','Color','r','LineWidth',4);
-% lgd = legend({'$\lambda_2\,\mathrm{solutions}$','$\lambda_2 = 0$','Instability threshold~$\rho = 0.062\,\mathrm{veh/m}$'});
-%
+% lgd = legend({'$\lambda_2\,\mathrm{solutions}$','$\lambda_2 = 0$','Instability threshold~$\rho = 0.062\,\mathrm{veh/m}$'},'Location','southeast');
+
 lgd = legend({strjoin({'$a = $',sprintf('%0.2f',i(1)),'$\mathrm{m/s^2}$'}),...
     strjoin({'$a = $',sprintf('%0.2f',i(2)),'$\mathrm{m/s^2}$'}),...
     strjoin({'$a = $',sprintf('%0.2f',i(3)),'$\mathrm{m/s^2}$'}),...
-    strjoin({'$a = $',sprintf('%0.2f',i(4)),'$\mathrm{m/s^2}$'}),'$\lambda_2 = 0$'});
+    strjoin({'$a = $',sprintf('%0.2f',i(4)),'$\mathrm{m/s^2}$'})});
+xlim([0 0.14])
 
-
+lgd.NumColumns = 2;
 %% Plot the stability edge line
 % get numerical values of density range, velocity and gap
 n = 100;
@@ -195,16 +196,23 @@ end
 % lgd = legend('$\lambda_2 = 0$','$a_{\mathrm{IDM}} = 1 m/s^2$');
 %%
 instabVec = instabVec(~isnan(instabVec));
-plot(instabVec,i(1:numel(instabVec)),'b-','LineWidth',1)
-ylabel('Acceleration parameter $a\,\mathrm{(m/s^2)}$')
+plot([instabVec],[i(1:numel(instabVec))]  ,'b-','LineWidth',2)
+hold on
+plot([0.042, 0.05, 0.0628],[0.50 0.75 1]  ,'r*','LineWidth',2)
+hold on
+plot([instabVec(end);0.14],[i(numel(instabVec)),i(numel(instabVec))]  ,'k--','LineWidth',1)
+
+ylabel('IDM Parameter $a\,\mathrm{(m/s^2)}$')
 xlabel('Density $\rho$ (veh/m)')
-text(0.04,0.3,'Unstable region','FontSize',30,'Color','r')
-text(0.02,1.1,'Stable region','FontSize',30,'Color','g')
-legend('Stability threshold')
+text(0.04,0.3,'Unstable region','FontSize',40,'Color','r')
+text(0.02,1.1,'Stable region','FontSize',40,'Color','g')
+lgd = legend('Stability threshold');
+lgd.FontSize = 24;
 xlim([min(instabVec) max(instabVec)+0.001])
 % xlim([min(instabVec) 0.16])
 ylim([0 2])
-
+xlim([0 0.14])
+grid off
 
 % xticks(0.1:0.1:3.5)
 % yticks(0.02:0.005:0.144)

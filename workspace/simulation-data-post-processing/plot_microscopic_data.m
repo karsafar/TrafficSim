@@ -22,11 +22,11 @@ end
 
 % Spatiotenporal Velocity Profiles
 
-d = 1; % density on points in scatter plot
+d = 2; % density on points in scatter plot
 plot_spatiotemporal_profiles(sim,transCut,t_rng(transCut+1:end),(nIterations-transCut),d)
 
 %% save the figure
-fileName = sprintf('verify-dens005-rand.pdf');
+fileName = sprintf('runningTimeCurve.pdf');
 savePDF(gcf,fileName)
 
 %% flow change

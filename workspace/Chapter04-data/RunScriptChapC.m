@@ -3,7 +3,7 @@ close all
 clc
 
 %% Name the output file
-fnm = sprintf('a_junc_ahead_3.mat')
+fnm = sprintf('agg-impatience-dens-011-two.mat')
 
 %% define types road and car objects available for simulations
 roadTypes = {@LoopRoad @FiniteRoad};
@@ -18,7 +18,7 @@ accelFlag = 0;% 1-mix arms; 2 - random arms; 0 - fixed arms
 
 accelAheadFlag = 0;% 1-mix arms; 2 - random arms; 0 - fixed arms
 
-plotFlag = 1; % 0 - don't plot sim, 1- plot sim
+plotFlag = 0; % 0 - don't plot sim, 1- plot sim
 
 singleArmFlag = 0;% 1 - stops plotting north arm, 0 - normal junction plotting
 
@@ -29,7 +29,7 @@ priority = 0;% 1- east arm has priority, 0 - no priority
 selectRoadTypes = [1 1]; % 1-loopToad; 2-finiteRoad
 
 %% simulation resolution
-runTime = 3600; % sec
+runTime = 360; % sec
 dt = 0.1;
 nIterations = (runTime/dt)+1;
 nDigits = numel(num2str(dt))-2;
@@ -60,13 +60,13 @@ setappdata(0,'spawnType',spawnType);
 swapRate = 0;
 
 %% density setup
-n_d = 0.014;
+n_d = 0.02;
 density(1) = n_d; % east arm density
 density(2) = n_d; % north arm density
 
 % dens = 0.002:0.001:0.13;
 % for density = dens
-n = 3;
+n = 30;
 nCars(1) = n; % east arm num cars
 nCars(2) = n; % north arm num cars
 
@@ -75,7 +75,7 @@ if timeDistFlag
     pd = makedist('Uniform','upper',3,'lower',1); % time gap with mean 2 seconds
     timeGapDist = random(pd,2*n,1); % (s)
 else
-    timeGapDist = 2*ones(2*n,1); % (s)
+    timeGapDist = 3*ones(2*n,1); % (s)
 end
 
 %% set maximum feasible decelearion
@@ -88,7 +88,7 @@ if accelFlag > 0
         a_feas_min = random(pd,2*n,1); % (m/s^2)
     end
 elseif accelFlag == 0
-    a_feas_min = -9*ones(2*n,1); % (m/s^2)
+    a_feas_min = -5*ones(2*n,1); % (m/s^2)
 end
 
 %% set maximum crossing acceleration
@@ -101,7 +101,7 @@ if accelAheadFlag > 0
         a_ahead = random(pd,2*n,1); % (m/s^2)
     end
 elseif accelAheadFlag == 0
-    a_ahead = 1.5*ones(2*n,1); % (m/s^2)
+    a_ahead = 1.2*ones(2*n,1); % (m/s^2)
 end
 
 
