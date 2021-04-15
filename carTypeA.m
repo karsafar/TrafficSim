@@ -25,6 +25,10 @@ classdef carTypeA < IdmModel
         juncExitVelocity = NaN
         
         behaviour_vec = []
+        changeRate = []
+        
+        firstCarFlag = true
+        genFlag = 0
     end
     
     properties (SetAccess = public)
@@ -145,17 +149,17 @@ classdef carTypeA < IdmModel
             %             obj.bbStore = NaN(nIterations,numel(obj.actStore),'int8');
             %             obj.bbStore = [obj.bbStore;[obj.actStore(:).output]]*NaN;
         end
-        function decide_acceleration(obj,oppositeRoad,roadLength,t,dt,iIteration)
+        function decide_acceleration(obj,oppositeRoad,roadLength,t,dt,iIteration,GenerousChance)
             
             %% if no cars opposite
             if oppositeRoad.numCars > 0
                 
-                oppositeCars = oppositeRoad.allCars;
-                s_in = obj.s_in;
-                s_out = obj.s_out;
-                s = obj.pose(1);
-                v = obj.velocity;
-                v0 = obj.targetVelocity;
+                oppositeCars    = oppositeRoad.allCars;
+                s_in            = obj.s_in;
+                s_out           = obj.s_out;
+                s               = obj.pose(1);
+                v               = obj.velocity;
+                v0              = obj.targetVelocity;
                 
                 %% calc and assign self distance to junction
                 selfDistToJunc = s_in - s + (s>s_in)*roadLength;
@@ -166,6 +170,7 @@ classdef carTypeA < IdmModel
                 %                 pass_ahead_accel = obj.idmAcceleration;
                 calculate_junc_accel(obj,roadLength,3)
                 pass_ahead_accel = obj.juncAccel;
+                
                 %% Future space gap
                 obj.juncExitVelocity = min(obj.maximumVelocity,sqrt(max(0,v^2+2*pass_ahead_accel*selfDistOutOfJunc)));
                 futureMinStopGap = calc_safe_gap(obj.a,obj.b,obj.juncExitVelocity,v0,obj.timeGap,obj.minimumGap,obj.delta,obj.a_min,1);
@@ -263,35 +268,61 @@ classdef carTypeA < IdmModel
                 
                 %% Update values of the Blackboard
                 
-                
-                blackBorad = obj.bb;
-                blackBorad.AemergStop = emergStop;
-                blackBorad.AjuncStop = juncStop;
-                blackBorad.Aahead = pass_ahead_accel;
-                blackBorad.canPassAhead = isEnoughGapAhead;
-                blackBorad.canPassBehind = isEnoughGapBehind;
-                blackBorad.distToJunc = selfDistToJunc;
-                blackBorad.comfDistToJunc = comfortableStopGap;
-                blackBorad.minStopDistToJunc = minStopDistGapToJunc;
-                blackBorad.futureMinGap = futureMinStopGap;
-                blackBorad.futureGap = futureGap;
-                blackBorad.CarsOpposite = any(oppositeDistToJunc > 0);
-                timeDiff = blackBorad.backOffTime - t;
+                blackBorad                      = obj.bb;
+                blackBorad.AemergStop           = emergStop;
+                blackBorad.AjuncStop            = juncStop;
+                blackBorad.Aahead               = pass_ahead_accel;
+                blackBorad.canPassAhead         = isEnoughGapAhead;
+                blackBorad.canPassBehind        = isEnoughGapBehind;
+                blackBorad.distToJunc           = selfDistToJunc;
+                blackBorad.comfDistToJunc       = comfortableStopGap;
+                blackBorad.minStopDistToJunc    = minStopDistGapToJunc;
+                blackBorad.futureMinGap         = futureMinStopGap;
+                blackBorad.futureGap            = futureGap;
+                blackBorad.CarsOpposite         = any(oppositeDistToJunc > 0);
+                timeDiff                        = blackBorad.backOffTime - t;
                 % 1 - if both cars stopped; 0 - if either or both move
                 if timeDiff < -1e-5
                     if (abs(v) < 1e-10 && abs(selfDistToJunc) < 0.1001 &&...
-                            abs(oppositeCars(ind).velocity) < 1e-10 && abs(s_op(ind)-obj.s_in) < 0.1001)
+                            abs(v_comp) < 1e-10 && abs(s_comp-obj.s_in) < 0.1001)
                         blackBorad.isDeadlock = true;
                         blackBorad.backOffTime = t + (randi(51)-1)/(1/dt);
-                        
                     end
-                elseif (abs(timeDiff) < 5e-2) || (abs(oppositeCars(ind).velocity) > 0.5 && blackBorad.isDeadlock)
+                elseif (abs(timeDiff) < 5e-2) || (abs(v_comp) > 0.5 && blackBorad.isDeadlock)
                     blackBorad.isDeadlock = false;
                     blackBorad.backOffTime = -1;
                 end
                 blackBorad.t = t;
                 blackBorad.frontCarPassedJunction = isFrontCarPassedJunction;
                 
+                
+                %% GENEORCITY LOGIC
+                nCars = oppositeRoad.numCars;
+                n_stop      = 4; % number of vehicles to look back for channel capture
+                genProb     = 0.00001; % chance of being generous vehicle (0.001%)
+                v_op        = oppositeRoad.allCarsStates(2,:);
+                nextIdx = ind+n_stop - ((ind+n_stop)>nCars)*nCars;
+                lastCarVel = v_op(nextIdx);
+                if v_comp == 0 && abs (s_comp-s_in) < 0.3 && s_in-s > 0 && obj.genFlag == 0 ...
+                        && v > 0 && lastCarVel == 0 && isEnoughGapAhead && ...
+                        selfDistToJunc >= minStopDistGapToJunc && genProb > GenerousChance 
+                    % && obj.firstCarFlag && isFrontCarPassedJunction
+                     
+                    isEnoughGapBehind = 0;
+                    isEnoughGapAhead = 0;
+                    obj.genFlag = 1;
+                elseif v > 0 && obj.genFlag
+                  
+                    isEnoughGapBehind   = 0;
+                    isEnoughGapAhead    = 0;
+                elseif v == 0 && obj.genFlag
+                    
+                    obj.genFlag = 0;
+                    blackBorad.isDeadlock = true;
+                    blackBorad.backOffTime = t + (randi(51)-1)/(1/dt);
+                end
+                
+                %%
                 
                 obj.cond1.condArray = (~any(oppositeDistToJunc > 0));
                 obj.cond2.condArray = (selfDistToJunc >= minStopDistGapToJunc);
@@ -304,24 +335,26 @@ classdef carTypeA < IdmModel
                 obj.cond12.condArray = (blackBorad.isDeadlock == 1);
                 obj.cond13.condArray = (blackBorad.backOffTime >= t);
                 
-                %% impatience logic
-                % trigger if velocity is zero, can't go ahead or behind
-                v_tol = 0.01; % 0.01 m/s
-                if mod(t,1) == 0
-                    if v < v_tol && isEnoughGapAhead == 0 && isEnoughGapBehind == 0 && abs(s - s_in) < 10 
-                        if obj.minTimeGap > 0.5
-                            obj.minTimeGap  = obj.minTimeGap-0.1;
-                            obj.a_feas_min  = obj.a_feas_min-0.4;
-                            obj.a_ahead     = obj.a_ahead+0.09;
-                        end
-%                         [obj.minTimeGap obj.a_feas_min obj.a_ahead]
-                    elseif obj.minTimeGap ~= obj.behaviour_vec(1) && s > s_out
-                        obj.minTimeGap  = obj.behaviour_vec(1);
-                        obj.a_feas_min  = obj.behaviour_vec(2);
-                        obj.a_ahead     = obj.behaviour_vec(3);
-                        %                     [obj.minTimeGap obj.a_feas_min obj.a_ahead]
-                    end
-                end
+                %% IMPATIENCE LOGIC
+%                 % trigger if velocity is zero, can't go ahead or behind
+%                 v_tol = 0.01; % 0.01 m/s
+%                 if mod(t,10) == 0
+%                     if v < v_tol && isEnoughGapAhead == 0 && isEnoughGapBehind == 0 && abs(s - s_in) < 10
+%                         if obj.minTimeGap > 1
+%                             obj.minTimeGap  = obj.minTimeGap-obj.changeRate(1);
+%                             obj.a_feas_min  = obj.a_feas_min-obj.changeRate(2);
+%                             obj.a_ahead     = obj.a_ahead+obj.changeRate(3);
+%                         end
+%                         %  [obj.minTimeGap obj.a_feas_min obj.a_ahead]
+%                     elseif obj.minTimeGap ~= obj.behaviour_vec(1) && s > s_out
+%                         obj.minTimeGap  = obj.behaviour_vec(1);
+%                         obj.a_feas_min  = obj.behaviour_vec(2);
+%                         obj.a_ahead     = obj.behaviour_vec(3);
+%                         %  [obj.minTimeGap obj.a_feas_min obj.a_ahead]
+%                     end
+%                 end
+%                 
+                
             end
             
             

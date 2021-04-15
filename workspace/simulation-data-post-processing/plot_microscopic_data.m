@@ -19,14 +19,14 @@ for iCar = 1:sim.vertArm.numCars
     velArrayNorth(iCar,:) = sim.vertArm.allCars(iCar).History(2,transCut+1:end);
 end
          
-
+ 
 % Spatiotenporal Velocity Profiles
 
-d = 2; % density on points in scatter plot
+d = 30; % density on points in scatter plot
 plot_spatiotemporal_profiles(sim,transCut,t_rng(transCut+1:end),(nIterations-transCut),d)
 
 %% save the figure
-fileName = sprintf('runningTimeCurve.pdf');
+fileName = sprintf('Point5-east-27-north-3-high-capacity.pdf');
 savePDF(gcf,fileName)
 
 %% flow change
