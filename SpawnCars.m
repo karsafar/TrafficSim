@@ -132,6 +132,7 @@ classdef SpawnCars < handle
                     if iCar > 1
                         insertAfter(obj.allCars(iCar),obj.allCars(iCar-1));
                         obj.allCars(iCar).leaderFlag = false;
+                        obj.allCars(iCar).firstCarFlag = false;
                     end
                 end
                 leaderCar = obj.allCars(1);

@@ -45,6 +45,7 @@ ylim([yA yB])
 lgd = legend('Vehicle 1','Vehicle 2','Vehicle 3','Vehicle 4','Location','northoutside','Orientation','horizontal');
 
 
+lgd.FontSize = 24;
 
 % plot velocities
 % Tile 2
@@ -84,7 +85,7 @@ plot(t_rng,1*ones(1,nIterations),'k--')
 t1 = text(1,2,'Maximum acceleration $\overline{a} = 1\,\mathrm{m/s^2}$');
 t1.FontSize = 22;
 plot(t_rng,-9*ones(1,nIterations),'k--')
-t2 = text(1,-11,'Maximum deceleration $a_{\textrm{feas}}^{\textrm{max}} = -9\,\mathrm{m/s^2}$');
+t2 = text(1,-11,'Maximum deceleration $\underline{a} = -9\,\mathrm{m/s^2}$');
 t2.FontSize = 22;
 % legend('Vehicle 1 with $v(0) = 0$','Vehicle 1 with $v(0) = \overline{v}$',...
 %     'Vehicle 2','Comfortable acceleration $a = 1\,\mathrm{m/s^2}$',...

@@ -13,8 +13,8 @@ function  [sim] = run_simulation(...
     dt)
 
 % construct two arms of the junction objects
-HorizontalArm = roadTypes{1}([{carTypes},0,roadDims,priority],ArmH);
-VerticalArm = roadTypes{2}([{carTypes},90,roadDims,priority],ArmV);
+HorizontalArm   = roadTypes{1}([{carTypes},0,roadDims,priority],ArmH);
+VerticalArm     = roadTypes{2}([{carTypes},90,roadDims,priority],ArmV);
 
 clear ArmH ArmV
 % plot the junction
@@ -63,12 +63,19 @@ for iCar = 1:HorizontalArm.numCars
     HorizontalArm.allCars(iCar).minTimeGap = minTimeGap(iCar);
     HorizontalArm.allCars(iCar).a_feas_min = a_feas_min(iCar);
     HorizontalArm.allCars(iCar).a_ahead = a_ahead(iCar);
+    HorizontalArm.allCars(iCar).behaviour_vec = [minTimeGap(iCar) a_feas_min(iCar) a_ahead(iCar)];
+    HorizontalArm.allCars(iCar).changeRate = [minTimeGap(iCar)-1 a_feas_min(iCar)+13 1.8-a_ahead(iCar)]/20;
 end
 for jCar = 1:VerticalArm.numCars
     VerticalArm.allCars(jCar).minTimeGap = minTimeGap(iCar+jCar);
     VerticalArm.allCars(jCar).a_feas_min = a_feas_min(iCar+jCar);
     VerticalArm.allCars(jCar).a_ahead = a_ahead(iCar+jCar);
+    VerticalArm.allCars(jCar).behaviour_vec = [minTimeGap(iCar+jCar) a_feas_min(iCar+jCar) a_ahead(iCar+jCar)];
+    VerticalArm.allCars(jCar).changeRate = [minTimeGap(iCar+jCar)-1 a_feas_min(iCar+jCar)+13 1.8-a_ahead(iCar+jCar)]/20;
 end
+
+% random arrays between 0 and 1 for the "generocity" feature
+generocityProbDist = makedist('uniform','lower',0,'upper',1);
 
 for iIteration = 1:nIterations
     % update time
@@ -122,7 +129,8 @@ for iIteration = 1:nIterations
     % Itersection Collision Avoidance (ICA)
     for iCar = 1:HorizontalArm.numCars
         if t >= transientCutOffLength
-            HorizontalArm.allCars(iCar).decide_acceleration(VerticalArm,roadDims.Length(1),t,dt,iIteration);
+            GenerousChance = random(generocityProbDist);
+            HorizontalArm.allCars(iCar).decide_acceleration(VerticalArm,roadDims.Length(1),t,dt,iIteration,GenerousChance);
         else
             HorizontalArm.allCars(iCar).acceleration = HorizontalArm.allCars(iCar).idmAcceleration;
             check_for_negative_velocity(HorizontalArm.allCars(iCar),dt);
@@ -130,7 +138,8 @@ for iIteration = 1:nIterations
     end
     for jCar = 1:VerticalArm.numCars
         if t >= transientCutOffLength
-            VerticalArm.allCars(jCar).decide_acceleration(HorizontalArm,roadDims.Length(2),t,dt,iIteration);
+            GenerousChance = random(generocityProbDist);
+            VerticalArm.allCars(jCar).decide_acceleration(HorizontalArm,roadDims.Length(2),t,dt,iIteration,GenerousChance);
         else
             VerticalArm.allCars(jCar).acceleration = VerticalArm.allCars(jCar).idmAcceleration;
             check_for_negative_velocity( VerticalArm.allCars(jCar),dt);

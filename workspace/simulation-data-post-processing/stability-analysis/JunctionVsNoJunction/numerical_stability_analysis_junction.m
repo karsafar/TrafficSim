@@ -4,37 +4,39 @@ close all
 
 %% 
 % load data in the loop
-d = dir('a_idm_*.mat');
+d = dir('Junction/a_idm_*.mat');
 Number_mat = length(d);
 numCars = [];
 a_val = {'0_5','0_75','1','1_5'};
 for i = 1:Number_mat
     fnm = sprintf('a_idm_%s',a_val{i});
-    setUp = sprintf('a_idm_%s_phased_vs_rand',a_val{i});
-    load(fullfile(fnm))   
+    setUp = sprintf('a_idm_%s_junction',a_val{i});
+    load(fullfile('Junction',fnm))   
     for j = 1:numel(data)
         numCrosses(i,j) = numel(data(j).crossCount);
     end
     
     %% Plot Fundamental Diagram
     xlabel('Density $\rho\,(\mathrm{veh/m})$')
-    ylabel('Flow Q  $(\mathrm{veh/hr})$')
+    ylabel('Flow $Q\,(\mathrm{veh/hr})$')
     hold on
     grid on
     box on
     [k,q,v] = fundamentaldiagram();
-    plot(k,2*q*3600,'k-','LineWidth',2,'DisplayName','2x Fundamental diagram')
-    plot(k,q*3600,'-','Color',[0.5 0.5 0.5 ],'LineWidth',2,'DisplayName','Fundamental diagram')
+%     plot(k,2*q*3600,'k-','LineWidth',2,'DisplayName','2x Fundamental diagram')
+    plot(k,q*3600,'-','Color',[0.5 0.5 0.5 ],'LineWidth',1,'DisplayName','Fundamental diagram')
     lgd = legend;
     lgd.Location = 'northoutside';
     lgd.NumColumns = 2;
     %% Instability border lines (sim vs analyt)
     % plot the crossings
-    plot(density(1,:),numCrosses(i,:),'r*','LineWidth',1,'DisplayName','Random Set-up')
-    %physical limiting density
-    x_val = [0.5952 0.5952];
-    y_val = [0 max(ylim)];
-    plot(x_val,y_val,'r-','LineWidth',1,'DisplayName','Physical Limiting Density')
+    plot(density(1,:),numCrosses(i,:),'r*','LineWidth',1,'DisplayName','Junction Flow')
+
+    fnm = sprintf('a_idm_%s',a_val{i});
+    setUp = sprintf('a_idm_%s_junction_no_junction',a_val{i});
+    load(fullfile('noJunciton',fnm)) 
+    
+    plot(eastArm.density,eastArm.flow*3600,'go','LineWidth',1,'DisplayName','Single Road Flow')
     % plot assymptote
     Yasymptote = 0:max(ylim);
     if i < 4

@@ -10,7 +10,7 @@ numCars = [];
 a_val = {'0_5','0_75','1','1_5'};
 for i = 1:Number_mat
     fnm = sprintf('a_idm_%s',a_val{i});
-    setUp = sprintf('a_idm_%s_phased_vs_rand',a_val{i});
+    setUp = sprintf('a_idm_%s_junction',a_val{i});
     load(fullfile(fnm))   
     for j = 1:numel(data)
         numCrosses(i,j) = numel(data(j).crossCount);
@@ -31,10 +31,6 @@ for i = 1:Number_mat
     %% Instability border lines (sim vs analyt)
     % plot the crossings
     plot(density(1,:),numCrosses(i,:),'r*','LineWidth',1,'DisplayName','Random Set-up')
-    %physical limiting density
-    x_val = [0.5952 0.5952];
-    y_val = [0 max(ylim)];
-    plot(x_val,y_val,'r-','LineWidth',1,'DisplayName','Physical Limiting Density')
     % plot assymptote
     Yasymptote = 0:max(ylim);
     if i < 4

@@ -19,14 +19,14 @@ for iCar = 1:sim.vertArm.numCars
     velArrayNorth(iCar,:) = sim.vertArm.allCars(iCar).History(2,transCut+1:end);
 end
          
-
+ 
 % Spatiotenporal Velocity Profiles
 
-d = 5; % density on points in scatter plot
+d = 30; % density on points in scatter plot
 plot_spatiotemporal_profiles(sim,transCut,t_rng(transCut+1:end),(nIterations-transCut),d)
 
 %% save the figure
-fileName = sprintf('Point5-east-27-north-3-low-capacity.pdf');
+fileName = sprintf('Point5-east-27-north-3-high-capacity.pdf');
 savePDF(gcf,fileName)
 
 %% flow change
@@ -138,7 +138,7 @@ ylabel(ax4,'Flow (veh/hr)')
 
 
 [k,q, v] = fundamentaldiagram();
-flowVal = q(abs(k-density(1))<0.0001);
+flowVal = q(abs(k-density(1))<0.0000001);
 plot(ax4,t_rng,flowVal(1)*ones(1,nIterations)*tLength,'k--','LineWidth',1)
 xlim([0 t_rng(end)])
 ylim([0 max(max(junction.flowChange),flowVal(1))*tLength+100])
