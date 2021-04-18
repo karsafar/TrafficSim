@@ -6,8 +6,10 @@ classdef Junction < handle
         %         vertCarsImageHandle = []
         collidingCarsIdx = NaN(1,2)
         collisionFlag = 0
-        crossOrder = NaN
-        crossCarTypeOrder = NaN
+        
+        crossOrder
+        crossCarTypeOrder
+        
         crossCount = []
         crossCarTypeCount = []
 
@@ -24,10 +26,12 @@ classdef Junction < handle
     end
     
     methods
-        function obj = Junction(roadDimensions,plotFlag)
+        function obj = Junction(roadDimensions,plotFlag,nIterations)
             if plotFlag
                 obj.plot_outline(roadDimensions);
             end
+            obj.crossOrder = NaN(nIterations,1,'single');
+            obj.crossCarTypeOrder = NaN(nIterations,1,'single');
         end
         function plot_outline(obj,roadDimensions)
             allAxesInFigure = findall(0,'type','axes');
@@ -38,7 +42,8 @@ classdef Junction < handle
             else
                 h1 = figure('units', 'normalized', 'position', [0.4, 0, 0.6, 1]);
             end
-            obj.junctionPlotHandle = axes('Parent',h1,'Units','normalized','Position',[0.05 0.5 0.9 0.45]);
+%             obj.junctionPlotHandle = axes('Parent',h1,'Units','normalized','Position',[0.05 0.5 0.9 0.45]);
+            obj.junctionPlotHandle = axes;
             %{
             obj.flowHandle = axes('Parent',h1,'Units','normalized','Position',[0.05 0.3 0.9 0.15]);
             hold(obj.flowHandle,'on')
@@ -70,9 +75,28 @@ classdef Junction < handle
                 xBox = xLimit([1 1 2 2 1]);
                 yBox = yLimit([1 2 2 1 1]);
                 
-                fill(obj.junctionPlotHandle,xBox,yBox,[0.5 0.5 0.5])
+                % roadPlotHanlde - handle for each individual road  
+                roadPlotHanlde(i) = fill(obj.junctionPlotHandle,xBox,yBox,[0.5 0.5 0.5]);
             end
-            
+            x1=-roadDimensions.Width(1)/2;
+            x2=roadDimensions.Width(1)/2;
+            y1=-roadDimensions.Width(1)/2;
+            y2=roadDimensions.Width(1)/2;
+            x = [x1, x2, x2, x1, x1];
+            y = [y1, y1, y2, y2, y1];
+           
+            % juncBoxhandle - handle for junction box
+            juncBoxhandle = plot(obj.junctionPlotHandle,x, y,'k');
+
+            %RoadOrJunctionFlag - flag determins if plotting junction or single road
+            % True - plot just road; False - plot full junction
+            RoadOrJunctionFlag = getappdata(0,'RoadOrJunctionFlag');
+             
+            if RoadOrJunctionFlag
+                roadPlotHanlde(2).Visible = 'Off';
+                juncBoxhandle.Visible = 'Off';
+            end
+                                
             if isempty(allAxesInFigure)
                 iDimension = [2.16 4.4 2.75];
                 carRectangle = [ 0 0; iDimension(2) 0; iDimension(2) iDimension(1); 0 iDimension(1)]-...
@@ -115,12 +139,10 @@ classdef Junction < handle
             end
 %}
         end
-        
-        
         function draw_car(obj,Arm,flag)
             plotVectorX = NaN(1,5);
             plotVectorY = NaN(1,5);
-            
+            delete(Arm.CarsNumberHandle);
             for iCar = 1:Arm.numCars
                 iDimension = Arm.allCars(iCar).dimension;
                 iPosition = Arm.allCars(iCar).pose;
@@ -169,14 +191,18 @@ classdef Junction < handle
                         carColour = 'k';
                 end
                 arm.CarsImageHandle = [arm.CarsImageHandle; fill(obj.junctionPlotHandle,plotVectorX',plotVectorY',carColour)];
-                
+%                 msg = sprintf('%i', iCar);
+%                 arm.CarsNumberHandle = [arm.CarsNumberHandle; text(mean(plotVectorX),mean(plotVectorY),msg,'Color','black')];
             else
                 set(arm.CarsImageHandle(iCar),'XData',plotVectorX','YData',plotVectorY');
+%                 set(arm.CarsNumberHandle(iCar),'XData',mean(plotVectorX),'YData',mean(plotVectorY));
             end
+            msg = sprintf('%i', iCar);
+            arm.CarsNumberHandle = [arm.CarsNumberHandle; text(mean(plotVectorX),mean(plotVectorY),msg,'Color','black')];
+            
+            
         end
-        
-        
-        function collision_check(obj,allCarsHoriz,allCarsVert,nCars,mCars,plotFlag,t)
+        function collision_check(obj,allCarsHoriz,allCarsVert,nCars,mCars,plotFlag,t,iIteration)
             hCar = 0;
             if isempty(allCarsHoriz) && isempty(allCarsVert)
                 return
@@ -212,50 +238,63 @@ classdef Junction < handle
             if nCars > 0 && mCars > 0
                 if hCar ==  obj.collidingCarsIdx(1) && vCar ==  obj.collidingCarsIdx(2)
                     obj.collisionFlag = 0;
-                    if isempty(obj.crossOrder)
-                        obj.crossOrder = NaN;
-                        obj.crossCarTypeOrder = NaN;
-                    else
-                        obj.crossOrder = [obj.crossOrder obj.crossOrder(end)];
-                        obj.crossCarTypeOrder = [obj.crossCarTypeOrder obj.crossCarTypeOrder(end)];
+%                     if isempty(obj.crossOrder)
+%                         obj.crossOrder = NaN;
+%                         obj.crossCarTypeOrder = NaN;
+%                     else
+%                         obj.crossOrder = [obj.crossOrder obj.crossOrder(end)];
+%                         obj.crossCarTypeOrder = [obj.crossCarTypeOrder obj.crossCarTypeOrder(end)];
+%                     end
+                    if iIteration > 1
+                        obj.crossOrder(iIteration) = obj.crossOrder(iIteration-1);
+                        obj.crossCarTypeOrder(iIteration) = obj.crossCarTypeOrder(iIteration-1);
                     end
                 elseif hCar > 0 && vCar > 0
+                    obj.crossCount = [obj.crossCount NaN];
                     obj.collidingCarsIdx = [hCar; vCar];
                     obj.collisionFlag = 1;
-                    if isempty(obj.crossOrder)
-                        obj.crossOrder = NaN;
-                        obj.crossCarTypeOrder = NaN;
-                    else
-                        obj.crossOrder = [obj.crossOrder obj.crossOrder(end)];
-                        obj.crossCarTypeOrder = [obj.crossCarTypeOrder obj.crossCarTypeOrder(end)];
+%                     if isempty(obj.crossOrder)
+%                         obj.crossOrder = NaN;
+%                         obj.crossCarTypeOrder = NaN;
+%                     else
+%                         obj.crossOrder = [obj.crossOrder obj.crossOrder(end)];
+%                         obj.crossCarTypeOrder = [obj.crossCarTypeOrder obj.crossCarTypeOrder(end)];
+%                     end
+                    
+                    if iIteration > 1
+                        obj.crossOrder(iIteration) = obj.crossOrder(iIteration-1);
+                        obj.crossCarTypeOrder(iIteration) = obj.crossCarTypeOrder(iIteration-1);
                     end
                     % count crossing orders
                 elseif hCar > 0 && hCar ~=  obj.collidingCarsIdx(1)
                     
-                    obj.crossOrder = [obj.crossOrder 0];
+%                     obj.crossOrder = [obj.crossOrder 0];
+                    obj.crossOrder(iIteration) = 0;
                     obj.crossCount = [obj.crossCount 0];
                     
                     obj.collidingCarsIdx(1) = hCar;
+                    
                     switch class(allCarsHoriz(hCar))
                         case 'carTypeA'
                             obj.crossCarTypeCount = [obj.crossCarTypeCount 1];
-                            obj.crossCarTypeOrder = [obj.crossCarTypeOrder 1];
-
+%                             obj.crossCarTypeOrder = [obj.crossCarTypeOrder 1];
+                            obj.crossCarTypeOrder(iIteration) = 1;
                         case 'carTypeB'
                             obj.crossCarTypeCount = [obj.crossCarTypeCount 2];
-                            obj.crossCarTypeOrder = [obj.crossCarTypeOrder 2];
-
+%                             obj.crossCarTypeOrder = [obj.crossCarTypeOrder 2];
+                            obj.crossCarTypeOrder(iIteration) = 2;   
                         case 'carTypeC'
                             obj.crossCarTypeCount = [obj.crossCarTypeCount 3];
-                            obj.crossCarTypeOrder = [obj.crossCarTypeOrder 3];
-
+%                             obj.crossCarTypeOrder = [obj.crossCarTypeOrder 3];
+                            obj.crossCarTypeOrder(iIteration) = 3;
                         otherwise
                             obj.crossCarTypeCount = [obj.crossCarTypeCount NaN];
-                            obj.crossCarTypeOrder = [obj.crossCarTypeOrder NaN];
+%                             obj.crossCarTypeOrder = [obj.crossCarTypeOrder NaN];
                     end
                 elseif vCar > 0 && vCar ~=  obj.collidingCarsIdx(2)
                     
-                    obj.crossOrder = [obj.crossOrder 1];
+%                     obj.crossOrder = [obj.crossOrder 1];
+                    obj.crossOrder(iIteration) = 1;
                     obj.crossCount = [obj.crossCount 1];
                     
                     %                     obj.collidingCarsIdx(1) = 0;
@@ -263,46 +302,55 @@ classdef Junction < handle
                     switch class(allCarsVert(vCar))
                         case 'carTypeA'
                             obj.crossCarTypeCount = [obj.crossCarTypeCount 1];
-                            obj.crossCarTypeOrder = [obj.crossCarTypeOrder 1];
-
+%                             obj.crossCarTypeOrder = [obj.crossCarTypeOrder 1];
+                            obj.crossCarTypeOrder(iIteration) = 1;
                         case 'carTypeB'
                             obj.crossCarTypeCount = [obj.crossCarTypeCount 2];
-                            obj.crossCarTypeOrder = [obj.crossCarTypeOrder 2];
-
+%                             obj.crossCarTypeOrder = [obj.crossCarTypeOrder 2];
+                            obj.crossCarTypeOrder(iIteration) = 2;   
                         case 'carTypeC'
                             obj.crossCarTypeCount = [obj.crossCarTypeCount 3];
-                            obj.crossCarTypeOrder = [obj.crossCarTypeOrder 3];
-
+%                             obj.crossCarTypeOrder = [obj.crossCarTypeOrder 3];
+                            obj.crossCarTypeOrder(iIteration) = 3;
                         otherwise
                             obj.crossCarTypeCount = [obj.crossCarTypeCount NaN];
-                            obj.crossCarTypeOrder = [obj.crossCarTypeOrder NaN];
+%                             obj.crossCarTypeOrder = [obj.crossCarTypeOrder NaN];
                     end
                 else
-                    if isempty(obj.crossOrder)
-                        obj.crossOrder = NaN;
-                        obj.crossCarTypeOrder = NaN;
-                    else
-                        obj.crossOrder = [obj.crossOrder obj.crossOrder(end)];
-                        obj.crossCarTypeOrder = [obj.crossCarTypeOrder obj.crossCarTypeOrder(end)];
+%                     if isempty(obj.crossOrder)
+%                         obj.crossOrder = NaN;
+%                         obj.crossCarTypeOrder = NaN;
+%                     else
+%                         obj.crossOrder = [obj.crossOrder obj.crossOrder(end)];
+%                         obj.crossCarTypeOrder = [obj.crossCarTypeOrder obj.crossCarTypeOrder(end)];
+%                     end
+                    if iIteration > 1
+                        obj.crossOrder(iIteration) = obj.crossOrder(iIteration-1);
+                        obj.crossCarTypeOrder(iIteration) = obj.crossCarTypeOrder(iIteration-1);
                     end
                 end
             else
-                obj.crossOrder = [obj.crossOrder obj.crossOrder(end)];
-                obj.crossCarTypeOrder = [obj.crossCarTypeOrder obj.crossCarTypeOrder(end)];
+                    if iIteration > 1
+                        obj.crossOrder(iIteration) = obj.crossOrder(iIteration-1);
+                        obj.crossCarTypeOrder(iIteration) = obj.crossCarTypeOrder(iIteration-1);
+                    end
+%                 obj.crossOrder = [obj.crossOrder obj.crossOrder(end)];
+%                 obj.crossCarTypeOrder = [obj.crossCarTypeOrder obj.crossCarTypeOrder(end)];
             end
-            %{
-                        if obj.collisionFlag
-                            msg = sprintf('Collision occured at time t = %f. collided cars = [%d %d] %i',t,hCar,vCar);
-                            obj.collisionMsgs = [obj.collisionMsgs; msg];
-                            %save(['coll_t-' num2str(t) '.mat'],'allCarsHoriz','allCarsVert');
-                            disp(msg);
-            
-                            if plotFlag
-                                junctionAxesHandle = text(obj.junctionPlotHandle,3,-7,msg,'Color','red');
-                                delete(junctionAxesHandle);
-                            else
-                            end
-                        end
+%             %{
+            if obj.collisionFlag
+                msg = sprintf('Collision occured at time t = %d collided cars = [%d %d]',t,hCar,vCar);
+                obj.collisionMsgs = [obj.collisionMsgs; size(msg)];
+                %save(['coll_t-' num2str(t) '.mat'],'allCarsHoriz','allCarsVert');
+                disp(msg);
+
+                if plotFlag
+                    junctionAxesHandle = text(obj.junctionPlotHandle,3,-7,msg,'Color','red');
+                    delete(junctionAxesHandle);
+                else
+                end
+                obj.collisionFlag = 0;
+            end
             %}
         end
         

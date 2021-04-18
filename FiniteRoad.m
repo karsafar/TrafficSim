@@ -37,6 +37,7 @@ classdef FiniteRoad < Road
                 obj.flow = NaN(finite_road_args{5},1);
                 obj.inflow = NaN(finite_road_args{5},1);
                 obj.outflow = NaN(finite_road_args{5},1);
+                obj.variance = NaN(finite_road_args{5},1);
             end
         end
         function spawn_car(obj,time,dt)

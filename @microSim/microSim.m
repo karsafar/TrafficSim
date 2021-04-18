@@ -22,7 +22,7 @@ function varargout = microSim(varargin)
 
 % Edit the above text to modify the response to help UI
 
-% Last Modified by GUIDE v2.5 18-Sep-2018 22:30:52
+% Last Modified by GUIDE v2.5 18-Nov-2019 18:30:48
 
 % Begin initialization code - DO NOT EDIT
 
@@ -55,7 +55,7 @@ function UI_OpeningFcn(hObject, eventdata, handles, varargin)
 %            command line (see VARARGIN)
 
 % Choose default command line output for UI
-handles.carTypes = {@IdmModel, @HdmModel, @carTypeB, @carTypeC, @HesitantCar, @carTypeA};
+handles.carTypes = {@IdmModel, @HdmModel, @carTypeB, @carTypeC, @HesitantCar,@carTypeA, @carTypeA_TEST};
 handles.roadTypes = {@LoopRoad @FiniteRoad};
 
 % handles.hPlot7 = plot(handles.axes7, NaN, NaN)
@@ -400,6 +400,10 @@ function handles = pushbutton2_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton2 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+pause(3)
+testNamingBox_Callback(handles.testNamingBox,eventdata,handles);
+spawn_type_Callback(handles.spawn_type,eventdata,handles);
+
 if handles.loadFlag == 0
     handles = uibuttongroup2_ButtonDownFcn(handles.uibuttongroup2, eventdata, handles);
     handles = uibuttongroup6_ButtonDownFcn(handles.uibuttongroup6, eventdata, handles);
@@ -454,7 +458,7 @@ else
     VerticalArm = handles.VerticalArm;
 end
 % plot the junction
-junc = Junction(roadDims, plotFlag);
+junc = Junction(roadDims, plotFlag,nIterations);
 
 if plotFlag == 0
     f = waitbar(0,'','Name','Running simulation',...
@@ -468,13 +472,16 @@ set(handles.pushbutton3,'userdata',0);
 
 % define the length of storage data for all cars
 for iCar = 1:HorizontalArm.numCars
-    HorizontalArm.allCars(iCar).History = NaN(4,nIterations);
+%     HorizontalArm.allCars(iCar).History = NaN(4,nIterations);
+    HorizontalArm.allCars(iCar).History = NaN(3,nIterations,'single');
+
 end
 for jCar = 1:VerticalArm.numCars
-    VerticalArm.allCars(jCar).History = NaN(4,nIterations);
+%     VerticalArm.allCars(jCar).History = NaN(4,nIterations);
+    VerticalArm.allCars(jCar).History = NaN(3,nIterations,'single');
 end
 
-transientCutOffLength = 100;
+transientCutOffLength = 0;
 swapRate = 0.0;
 % define transient length
 HorizontalArm.transientCutOffLength = transientCutOffLength;
@@ -487,12 +494,13 @@ end
 if isa(VerticalArm,'LoopRoad')
     VerticalArm.swapRate = swapRate;
 end
-
+tic
+% create our clean up object
+cleanupObj = onCleanup(@cleanMeUp);
 for iIteration = handles.iIteration:nIterations
     % update time
     t = handles.t_rng(iIteration);
     
-    % define the length of storage data for all cars
     for iCar = 1:HorizontalArm.numCars
         HorizontalArm.allCarsStates(1,iCar) = HorizontalArm.allCars(iCar).pose(1);
         HorizontalArm.allCarsStates(2,iCar) = HorizontalArm.allCars(iCar).velocity;
@@ -522,7 +530,7 @@ for iIteration = handles.iIteration:nIterations
         VerticalArm.allCars,...
         HorizontalArm.numCars,...
         VerticalArm.numCars,...
-        plotFlag,t);
+        plotFlag,t,iIteration);
     
     % calculate IDM acceleration
     for iCar = 1:HorizontalArm.numCars
@@ -534,24 +542,33 @@ for iIteration = handles.iIteration:nIterations
     
     % Itersection Collision Avoidance (ICA)
     for iCar = 1:HorizontalArm.numCars
-        if t >= transientCutOffLength*0.8
-            HorizontalArm.allCars(iCar).decide_acceleration(VerticalArm,roadDims.Length(1),t,dt);
+        if t >= transientCutOffLength
+            HorizontalArm.allCars(iCar).decide_acceleration(VerticalArm,roadDims.Length(1),t,dt,iIteration);
         else
             HorizontalArm.allCars(iCar).acceleration = HorizontalArm.allCars(iCar).idmAcceleration;
             check_for_negative_velocity( HorizontalArm.allCars(iCar),dt);
         end
 %         HorizontalArm.allCarsStates(3,iCar) = HorizontalArm.allCars(iCar).acceleration;
-        
     end
     for jCar = 1:VerticalArm.numCars
-        if t >= transientCutOffLength*0.8
-            VerticalArm.allCars(jCar).decide_acceleration(HorizontalArm,roadDims.Length(2),t,dt);
+        if t >= transientCutOffLength
+            VerticalArm.allCars(jCar).decide_acceleration(HorizontalArm,roadDims.Length(2),t,dt,iIteration);
         else
             VerticalArm.allCars(jCar).acceleration = VerticalArm.allCars(jCar).idmAcceleration;
             check_for_negative_velocity( VerticalArm.allCars(jCar),dt);
         end
 %         VerticalArm.allCarsStates(3,jCar) = VerticalArm.allCars(jCar).acceleration;
     end
+    
+%     % define the length of storage data for all cars
+%     for iCar = 1:HorizontalArm.numCars
+%         HorizontalArm.allCarsStates(3,iCar) = HorizontalArm.allCars(iCar).acceleration;
+%         HorizontalArm.allCars(iCar).store_state_data(t,HorizontalArm.allCarsStates(:,iCar));
+%     end
+%     for jCar = 1:VerticalArm.numCars
+%         VerticalArm.allCarsStates(3,jCar) = VerticalArm.allCars(jCar).acceleration;
+%         VerticalArm.allCars(jCar).store_state_data(t,VerticalArm.allCarsStates(:,jCar));
+%     end
     
     count_emegrency_breaks(HorizontalArm);
     count_emegrency_breaks(VerticalArm);
@@ -584,8 +601,46 @@ if plotFlag == 0
     f = findall(0,'type','figure','tag','TMWWaitbar');
     delete(f)
 end
-set(handles.pushbutton_plot_resutls, 'enable', 'on')
 
+sim.horizArm = HorizontalArm;
+sim.vertArm = VerticalArm;
+sim.crossOrder = junc.crossOrder;
+sim.crossCount = junc.crossCount;
+sim.crossCarTypeCount = junc.crossCarTypeCount;
+sim.crossCarTypeOrder = junc.crossCarTypeOrder;
+
+allCarsNumArray_H = handles.allCarsNumArray_H;
+allCarsNumArray_V = handles.allCarsNumArray_V;
+carTypes = handles.carTypes;
+nCars(1) = HorizontalArm.numCars;
+nCars(2) = VerticalArm.numCars;
+density = roadDims.Length./nCars';
+t_rng = handles.t_rng;
+road = roadDims;
+
+Test_Name = getappdata(0,'file_name');
+
+fileName = sprintf('%s.mat',Test_Name);
+
+save(fileName,...
+    'carTypes',...
+    'nCars',...
+    'allCarsNumArray_H',...
+    'allCarsNumArray_V',...
+    'dt',...
+    't_rng',...
+    'plotFlag',...
+    'density',...
+    'road',...
+    'nIterations',...
+    'sim',...
+    'transientCutOffLength',...
+    'swapRate',...
+    '-v7.3')
+
+
+set(handles.pushbutton_plot_resutls, 'enable', 'on')
+toc
 handles.HorizontalArm = HorizontalArm;
 handles.VerticalArm = VerticalArm;
 handles.iIteration = iIteration;
@@ -1428,6 +1483,9 @@ function pushbutton7_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % construct two arms of the junction objects
+testNamingBox_Callback(handles.testNamingBox,eventdata,handles);
+spawn_type_Callback(handles.spawn_type,eventdata,handles);
+
 handles = pushbutton2_Callback(handles.pushbutton2, eventdata, handles);
 guidata(hObject,handles);
 
@@ -1826,3 +1884,56 @@ function updateRateGroup_CreateFcn(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 set(findall(hObject, '-property', 'enable'), 'enable', 'on');
+
+
+% --- Executes on button press in vertical_arm_visibility.
+function vertical_arm_visibility_Callback(hObject, eventdata, handles)
+% hObject    handle to vertical_arm_visibility (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+RoadOrJunctionFlag = get(hObject,'Value');
+
+setappdata(0,'RoadOrJunctionFlag',RoadOrJunctionFlag);
+
+% Hint: get(hObject,'Value') returns toggle state of vertical_arm_visibility
+
+
+
+function testNamingBox_Callback(hObject, eventdata, handles)
+% hObject    handle to testNamingBox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of testNamingBox as text
+%        str2double(get(hObject,'String')) returns contents of testNamingBox as a double
+file_name = get(hObject,'String');
+setappdata(0,'file_name',file_name)
+guidata(hObject,handles);
+
+% --- Executes during object creation, after setting all properties.
+function testNamingBox_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to testNamingBox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in spawn_type.
+function spawn_type_Callback(hObject, eventdata, handles)
+% hObject    handle to spawn_type (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% 0 - random; 1 - phased
+if get(hObject,'Value')
+    spawnType = 1;
+else
+    spawnType = 0;
+end
+setappdata(0,'spawnType',spawnType);
+% Hint: get(hObject,'Value') returns toggle state of spawn_type

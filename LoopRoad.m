@@ -1,14 +1,12 @@
+
 classdef LoopRoad < Road
     properties (SetAccess = public)
-        storeSwappedIndices = []
         diceDistGen = makedist('uniform','lower',0,'upper',1);
-        carTypeRatios
         swapPostionArray = [];
         originalClassArray = [];
         newClassArray = [];
         swapRate = []
         flow = []
-        
         inflow = []
         outflow = []
     end
@@ -20,13 +18,13 @@ classdef LoopRoad < Road
             if numel(loop_road_args) == 1
                 obj.numCars = loop_road_args.numCars;
                 obj.allCars = loop_road_args.allCars;
-                obj.averageVelocityHistory = NaN(loop_road_args.nIterations,1);
+%                 obj.averageVelocityHistory = single(NaN(loop_road_args.nIterations,1));
                 
-                obj.flow = NaN(loop_road_args.nIterations,1);
-                obj.inflow = NaN(loop_road_args.nIterations,1);
-                obj.outflow = NaN(loop_road_args.nIterations,1);
-                
-                obj.variance = NaN(loop_road_args.nIterations,1);
+%                 obj.flow = single( NaN(loop_road_args.nIterations,1));
+%                 obj.inflow = single(NaN(loop_road_args.nIterations,1));
+%                 obj.outflow = single(NaN(loop_road_args.nIterations,1));
+%                 
+%                 obj.variance = single(NaN(loop_road_args.nIterations,1));
             else
                 % I don't need this part
                 obj.allCarsNumArray = loop_road_args{1};
@@ -34,10 +32,10 @@ classdef LoopRoad < Road
                 obj.FixedSeed = loop_road_args{2};
                 obj.spawn_initial_cars(loop_road_args{3});
             end
-            obj.carTypeRatios = ones(2,loop_road_args.nIterations).*[round(obj.numCars/2);round(obj.numCars/2)];
+%             obj.carTypeRatios = ones(2,loop_road_args.nIterations).*[round(obj.numCars/2);round(obj.numCars/2)];
         end
         function spawn_initial_cars(obj,dt)
-            %%
+            %% not used anymore (delete later)
             minimumSpacing = IdmCar.minimumGap;
             if obj.numCars ~= 0
                 allCarsPoseArray = NaN(obj.numCars,1);
@@ -80,7 +78,7 @@ classdef LoopRoad < Road
                     if obj.allCarsNumArray(i) > 0
                         for j = 1:obj.allCarsNumArray(i)
                             new_car = add_car(obj,i,dt);
-                            allCarsArray = [allCarsArray new_car];
+                            allCarsArray = [allCarsArray; new_car];
                         end
                     end
                 end
@@ -102,7 +100,7 @@ classdef LoopRoad < Road
             end
         end
         function controlled_spawn(obj,nCars,positions,velocities,accelerations,types,dt)
-            %%
+            %% check if it used
             obj.numCars = nCars;
             for iCar = 1:nCars
                 new_car = add_car(obj,types(iCar),dt);
@@ -123,21 +121,18 @@ classdef LoopRoad < Road
         end
         function respawn_car(obj,leaderCar,t)
             %%
-            
-            if t >= obj.transientCutOffLength % transient cut
-                obj.collect_car_history(leaderCar);
-            end
-            
-            leaderCar.historyIndex = 1;
-            
-            leaderCar.History = [];
+%             if t >= obj.transientCutOffLength % transient cut
+%                 obj.collect_car_history(leaderCar);
+%             end
+%             leaderCar.historyIndex = 1;
+%             leaderCar.History = [];
             
             if obj.numCars > 1
                 leaderCar.leaderFlag = false;
                 leaderCar.Next.leaderFlag = true;
             end
         end
-        function move_all_cars(obj,t,dt,iIteration,nIterations)
+        function move_all_cars(obj,t,dt,iIteration,nIterations,oppositeArm,oppositeArmLength)
             %%
 %             aggregatedVelocities = 0;
             
@@ -148,10 +143,12 @@ classdef LoopRoad < Road
                     obj.allCarsStates(1,iCar) = currentCar.pose(1);
                     
                     obj.respawn_car(currentCar,t);
-    
+                    currentCar.downStreamEndTime = [currentCar.downStreamEndTime iIteration+1];
+                    
+%                     currentCar.History = single(NaN(4,nIterations));
+                    
                     % morph the car
                     chance = random(obj.diceDistGen);
-                    
                     if chance < obj.swapRate && (isempty(obj.swapPostionArray) || (strcmpi(class(obj.allCars(obj.swapPostionArray(end))),class(currentCar))))
   
                         obj.swapPostionArray = [obj.swapPostionArray iCar];
@@ -168,22 +165,17 @@ classdef LoopRoad < Road
                             insertAfter(morphedCar,anchorCar);
                         end
                         currentCar = morphedCar;
-                        % calculate change in ratio of A/B types every time
-                        % the swap happened
-                        if strcmpi(class(morphedCar),'carTypeA')
-                            obj.carTypeRatios(1,iIteration:end) = obj.carTypeRatios(1,iIteration:end)+1;
-                            obj.carTypeRatios(2,iIteration:end) = obj.carTypeRatios(2,iIteration:end)-1;
-                        else
-                            obj.carTypeRatios(1,iIteration:end) = obj.carTypeRatios(1,iIteration:end)-1;
-                            obj.carTypeRatios(2,iIteration:end) = obj.carTypeRatios(2,iIteration:end)+1;
-                        end
                     end
                                         
                 end
                 
                 currentCar.move_car(dt);
-
+                
+%                 currentCar.decide_acceleration(oppositeArm,oppositeArmLength,t,dt);
+%                 currentCar.update_velocity(dt);
             end
+%{      
+      % check if needed later and delete if not!
             if t >= obj.transientCutOffLength % transient cut
                 if obj.numCars > 0
                 avVel = sum(obj.allCarsStates(2,:))/obj.numCars;
@@ -218,6 +210,7 @@ classdef LoopRoad < Road
             else
                 obj.variance(iIteration) = NaN;
             end
+%}             
         end
         function morphedCar = morph_car(obj,carToMorph,dt)
             

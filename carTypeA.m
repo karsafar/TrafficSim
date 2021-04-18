@@ -1,27 +1,28 @@
 classdef carTypeA < IdmModel
     properties(SetAccess = public)
         bb
-        it_accel
-        it_a_follow
-        it_a_emerg_stop
-        it_a_junc_stop
-        it_a_ahead
-        it_canPassAhead
-        it_canPassBehind
-        it_canPassAheadNext
-        it_dist_to_junc
-        it_future_min_stop_gap
-        it_future_gap
-        it_comf_dist_to_junc
-        it_min_stop_dist_to_junc
-        full_tree
+        bbValues = []
+        bbStore = []
+        cond1
+        cond2
+        cond3
+        cond4
+        cond8
+        cond9
+        cond10
+        cond11
+        cond12
+        cond13
+      
+        actStore = ConditionNode.empty
+        full_select
+        Fig = []
+        
         t_in_self = 0
         t_out_self = 0
-        it_CarsOpposite
-        it_frontCarPassedJunction
+        a_ahead = []
+        minTimeGap = 0 % minimum time gap to cross junction 
         juncExitVelocity = NaN
-        it_backOffTime
-        it_currentTime
     end
     
     properties (SetAccess = public)
@@ -38,371 +39,436 @@ classdef carTypeA < IdmModel
             end
             obj = obj@IdmModel(orientation, startPoint, Width,dt);
             obj.priority = 1;
-%             obj.temp_a = obj.a;
-            
+                        
             %% -----------------Initialize Blackboard------------------
-            obj.bb = BtBlackboard;
-            obj.it_accel = obj.bb.add_item('A',obj.acceleration);
-            obj.it_a_follow = obj.bb.add_item('Afollow',obj.idmAcceleration);
-            obj.it_a_emerg_stop = obj.bb.add_item('AemergStop',obj.idmAcceleration);
-            obj.it_a_junc_stop = obj.bb.add_item('AjuncStop',obj.idmAcceleration);
-            obj.it_a_ahead = obj.bb.add_item('Aahead',obj.idmAcceleration);
-            obj.it_canPassAhead = obj.bb.add_item('canPassAhead',false);
-            obj.it_canPassBehind = obj.bb.add_item('canPassBehind',false);
-            obj.it_canPassAheadNext = obj.bb.add_item('canPassAheadNext',false);
-            obj.it_dist_to_junc = obj.bb.add_item('distToJunc',abs(obj.pose(1)-obj.s_in));
-            obj.it_comf_dist_to_junc = obj.bb.add_item('comfDistToJunc',0);
-            obj.it_min_stop_dist_to_junc = obj.bb.add_item('minStopDistToJunc',0);
-            obj.it_future_min_stop_gap = obj.bb.add_item('futureMinGap',0);
-            obj.it_future_gap = obj.bb.add_item('futureGap',1e5);
-            obj.it_CarsOpposite = obj.bb.add_item('CarsOpposite',true);
-            obj.it_backOffTime = obj.bb.add_item('backOffTime',0);
-            obj.it_currentTime = obj.bb.add_item('t',0);
-            obj.it_frontCarPassedJunction = obj.bb.add_item('frontCarPassedJunction',isempty(obj.Prev) || obj.Prev.pose(1) > 0.825);
+            obj.bb = BlackBoard;
+            obj.bb.add_item('A',obj.acceleration);
+            obj.bb.add_item('Afollow',obj.idmAcceleration);
+            obj.bb.add_item('AemergStop',obj.idmAcceleration);
+            obj.bb.add_item('AjuncStop',obj.idmAcceleration);
+            obj.bb.add_item('Aahead',obj.idmAcceleration);
+            obj.bb.add_item('canPassAhead',false);
+            obj.bb.add_item('canPassBehind',false);
+            obj.bb.add_item('distToJunc',1e5);
+            obj.bb.add_item('comfDistToJunc',0);
+            obj.bb.add_item('minStopDistToJunc',0);
+            obj.bb.add_item('futureMinGap',0);
+            obj.bb.add_item('futureGap',1e5);
+            obj.bb.add_item('CarsOpposite',true);
+            obj.bb.add_item('backOffTime',-1);
+            obj.bb.add_item('t',0);
+            obj.bb.add_item('isDeadlock',false);
+            obj.bb.add_item('Zero',0);
+            obj.bb.add_item('frontCarPassedJunction',false);
+            
+            obj.bbValues.A                      = [];
+            obj.bbValues.Afollow                = [];
+            obj.bbValues.AemergStop             = [];
+            obj.bbValues.AjuncStop              = [];
+            obj.bbValues.Aahead                 = [];
+            obj.bbValues.canPassAhead           = [];
+            obj.bbValues.canPassBehind          = [];
+            obj.bbValues.distToJunc             = [];
+            obj.bbValues.comfDistToJunc         = [];
+            obj.bbValues.minStopDistToJunc      = [];
+            obj.bbValues.futureMinGap           = [];
+            obj.bbValues.futureGap              = [];
+            obj.bbValues.CarsOpposite           = [];
+            obj.bbValues.backOffTime            = [];
+            obj.bbValues.t                      = [];
+            obj.bbValues.isDeadlock             = [];
+            obj.bbValues.frontCarPassedJunction = [];
             
             %% 'Follow Front Car' Tree
-            followFrontCar = BtSelector(...
-                obj.it_CarsOpposite == 0,...
-                obj.it_dist_to_junc >= obj.it_min_stop_dist_to_junc);
-            clearedJunction = BtSequence(...
-                obj.it_frontCarPassedJunction == 0,...
-                followFrontCar);
-            CruisePreOrAfterJunction = BtSelector(...
-                obj.it_dist_to_junc > obj.it_comf_dist_to_junc,...
-                clearedJunction);
-            assignIdm = BtAssign(obj.it_accel, obj.it_a_follow);
-            DoCruise = BtSequence(CruisePreOrAfterJunction,assignIdm);
+            obj.cond1 = ConditionNode(obj.bb.CarsOpposite == 0,'CarsOpposite == 0');
+            obj.cond2 = ConditionNode(obj.bb.distToJunc >= obj.bb.minStopDistToJunc,'distToJunc >= minStopDistToJunc');
+            followFrontCar = SelectorNode([obj.cond1,obj.cond2],obj.bb);
             
+            obj.cond3 = ConditionNode(obj.bb.frontCarPassedJunction == 0,'frontCarPassedJunction == 0');
+            clearedJunction = SequenceNode([obj.cond3,followFrontCar],obj.bb);
+            
+            obj.cond4 = ConditionNode(obj.bb.distToJunc > obj.bb.comfDistToJunc,'distToJunc > comfDistToJunc');
+            CruisePreOrAfterJunction = SelectorNode([obj.cond4,clearedJunction],obj.bb);
+            
+            
+            act1 = ActionNode('A','Afollow',obj.bb);
+            DoCruise = SequenceNode([CruisePreOrAfterJunction, act1],obj.bb);
             %% 'Junction' Tree
             % 'Stop at Junction' Tree
-            assignJuncStop = BtAssign(obj.it_accel, obj.it_a_junc_stop);
-            keepJunctionClear = BtSequence(...
-                obj.it_frontCarPassedJunction == 1,...
-                obj.it_CarsOpposite == 1,...
-                obj.it_future_gap < obj.it_future_min_stop_gap,...
-                assignJuncStop);
-            stopBeforeJunction = BtSequence(...
-                obj.it_dist_to_junc >= obj.it_min_stop_dist_to_junc,...
-                assignJuncStop);
+            %             assignJuncStop = ActionNode('A','AjuncStop',obj.bb);
+            %             obj.cond5 = ConditionNode(obj.bb.frontCarPassedJunction == 1,'frontCarPassedJunction == 1');
+            %             obj.cond6 = ConditionNode(obj.bb.CarsOpposite == 1,'CarsOpposite == 1');
+            %             obj.cond7 = ConditionNode(obj.bb.futureGap < obj.bb.futureMinGap,'futureGap < futureMinGap');
+            %
+            %             keepJunctionClear = SequenceNode([obj.cond5, obj.cond6,obj.cond7, assignJuncStop],obj.bb);
+            %
+            assignJuncStop = ActionNode('A','AjuncStop',obj.bb);
+            obj.cond8 = ConditionNode(obj.bb.distToJunc >= obj.bb.minStopDistToJunc,'distToJunc >= minStopDistToJunc');
+            stopBeforeJunction = SequenceNode([obj.cond8, assignJuncStop],obj.bb);
+            
             % 'Cross Behind' Tree
-            assignBehind = BtAssign(obj.it_accel,obj.it_a_follow);
-            passBehind = BtSequence(...
-                obj.it_canPassBehind == 1,...
-                obj.it_canPassAheadNext == 1,...
-                assignBehind);
+            assignBehind =  ActionNode('A','Afollow',obj.bb);
+            obj.cond9 = ConditionNode(obj.bb.canPassBehind == 1,'canPassBehind == 1');
+            passBehind = SequenceNode([obj.cond9, assignBehind],obj.bb);
+            
             % 'Cross Ahead' Tree
-            assignAhead = BtAssign(obj.it_accel, obj.it_a_ahead);
-            passAhead = BtSequence(obj.it_canPassAhead == 1,assignAhead);
+            assignAhead =  ActionNode('A','Aahead',obj.bb);
+            obj.cond10 = ConditionNode(obj.bb.canPassAhead == 1,'canPassAhead == 1');
+            passAhead = SequenceNode([obj.cond10, assignAhead],obj.bb);
+            
             % Choose 'Ahead or Behind' Tree
-            selectAheadOrBehind = BtSelector(passAhead,passBehind,stopBeforeJunction);
-%             selectAheadOrBehind = BtSelector(passAhead,passBehind);
-            doAheadOrBehind = BtSequence(...
-                obj.it_future_gap > obj.it_future_min_stop_gap,...
-                selectAheadOrBehind);
+            selectAheadOrBehind = SelectorNode([passAhead,passBehind,stopBeforeJunction],obj.bb);
+            
+            obj.cond11 = ConditionNode(obj.bb.futureGap >= obj.bb.futureMinGap,'futureGap >= futureMinGap');
+            doAheadOrBehind = SequenceNode([obj.cond11, selectAheadOrBehind],obj.bb);
             
             %% 'Emengency Stop' Tree
-            assignStop = BtAssign(obj.it_accel, obj.it_a_emerg_stop);
+            assignStop = ActionNode('A','AemergStop',obj.bb);
+            
             
             %% random back-off
-            assignZero = BtAssign(obj.it_accel, 0);
-            backOff = BtSequence(obj.it_backOffTime > obj.it_currentTime,assignZero);
+            assignZero = ActionNode('A','Zero',obj.bb);
+            obj.cond12 = ConditionNode(obj.bb.isDeadlock == 1,'isDeadlock == 1');
+            obj.cond13 = ConditionNode(obj.bb.backOffTime >= obj.bb.t,'backOffTime >= t');
+            backOff = SequenceNode([obj.cond12, obj.cond13,assignZero],obj.bb);
+            
             %% Full Behaviour Tree
-            obj.full_tree = BtSelector(DoCruise,keepJunctionClear,backOff,doAheadOrBehind,assignStop);
-% 
-%% test
-%             obj.full_tree = BtSelector(DoCruise,backOff,selectAheadOrBehind);
-%             obj.full_tree = BtSelector(DoCruise,backOff,selectAheadOrBehind,assignStop);
-
-%             obj.full_tree = BtSelector(DoCruise,backOff,selectAheadOrBehind,assignStop);
-%             figure(5)
-%             tempGraph = gca;
-%             plot(obj.full_tree,tempGraph)
+            %             obj.full_select = SelectorNode([DoCruise,backOff,keepJunctionClear,doAheadOrBehind,assignStop],obj.bb);
+            obj.full_select = SelectorNode([DoCruise,backOff,doAheadOrBehind,assignStop],obj.bb);
+            
+            
+            %             obj.actStore = [act1,assignZero,assignJuncStop,assignAhead,assignBehind,assignJuncStop1,assignStop];
+            obj.actStore = [act1,assignZero,assignAhead,assignBehind,assignJuncStop,assignStop];
+            
+%             obj.bbStore = NaN(nIterations,numel(obj.actStore),'int8');
+%             obj.bbStore = [obj.bbStore;[obj.actStore(:).output]]*NaN;
         end
-        function decide_acceleration(obj,oppositeRoad,roadLength,t,dt)
-            oppositeCars = oppositeRoad.allCars;
+        function decide_acceleration(obj,oppositeRoad,roadLength,t,dt,iIteration)
             
-            crossingBegin = obj.s_in;
-            crossingEnd = obj.s_out;
-            
-            %% assign cruising acceleration
-            obj.it_a_follow.set_value(obj.idmAcceleration);
-            
-            %% assign junction acceleration
-            if obj.pose(1) < crossingEnd
-%                 modifyIdm(obj,obj.temp_a);
-                calculate_junc_accel(obj,roadLength)  ;
-                pass_ahead_accel = obj.juncAccel;
-                % return value of IDM to follow mode with a = 1
-%                 modifyIdm(obj,1);
-%                 calculate_idm_accel(obj,roadLength);
-            else
-                pass_ahead_accel = obj.idmAcceleration;
-            end
-            obj.it_a_ahead.set_value(pass_ahead_accel);
-            
-            %% calc and assign self distance to junction
-           if obj.pose(1) > crossingBegin
-                selfDistToJunc = crossingBegin-obj.pose(1)+roadLength;
-            else
-                selfDistToJunc = crossingBegin-obj.pose(1);
-           end
-           
-           obj.it_dist_to_junc.set_value(selfDistToJunc);
-           
-            
-            %%
-            obj.juncExitVelocity = min(obj.maximumVelocity,sqrt(max(0,obj.velocity^2+2*pass_ahead_accel*(crossingEnd-obj.pose(1)))));
-            futureMinStopGap = calc_safe_gap(obj.a,obj.b,obj.juncExitVelocity,obj.targetVelocity,obj.timeGap,obj.minimumGap,obj.delta,obj.a_min,1)+obj.minimumGap;
-            obj.it_future_min_stop_gap.set_value(futureMinStopGap)
-            
-            %% update t_in_self and t_out_self
-            [obj.t_in_self, obj.t_out_self] = calculate_t_in_and_out(obj,pass_ahead_accel,obj.velocity,obj.pose(1),t,roadLength);
-            
-            if obj.pose(1) < crossingEnd && ~isempty(obj.Prev) && ~isnan(obj.t_out_self)
-                sPrev = obj.Prev.pose(1);
-                vPrev = obj.Prev.velocity;
-                if sPrev > crossingBegin
-                    futureGap = (sPrev + vPrev*(obj.t_out_self-(t+dt))) - crossingEnd;
-                elseif sPrev < crossingBegin && sPrev < obj.pose(1)
-                    futureGap = (sPrev + roadLength + vPrev*(obj.t_out_self-(t+dt))) - crossingEnd;
-                else
-                    futureGap = 0;
-                end
-            else
-                futureGap = 1e5;
-            end
-            obj.it_future_gap.set_value(futureGap)
-            
-            %%
-            if obj.pose(1) <= crossingEnd && obj.pose(1) >= crossingBegin
-                comfortableStopGap = 9999;
-            else
-                comfortableStopGap = calc_safe_gap(obj.a,obj.b,obj.velocity,obj.targetVelocity,obj.timeGap,0.1,obj.delta,-obj.b)+10;
-            end
-            obj.it_comf_dist_to_junc.set_value(comfortableStopGap);
-            
-            %%
-            minStopDistGapToJunc = calc_safe_gap(obj.a,obj.b,obj.velocity,obj.targetVelocity,obj.timeGap,0,obj.delta,obj.a_min);
-            obj.it_min_stop_dist_to_junc.set_value(minStopDistGapToJunc);
-            
-            %%
-            calculate_junc_accel(obj,roadLength,2)
-            obj.it_a_junc_stop.set_value(obj.juncAccel);
-            
-            %% Change this logic for emergency stop
-            if obj.pose(1) < crossingBegin
-                calculate_junc_accel(obj,roadLength,1)
-            else
-                calculate_junc_accel(obj,roadLength,3)
-            end
-            obj.it_a_emerg_stop.set_value(obj.juncAccel);
-
             %% if no cars opposite
-            if oppositeRoad.numCars == 0
-                % if no cars on competing arm
-                obj.it_CarsOpposite.set_value(0);
-                obj.it_canPassAhead.set_value(1);
-                obj.it_canPassBehind.set_value(0);
-                obj.it_canPassAheadNext.set_value(0);
+            if oppositeRoad.numCars > 0
+                oppositeCars = oppositeRoad.allCars;
+                s_in = obj.s_in;
+                s_out = obj.s_out;
+                s = obj.pose(1);
+                v = obj.velocity;
+                v0 = obj.targetVelocity;
                 
-            else
-
+                %% calc and assign self distance to junction
+                selfDistToJunc = s_in - s + (s>s_in)*roadLength;
+                
+                selfDistOutOfJunc = s_out - s + (s>s_out)*roadLength;
+                
+                %% assign junction acceleration
+%                 pass_ahead_accel = obj.idmAcceleration;
+                calculate_junc_accel(obj,roadLength,3)
+                pass_ahead_accel = obj.juncAccel;
+                %% Future space gap
+                obj.juncExitVelocity = min(obj.maximumVelocity,sqrt(max(0,v^2+2*pass_ahead_accel*selfDistOutOfJunc)));
+                futureMinStopGap = calc_safe_gap(obj.a,obj.b,obj.juncExitVelocity,v0,obj.timeGap,obj.minimumGap,obj.delta,obj.a_min,1);
+                
+                % self t_in and t_out
+                [obj.t_in_self, obj.t_out_self] = calculate_t_in_and_out(obj,pass_ahead_accel,v,s,t,roadLength);
+                
+                if s < s_out  && ~isnan(obj.t_out_self) && obj.Prev.pose(1) ~= s
+                    sPrev = obj.Prev.pose(1);
+                    vPrev = obj.Prev.velocity;
+                    if sPrev > s %sPrev > s_in
+                        futureGap = (sPrev + max(0,vPrev*(obj.t_out_self-(t+dt)))) - s_out;
+                    elseif sPrev < s_in && sPrev < s
+                        futureGap = (sPrev + roadLength + max(0,vPrev*(obj.t_out_self-(t+dt)))) - s_out;
+                    else
+                        futureGap = 0;
+                    end
+                else
+                    futureGap = 1e5;
+                end
+                
+                %% Comf stop gap
+                if s <= s_out && s >= s_in
+                    comfortableStopGap = 1e5;
+                else
+                    % 8 inputs. find out if this is the best way
+                    comfortableStopGap = calc_safe_gap(obj.a,obj.b,v,v0,obj.timeGap,0,obj.delta,-obj.b)+10;
+                end
+                
+                %% Min stop gap
+                % 8 inputs. find out if this is the best way
+                minStopDistGapToJunc = calc_safe_gap(obj.a,obj.b,v,v0,obj.timeGap,0,obj.delta,obj.a_feas_min);
+                
+                %% longic for junc stop
+                calculate_junc_accel(obj,roadLength,2)
+                juncStop = obj.juncAccel;
+                
+                %% logic for emergency stop
+                if s < s_in
+                    calculate_junc_accel(obj,roadLength,1)
+                else
+                    calculate_junc_accel(obj,roadLength,3)
+                end
+                emergStop = obj.juncAccel;
+                
                 % get all opposite arm cars' positions
                 s_op = oppositeRoad.allCarsStates(1,:);
                 
-                % convert positions to distances to junction
-                oppositeDistToJunc = crossingEnd - s_op;
                 
-                % '0' - all competing cars passed junction; '1' - not all passed
-                obj.it_CarsOpposite.set_value(any(oppositeDistToJunc > 0));
+                % convert positions to distances to junction
+                oppositeDistToJunc = s_out - s_op;
                 
                 % inf - passed junction
                 oppositeDistToJunc(oppositeDistToJunc<0) = inf;
                 [~, ind] = min(oppositeDistToJunc);
                 
+                % competing car t_in and t_out
+                tol_op = 0;
                 s_comp = oppositeRoad.allCarsStates(1,ind);
                 v_comp = oppositeRoad.allCarsStates(2,ind);
                 a_comp = oppositeRoad.allCarsStates(3,ind);
                 
-                tol_op = 0.0;
+%                 randVal = rand();
+%                 noiseRate = 0.05;
+%                 posNoiseRate = 2*s_comp*noiseRate*randVal - s_comp*noiseRate;
+%                 velNoiseRate = 2*v_comp*noiseRate*randVal - v_comp*noiseRate;
+%                 accelNoiseRate = 2*a_comp*noiseRate*randVal - a_comp*noiseRate;
+%                 [t_in_op, t_out_op] = calculate_t_in_and_out(obj,a_comp,v_comp+velNoiseRate,s_comp,t,oppositeRoad.Length,tol_op);
                 [t_in_op, t_out_op] = calculate_t_in_and_out(obj,a_comp,v_comp,s_comp,t,oppositeRoad.Length,tol_op);
-                
-                if ~isempty(oppositeCars(ind).Next)
-                    
-                    s_comp_next = oppositeCars(ind).Next.pose(1);
-                    v_comp_next = oppositeCars(ind).Next.velocity;
-                    %                     a_comp_next = oppositeCars(ind).Next.acceleration;
-                    a_comp_next = oppositeCars(ind).Next.History(4,oppositeCars(ind).Next.historyIndex-1);
-                    
-                    [t_in_next, ~] = calculate_t_in_and_out(obj,a_comp_next,v_comp_next,s_comp_next,t,oppositeRoad.Length,tol_op);
-                else
-                    t_in_next = 1e5;
-                end
-                if obj.pose(1) > crossingBegin && obj.pose(1) < crossingEnd
-                    canPassAhead = 1;
-                else
-                    canPassAhead = (t_in_op > obj.t_out_self);
-                end
-                obj.it_canPassAhead.set_value(canPassAhead);
-                
-                canPassBehind = (obj.t_in_self > t_out_op);
-                obj.it_canPassBehind.set_value(canPassBehind);
-                
-                canPassAheadNext = (t_in_next > obj.t_out_self);
-                obj.it_canPassAheadNext.set_value(canPassAheadNext);
-            end
 
-            obj.it_frontCarPassedJunction = obj.bb.add_item('frontCarPassedJunction',...
-                (isempty(obj.Prev) || obj.Prev.pose(1) > 0.825 || obj.Prev.pose(1) < obj.pose(1)));
-
-            obj.it_currentTime.set_value(t);
-            if abs(obj.velocity)< 0.001 && abs(selfDistToJunc) < 0.1 ...
-                    && abs(oppositeCars(ind).velocity)< 0.001 &&...
-                    abs(s_op(ind)-obj.s_in) < 0.1 && abs(obj.it_backOffTime.get_value - t) > 0.01
-                obj.it_backOffTime.set_value(t + (randi(21)-1)/10);
-            end
-            
-            
-            obj.full_tree.tick;
-            obj.acceleration =  obj.it_accel.get_value;
-            
-            %% draw behaviour tree
-            if obj.BT_plot_flag
-                tempGraph = gca;
-                if isempty(tempGraph.Parent.Number) || tempGraph.Parent.Number ~= 5
-                    figure(5)
+                % next car after competing car t_in and t_out
+                s_comp_next = oppositeCars(ind).Next.pose(1);
+                v_comp_next = oppositeCars(ind).Next.velocity;
+                a_comp_next = oppositeCars(ind).Next.History(3,round(t/dt+1));
+                [t_in_next, ~] = calculate_t_in_and_out(obj,a_comp_next,v_comp_next,s_comp_next,t,oppositeRoad.Length,tol_op);
+                t_in_next(t_in_next == t_in_op && oppositeRoad.numCars == 1) = 1e5;
+                
+                % 1 - enough gap to go ahead of competing car
+                if s > s_in && s < s_out
+                    isEnoughGapAhead = 1;
                 else
-                    clf(tempGraph.Parent)
+                    isEnoughGapAhead = (t_in_op-obj.minTimeGap > obj.t_out_self);
                 end
-                plot(obj.full_tree,tempGraph)
-                obj.bb
+                
+                % 1 - enough gap between current leaving and next car entering junction
+                isEnoughGapBehind = (obj.t_in_self > t_out_op) && (t_in_next-obj.minTimeGap > obj.t_out_self);
+
+                %% %%%%%%%%
+%                 aheadGap = (t_in_op -2 - obj.t_out_self);
+
+%                 sprintf('cross ahead gap is %f',aheadGap)
+                %% %%%%%%%%
+                % 1 - passed, 0 - not passed
+                isFrontCarPassedJunction = (obj.Prev.pose(1) == s || obj.Prev.pose(1) > obj.Prev.ownDistfromRearToBack  || obj.Prev.pose(1) < s);
+                 
+                %% Update values of the Blackboard
+                
+                
+                blackBorad = obj.bb;
+                blackBorad.AemergStop = emergStop;
+                blackBorad.AjuncStop = juncStop;
+                blackBorad.Aahead = pass_ahead_accel;
+                blackBorad.canPassAhead = isEnoughGapAhead;
+                blackBorad.canPassBehind = isEnoughGapBehind;
+                blackBorad.distToJunc = selfDistToJunc;
+                blackBorad.comfDistToJunc = comfortableStopGap;
+                blackBorad.minStopDistToJunc = minStopDistGapToJunc;
+                blackBorad.futureMinGap = futureMinStopGap;
+                blackBorad.futureGap = futureGap;
+                blackBorad.CarsOpposite = any(oppositeDistToJunc > 0);
+                timeDiff = blackBorad.backOffTime - t;
+                % 1 - if both cars stopped; 0 - if either or both move
+                if timeDiff < -1e-5
+                    if (abs(v) < 1e-10 && abs(selfDistToJunc) < 0.1001 &&...
+                            abs(oppositeCars(ind).velocity) < 1e-10 && abs(s_op(ind)-obj.s_in) < 0.1001)
+                        blackBorad.isDeadlock = true;
+                        blackBorad.backOffTime = t + (randi(51)-1)/(1/dt);
+                        
+                    end
+                elseif (abs(timeDiff) < 5e-2) || (abs(oppositeCars(ind).velocity) > 0.5 && blackBorad.isDeadlock)
+                    blackBorad.isDeadlock = false;
+                    blackBorad.backOffTime = -1;
+                end
+                blackBorad.t = t;
+                blackBorad.frontCarPassedJunction = isFrontCarPassedJunction;
+                
+                
+                obj.cond1.condArray = (~any(oppositeDistToJunc > 0));
+                obj.cond2.condArray = (selfDistToJunc >= minStopDistGapToJunc);
+                obj.cond3.condArray = (isFrontCarPassedJunction == 0);
+                obj.cond4.condArray = (selfDistToJunc > comfortableStopGap);
+                obj.cond8.condArray = (selfDistToJunc >= minStopDistGapToJunc);
+                obj.cond9.condArray = (isEnoughGapBehind == 1);
+                obj.cond10.condArray = (isEnoughGapAhead == 1);
+                obj.cond11.condArray = (futureGap>=futureMinStopGap);
+                obj.cond12.condArray = (blackBorad.isDeadlock == 1);
+                obj.cond13.condArray = (blackBorad.backOffTime >= t);
             end
+            
+            
+            %% Update cruising acceleration
+            blackBorad.Afollow = obj.idmAcceleration;
+            
+            
+            
+            if mod(t,obj.UpdateRate) == 0 || t < 2*dt
+                
+                % reset all action vaules to -1 for the next iteration
+%                 [obj.actStore(:).output]=deal(-1);
+                temp = int8((-1)*ones(1,numel(obj.actStore)));
+                temp1 = num2cell(temp);
+                [obj.actStore.output]= temp1{:};
+                %% update BT
+                tick(obj.full_select,int8(1));
+                
+%                 obj.bbStore = [obj.bbStore;[obj.actStore(:).output]];
+                 obj.bbStore(:,iIteration) = [obj.actStore(:).output];
+                 
+                %% draw behaviour tree
+                if obj.BT_plot_flag
+                    if isempty(obj.Fig)
+                        obj.Fig = figure();
+                    end
+                    obj.full_select.plot_tree(0);
+                    obj.full_select.plot_bt(obj.Fig);
+                end
+                
+            else
+                obj.bbStore(:,iIteration) = [obj.actStore(:).output];
+                tempActOutput = [obj.actStore(:).output];
+                tempAccelVals = [blackBorad.Afollow, 0, blackBorad.Aahead, blackBorad.Afollow, blackBorad.AjuncStop,blackBorad.AemergStop];
+                blackBorad.A = tempAccelVals(tempActOutput == 1);
+            end
+            
+            
+            %% assign BT output to acceleration
+            randVal = rand();
+            noiseRate = 0;
+            if oppositeRoad.numCars > 0
+                bbAccel = blackBorad.A;
+                bbAccel = bbAccel + 2*bbAccel*noiseRate*randVal - bbAccel*noiseRate;
+                obj.acceleration = bbAccel;
+            else
+                obj.acceleration = obj.idmAcceleration;
+            end
+            
+%             obj.bbValues.A(end+1)                      = obj.bb.A;
+%             obj.bbValues.Afollow(end+1)                = obj.bb.Afollow;
+%             obj.bbValues.AemergStop(end+1)             = obj.bb.AemergStop;
+%             obj.bbValues.AjuncStop(end+1)              = obj.bb.AjuncStop;
+%             obj.bbValues.Aahead(end+1)                 = obj.bb.Aahead;
+%             obj.bbValues.canPassAhead(end+1)           = obj.bb.canPassAhead;
+%             obj.bbValues.canPassBehind(end+1)          = obj.bb.canPassBehind;
+%             obj.bbValues.distToJunc(end+1)             = obj.bb.distToJunc;
+%             obj.bbValues.comfDistToJunc(end+1)         = obj.bb.comfDistToJunc;
+%             obj.bbValues.minStopDistToJunc(end+1)      = obj.bb.minStopDistToJunc;
+%             obj.bbValues.futureMinGap(end+1)           = obj.bb.futureMinGap;
+%             obj.bbValues.futureGap(end+1)              = obj.bb.futureGap;
+%             obj.bbValues.CarsOpposite(end+1)           = obj.bb.CarsOpposite;
+%             obj.bbValues.backOffTime(end+1)            = obj.bb.backOffTime;
+%             obj.bbValues.t(end+1)                      = obj.bb.t;
+%             obj.bbValues.isDeadlock(end+1)             = obj.bb.isDeadlock;
+%             obj.bbValues.frontCarPassedJunction(end+1) = obj.bb.frontCarPassedJunction;
+            
+            
             %%
             check_for_negative_velocity(obj,dt);
         end
         function [t_in, t_out] = calculate_t_in_and_out(obj,a,v,s,t,roadLength,varargin)
-            crossingBegin = obj.s_in;
-            crossingEnd = obj.s_out;
             
-            if nargin == 7
-                time_tol = varargin{1};
-            else
-                time_tol = 0;
+            crossingBegin   = obj.s_in;
+            crossingEnd     = obj.s_out;
+            
+            if s <= crossingBegin
+                d_in    = crossingBegin - s;
+                d_out   = crossingEnd - s;
+            elseif s >= crossingEnd
+                d_in    = crossingBegin - (s - roadLength);
+                d_out   = crossingEnd - (s - roadLength);
+            elseif s > crossingBegin && s < crossingEnd
+                d_in    = 0;
+                d_out   = crossingEnd - s;
             end
             
-            if s > crossingEnd
-                s = s - roadLength;
-            end
-          
-            v_f_sqr_in = min(obj.maximumVelocity^2,v^2+2*a*(crossingBegin-s));
-            v_f_sqr_out = min(obj.maximumVelocity^2,v^2+2*a*(crossingEnd-s));
- %{ 
-            if s > crossingBegin && s < crossingEnd
-                t_in = 0;
-                t_out = (-v+sqrt(v_f_sqr_out))/a+t+time_tol;
-            elseif (v_f_sqr_in >= 0 || s > crossingBegin) && v_f_sqr_out >= 0 && obj.tol < abs(a)
-                t_in = (-v+sqrt(v_f_sqr_in))/a+t-time_tol;
-                t_out = (-v+sqrt(v_f_sqr_out))/a+t+time_tol;
-            elseif obj.tol >= abs(a) && obj.tol < abs(v)
-                t_in = (crossingBegin - s)/v+t-time_tol;
-                t_out = (crossingEnd - s)/v+t+time_tol;
-            else
-                t_in = 1e5;
-                t_out = 1e5;
-            end
-%}
-% %{            
-            if nargin == 7
+            if  nargin == 7 % includes error tolerance for comp vehice 
                 % opposite car time gap
-                if s > crossingBegin && s < crossingEnd
-                    t_in = 0;
-                    t_out = (crossingEnd - s)/v+t+time_tol;
-                elseif obj.tol < abs(v)
-                    t_in = (crossingBegin - s)/v+t-time_tol;
-                    t_out = (crossingEnd - s)/v+t+time_tol;
-                else
-                    t_in = 1e5;
-                    t_out = 1e5;
-                end
+                t_in    = d_in/v + t;
+                t_out   = d_out/v + t;
             else
                 % self time gap
-                if s > crossingBegin && s < crossingEnd
-                    t_in = 0;
-                    t_out = (-v+sqrt(v_f_sqr_out))/a+t+time_tol;
-                elseif (v_f_sqr_in >= 0 || s > crossingBegin) && v_f_sqr_out >= 0 && obj.tol < abs(a)
-                    t_in = (-v+sqrt(v_f_sqr_in))/a+t-time_tol;
-                    t_out = (-v+sqrt(v_f_sqr_out))/a+t+time_tol;
-                elseif obj.tol >= abs(a) && obj.tol < abs(v)
-                    t_in = (crossingBegin - s)/v+t-time_tol;
-                    t_out = (crossingEnd - s)/v+t+time_tol;
+                if abs(v) <= 0.5 % 5 time steps vehicle uses accel to enter junction  
+                    v_f_in  = min(obj.maximumVelocity,sqrt(max(0,v^2 + 2*a*d_in)));
+                    v_f_out = min(obj.maximumVelocity,sqrt(max(0,v^2 + 2*a*d_out)));
+                    
+                    t_in    = (-v + v_f_in)/a + t;
+                    t_out   = (-v + v_f_out)/a + t;
                 else
-                    t_in = 1e5;
-                    t_out = 1e5;
+                    t_in    = d_in/v + t;
+                    t_out   = d_out/v + t;
                 end
             end
-%}
-     
         end
         function calculate_junc_accel(obj,varargin)
-            roadLength = varargin{1};
-            if nargin == 2
-                stop_flag = 0;
-                junc_flag = 0;
-                emerg_flag = 0;
-            elseif varargin{2} == 1
+            if varargin{2} == 1     % emergency stop at junction
                 stop_flag = 1;
                 junc_flag = 0;
                 emerg_flag = 0;
-            elseif varargin{2} == 2
-                junc_flag = 1;
+            elseif varargin{2} == 2 % normal junction stop
                 stop_flag = 0;
+                junc_flag = 1;
                 emerg_flag = 0;
-            elseif varargin{2} == 3
+            else                    % emergency stop without colliding with lead-car
                 stop_flag = 0;
                 junc_flag = 0;
                 emerg_flag = 1;
             end
             
-            if stop_flag ||junc_flag
+            
+            if stop_flag || junc_flag
                 s = obj.s_in - obj.pose(1);
                 dV = obj.velocity;
             elseif obj.leaderFlag == 0
-                s = obj.Prev.pose(1) - obj.pose(1);
+                s = obj.Prev.pose(1) - obj.pose(1)-obj.dimension(2);
                 dV = (obj.velocity - obj.Prev.velocity);
-            elseif ~isempty(obj.Prev)
-                s = obj.Prev.pose(1) - obj.pose(1)+ roadLength;
-                dV = (obj.velocity - obj.Prev.velocity);
-            else
+             else
                 s = 1e5;
                 dV = 1e-5;
             end
             
             intelligentBreaking = obj.velocity*obj.timeGap + (obj.velocity*dV)/(2*sqrt(obj.a*obj.b));
-            if stop_flag || junc_flag
+            
+            
+            if stop_flag % emergency stop at junction
                 s_star = 0.1 + max(0,intelligentBreaking);
-            else
-                s_star = (obj.minimumGap+obj.dimension(2)) + max(0,intelligentBreaking);
+            elseif junc_flag % normal stop at junction
+                s_star = 0.1 + max(0,intelligentBreaking);
+            else % emergency stop if not in junction
+                s_star = obj.minimumGap + max(0,intelligentBreaking);
             end
             
-            if obj.velocity == 0 && obj.targetVelocity == 0
-                obj.juncAccel = -obj.a*(s_star/s)^2;
-            else
-                obj.juncAccel = obj.a*(1 - (obj.velocity/obj.targetVelocity)^obj.delta - (s_star/s)^2);
+            velDif = obj.velocity/obj.targetVelocity;
+            if isnan(velDif)
+                velDif = 1;
             end
             
-            if obj.juncAccel > obj.a_max
-                obj.juncAccel = obj.a_max;
-            elseif obj.juncAccel < obj.a_min
-                if (emerg_flag == 0 && stop_flag == 0)
-                    if obj.juncAccel < obj.a_feas_min
-                        obj.juncAccel =  obj.a_feas_min;
-                    end
-                elseif (emerg_flag || stop_flag)  && obj.juncAccel < obj.a_feas_min
+            % don't move closer to junction if already stopped near it
+            if obj.acceleration == 0 && obj.velocity == 0 && s<0.2
+                obj.juncAccel = 0;
+            else
+                if isempty(obj.a_ahead) || obj.a_ahead == obj.a
+                    obj.juncAccel = obj.a*(1 - (velDif)^obj.delta - (s_star/s)^2);
+                else
+                    obj.juncAccel = obj.a_ahead*(1 - (velDif)^obj.delta - (s_star/s)^2);
+                end
+            end
+            % use lennard-jones if exceeded a_feas_min = 9 m/s^2
+            if obj.juncAccel < obj.a_feas_min
+                if (emerg_flag || stop_flag)
                     obj.juncAccel = -Lennard_Jones(s ,obj.a_feas_min);
                 else
+                    % BT logic excludes this from happening
+                    % !! Test if ever get here !!
                     obj.juncAccel =  obj.a_feas_min;
                 end
             end
+
         end
     end
 end

@@ -1,3 +1,5 @@
+
+
 classdef Car < dlnode & matlab.mixin.Copyable
     properties (SetAccess = protected)
     end
@@ -12,13 +14,12 @@ classdef Car < dlnode & matlab.mixin.Copyable
         a_min = -3.5
         a_feas_min = -9
         History = []
-%         locationHistory = NaN(1,100000)
-%         velocityHistory = NaN(1,100000)
-%         accelerationHistory = NaN(1,100000)
-%         timeHistory = NaN(1,100000)
         historyIndex = 1.0
         leaderFlag = true
         stopIndex = 0
+        downStreamEndTime = 1
+        tempAccel
+        UpdateRate
     end
     properties (SetAccess = immutable)
         ownDistfromRearToBack = NaN
@@ -29,7 +30,7 @@ classdef Car < dlnode & matlab.mixin.Copyable
     end
     properties (Constant)
         dimension = [2.16 4.4 2.75];
-        tol = 1e-6
+        tol = 1e-4
     end
     methods
         
@@ -51,26 +52,38 @@ classdef Car < dlnode & matlab.mixin.Copyable
                 obj.dt = car_args{4};
                 obj.s_in = -roadWidth/2-obj.ownDistfromRearToFront;
                 obj.s_out = roadWidth/2+obj.ownDistfromRearToBack;
+                obj.Prev = obj;
+                obj.Next = obj;
             end
         end
         
         function move_car(obj,dt)
-            obj.pose(1) = obj.pose(1) + obj.velocity*dt + 0.5*obj.acceleration*dt^2;
-            obj.velocity = obj.velocity + obj.acceleration*dt;
-            if obj.velocity < obj.tol && obj.velocity > 0
+            vel_prev = obj.velocity;
+            vel_new = vel_prev + obj.acceleration*dt;
+            
+            % removes velocity oscillations near zero
+            v_tol = 3e-2;
+            if vel_new > v_tol
+                obj.velocity = vel_new;
+            else
                 obj.velocity = 0;
             end
+            
+            % don't update position if acceleration is negative near zero
+            if obj.velocity < v_tol && obj.acceleration <= 0
+                obj.acceleration = 0;
+            else
+                obj.pose(1) = obj.pose(1) + 0.5*(vel_prev + vel_new)*dt;
+            end
         end
-
+        function update_velocity(obj,dt)
+            obj.velocity = obj.velocity + 0.5*(obj.tempAccel+obj.acceleration)*dt;
+        end
+        
         function store_state_data(obj,t,currentStates)
-
+            
             i = obj.historyIndex;
-%             obj.locationHistory(i) = s;
-%             obj.velocityHistory(i) = v;
-%             obj.accelerationHistory(i) = a;
-%             obj.timeHistory(i) = t;
-%             obj.History = [obj.History, dynArgs];
-            obj.History(:,i) = [t;currentStates];
+            obj.History(:,i) = currentStates;
             obj.historyIndex = i + 1;
             
             % unit test the constraints
@@ -79,15 +92,13 @@ classdef Car < dlnode & matlab.mixin.Copyable
 %             assert(obj.acceleration >=(obj.a_feas_min - tolerance) && obj.acceleration <= (tolerance + obj.a_max) ,'Acceleration contraints are violated');            
         end
         function check_for_negative_velocity(obj,dt)
+            
             if (obj.velocity + obj.acceleration*dt) < 0
-                if obj.velocity == 0
-                    obj.acceleration = 0;
-                else
-                    obj.acceleration = - obj.velocity/dt;
-                end
+                obj.acceleration = - obj.velocity/dt;
             elseif (obj.velocity + obj.acceleration*dt) > obj.maximumVelocity
                 obj.acceleration = (obj.maximumVelocity - obj.velocity)/dt;
             end
+            
         end
     end
 end

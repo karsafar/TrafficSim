@@ -1,5 +1,4 @@
 classdef AutonomousCar < IdmModel
-    
     properties (SetAccess = public)
         acc_min_ahead
         acc_max_behind
@@ -7,7 +6,6 @@ classdef AutonomousCar < IdmModel
         juncExitVelocity = NaN
         t_in = NaN
         t_out = NaN
-%         tol = 1e-6
     end
     methods
         function obj = AutonomousCar(varargin)
@@ -21,111 +19,81 @@ classdef AutonomousCar < IdmModel
         end
         function calc_a_min_ahead(obj,t,dt,competingCar,OppositeLength)
             %%
+            % self car states
             v = obj.velocity;
             v_max = obj.maximumVelocity;
             s = obj.pose(1);
-            s_in = obj.s_in;
-            s_out = obj.s_out;
-%             T_safe = obj.T_safe;
-%             tol = obj.tol;
-            if competingCar.pose(1) > s_out
-                s_comp = competingCar.pose(1)-OppositeLength;
-            else
-                s_comp = competingCar.pose(1);
-            end
+            
+            % competing car states
+            s_in = competingCar.s_in;
+            s_out = competingCar.s_out;
+            s_comp = competingCar.pose(1)-OppositeLength*(competingCar.pose(1)>s_out);
             v_comp = competingCar.velocity;
-%             a_comp = competingCar.acceleration;
-            a_comp = competingCar.History(4,competingCar.historyIndex-1);
-            if s_comp <= s_in && obj.tol < v_comp
-%                 if obj.tol < a_comp
-%                     obj.t_in = (-v_comp+sqrt((v_comp)^2+2*a_comp*(s_in-s_comp)))/a_comp+t;
-%                 else
-%                     obj.t_in = (s_in - s_comp)/v_comp+t;
-%                 end
-                obj.t_in = (s_in - s_comp)/v_comp+t;
-                if t < obj.t_in && s >= (s_out-v_max*(obj.t_in-t))
-                    
-                    aheadWithPositive_A = (s_out - 0.5*obj.a_max*(obj.t_in-(t+dt))^2 - v*(obj.t_in-t) - s)/ (dt*(obj.t_in-(t+dt/2)));
-                    juncExitVel  = (v + aheadWithPositive_A*dt) + obj.a_max*(obj.t_in-(t+dt));
-
-                    aheadWithMaxVel = (-sqrt((v_max-v+0.5*obj.a_max*dt)^2-2*obj.a_max*(s_out-v_max*(obj.t_in-(t+dt))-s-v*dt)-v_max^2+2*v*v_max-v^2)+v_max-v+0.5*obj.a_max*dt)/dt;
-                    
-                    if juncExitVel > v_max 
-                        obj.acc_min_ahead = aheadWithMaxVel;
-                        if aheadWithMaxVel <= obj.a_max && aheadWithMaxVel >= obj.a_min
-                            obj.juncExitVelocity = v_max;
-                        else
-                            obj.juncExitVelocity = sqrt(v^2+2*obj.a_max*(s_out-s));
-                        end
-                    elseif aheadWithMaxVel >= aheadWithPositive_A
-                        obj.acc_min_ahead = aheadWithPositive_A;
-                        obj.juncExitVelocity = juncExitVel;
-                    else
-                        obj.acc_min_ahead = 1e3;
-                        obj.juncExitVelocity = sqrt(v^2+2*obj.a_max*(s_out-s));
-                    end
+            
+            % calculate t_in of competing car without taking its acceleration into account
+            obj.t_in = (s_in - s_comp)/v_comp+t;
+            
+            if s_comp <= s_in && obj.tol < v_comp && s < s_out && s >= (s_out-v_max*(obj.t_in-(t+dt)))
+                % competing car has not entered the junction yet,
+                % competing car velocity is not zero,
+                % self car has not left the junction yet
+                % self car is above the line that defines the edge of
+                % collision inevitable state space
+                
+                A_ahead = (s_out - 0.5*obj.a_max*(obj.t_in-(t+dt))^2 - v*(obj.t_in-t) - s)/ (dt*(obj.t_in-(t+dt/2)));
+                juncExitVel  = (v + A_ahead*dt) + obj.a_max*(obj.t_in-(t+dt));
+                
+                if juncExitVel < v_max
+                    obj.acc_min_ahead = A_ahead;
                 else
-                    obj.acc_min_ahead = 1e3;
-                    obj.juncExitVelocity = sqrt(v^2+2*obj.a_max*(s_out-s));
+                    aheadWithMaxVel = (-sqrt((v_max-v+0.5*obj.a_max*dt)^2-2*obj.a_max*(s_out-v_max*(obj.t_in-(t+dt))-s-v*dt)-v_max^2+2*v*v_max-v^2)+v_max-v+0.5*obj.a_max*dt)/dt;
+                    obj.acc_min_ahead = aheadWithMaxVel;
                 end
             elseif obj.tol > v_comp && s_comp <= s_in
-                obj.acc_min_ahead = obj.idmAcceleration;
-                obj.juncExitVelocity = sqrt(v^2+2*obj.a_max*(s_out-s));
+                obj.acc_min_ahead = -1e3;
             else
                 obj.acc_min_ahead = 1e3;
-                obj.juncExitVelocity = sqrt(v^2+2*obj.a_max*(s_out-s));
             end
-      
         end
         function calc_a_max_behind(obj,t,dt,A_min_ahead_next,competingCar,OppositeLength)
             %%
+            % self car states
             v = obj.velocity;
             s = obj.pose(1);
-            s_in = obj.s_in; 
-            s_out = obj.s_out;
-%             T_safe = obj.T_safe; %#ok<*PROPLC>
-%             tol = obj.tol;
-            if competingCar.pose(1) > s_out
-                s_comp = competingCar.pose(1)-OppositeLength;
-            else
-                s_comp = competingCar.pose(1);
-            end
+            
+            % competing car states
+            s_in = competingCar.s_in;
+            s_out = competingCar.s_out;
+            s_comp = competingCar.pose(1)-OppositeLength*(competingCar.pose(1)>s_out);
             v_comp = competingCar.velocity;
-            %             a_comp = competingCar.acceleration;
-            a_comp = competingCar.History(4,competingCar.historyIndex-1);
-            if s_comp <= s_out && obj.tol < v_comp
-                if obj.tol < a_comp
-                    obj.t_out = (-v_comp+sqrt((v_comp)^2+2*a_comp*(s_out-s_comp)))/a_comp+t;
+%             a_comp = competingCar.History(4,competingCar.historyIndex-1);
+            
+            % time when competing car leaves junction
+            obj.t_out = (s_out - s_comp)/v_comp+t;
+            
+            if s_comp <= s_out && obj.tol < v_comp && s <= obj.s_in
+                % competing car has not left junction yet
+                % competing car velocity is not zero
+                % self car has not entered junction yet                
+                
+                if obj.t_out > t && obj.t_out <t+dt
+                    % when t_out is smaller than t+dt it gives a complex output
+                    % due to negative (t_out - (t+dt)) < 0
+                    obj.t_out = obj.t_out + dt;
+                end
+                
+                A_nonZero = ((s_in-0.02) - 0.5*obj.a_min*(obj.t_out-(t+dt))^2 -v*(obj.t_out-t) - s)/(dt*(obj.t_out-(t+dt/2)));
+                ExitVel = (v + A_nonZero*dt) + obj.a_min*(obj.t_out-(t+dt));
+                if A_min_ahead_next <= obj.a_max &&  ExitVel > 0
+                    obj.acc_max_behind =  A_nonZero;
                 else
-                    obj.t_out = (s_out - s_comp)/v_comp+t;
+                    behindWithZeroVel = ((dt*obj.a_min-2*v) + sqrt(((dt*obj.a_min-2*v)^2 -4*(2*obj.a_min*((s_in-0.02)-s-v*dt)+v^2))))/(2*dt);
+                    obj.acc_max_behind = behindWithZeroVel;
                 end
-                
-                
-                if obj.t_out < (t + dt)
-                    %% if t_out is less than t+dt then the equation gives a negative time which is impossible
-                    obj.t_out = t + dt;
-                end
-                
-                if  s <= obj.s_in
-                    behindWithNegative_A = (s_in - 0.5*obj.a_min*(obj.t_out-(t+dt))^2 -v*(obj.t_out-t) - s)/ (dt*(obj.t_out-(t+dt/2)));
-                    junctionExitVelocity = (v + behindWithNegative_A*dt) + obj.a_min*(obj.t_out-(t+dt));
-                    
-%                     behindWithZeroVel = ((dt*obj.a_min-2*v) + sqrt(((dt*obj.a_min-2*v)^2 -4*(2*obj.a_min*(s_in-s-v*dt)+v^2))))/(2*dt);
-                    
-%                     if junctionExitVelocity < 0 || A_min_ahead_next > -50
-%                         obj.acc_max_behind = behindWithZeroVel;
-%                     else
-                    if  junctionExitVelocity > 0 && A_min_ahead_next <= 50
-                        obj.acc_max_behind =  behindWithNegative_A;
-                    else
-                        obj.acc_max_behind = -1e3;
-                    end
-                    
-                else
-                    obj.acc_max_behind = -1e3;
-                end
-            elseif obj.tol > v_comp && s_comp <= s_in
-                obj.acc_max_behind = obj.idmAcceleration;
+            elseif obj.tol > v_comp && s_comp < s_in
+                % when competing car stopped just set a_max_behind to a very
+                % large number
+                obj.acc_max_behind =  1e3;
             else
                 obj.acc_max_behind = -1e3;
             end

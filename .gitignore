@@ -34,9 +34,34 @@ box_plot\.m
 plot data/test_real_time_plot\.m
 
 test_env\.m
+
+plot data/junc_cross_plot/
+
+parallel_density_range_4\.m
+
+/@microSim/Single_Arm/TwoScenarios.eps
+/@microSim/Single_Arm/TwoScenarios.pdf
+/@microSim/Single_Arm/flowDensity.pdf
+/@microSim/Single_Arm/spatioTest20Veh.eps
+/@microSim/Single_Arm/spatioTest20Veh.pdf
+/@microSim/Single_Arm/spatioTest30Veh.eps
+/@microSim/Single_Arm/spatioTest30Veh.pdf
 *.pdf
-*.png
+workspace/Demos
+workspace/Old_code
+workspace/Simple IDM
+workspace/debugging
+workspace/data-of-initializing-HPC-sim
+workspace/Chapter02-data
+workspace/Chapter03-data
+
+
 *.eps
-*.mov
-*.ps
-*.bmp
+*.png
+workspace/writing_progress.m
+workspace/tiled_trajectories.m
+workspace/tdv_plot.m
+workspace/plot_lines.m
+workspace/jerk_control_test.m
+workspace/jerk_control_m_file.m
+workspace/decision_space_plot.m
